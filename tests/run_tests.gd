@@ -49,6 +49,7 @@ func _init() -> void:
 	test_v30_changes()
 	test_v31_safe_saves()
 	test_v31_isle_quests()
+	test_v32_translations()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -952,3 +953,21 @@ func test_v31_isle_quests() -> void:
 	w.bag = {}
 	p.bank(w)
 	check(p.last_bank_quests.is_empty(), "no quest twice")
+
+
+## 3.2: every Thai line keeps the same placeholders as its English key, and every key is used.
+func test_v32_translations() -> void:
+	var th: Dictionary = GameData.load_json("res://data/lang_th.json")
+	check(th.size() > 200, "Thai translation file loaded (%d lines)" % th.size())
+	var re := RegEx.new()
+	re.compile("%[-0-9]*[sd%]")
+	var bad: Array[String] = []
+	for key in th:
+		if key.begins_with("_") or key.contains("."):
+			continue
+		var a: Array = re.search_all(key).map(func(m): return m.get_string())
+		var b: Array = re.search_all(str(th[key])).map(func(m): return m.get_string())
+		if a != b:
+			bad.append(key)
+	check(bad.is_empty(), "Thai placeholders match English: %s" % str(bad))
+	check(ResourceLoader.exists("res://assets/fonts/NotoSansThai-Regular.woff2"), "Thai font is bundled")

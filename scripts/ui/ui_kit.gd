@@ -147,7 +147,7 @@ static func element_badge(element: String, extra: String = "") -> Control:
 	ic.stretch_mode = TextureRect.STRETCH_SCALE
 	ic.custom_minimum_size = Vector2(16, 16)
 	row.add_child(ic)
-	row.add_child(label(e["name"] + extra, 12, Color(e["color"])))
+	row.add_child(label(TranslationServer.translate(e["name"]) + extra, 12, Color(e["color"])))
 	return row
 
 
@@ -157,7 +157,7 @@ static func element_weakness(element: String) -> String:
 		element_badge("")
 	for k in _elements["elements"]:
 		if element in _elements["elements"][k]["strong"]:
-			return _elements["elements"][k]["name"]
+			return TranslationServer.translate(_elements["elements"][k]["name"])
 	return ""
 
 
@@ -171,8 +171,12 @@ static func face_icon(face_type: String) -> Texture2D:
 	return _icons[face_type]
 
 
+static func face_name(type: String) -> String:
+	return TranslationServer.translate(FACE_NAMES[type])
+
+
 static func face_short(f: Dictionary) -> String:
-	return FACE_NAMES[f["type"]] + ("" if f["type"] == "blank" else str(int(f["value"])))
+	return face_name(f["type"]) + ("" if f["type"] == "blank" else str(int(f["value"])))
 
 
 static func full_rect(c: Control) -> Control:

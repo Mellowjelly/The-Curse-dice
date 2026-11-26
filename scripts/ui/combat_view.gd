@@ -89,9 +89,9 @@ func bind(c: Combat, fight_title: String, background: String = "battle_early", t
 		ps.position = Vector2(0, -8)
 		_pet_slot.add_child(ps)
 	_log.append_text("\n[color=#c9a227][b]== %s ==[/b][/color]\n" % fight_title)
-	_on_log("--- Round %d ---" % combat.round_number)
+	_on_log(tr("--- Round %d ---") % combat.round_number)
 	if not combat.pet.is_empty() and combat.pet["passive"] in ["first_strike", "fate_start"]:
-		_on_log("%s is ready." % combat.pet["name"])
+		_on_log(tr("%s is ready.") % combat.pet["name"])
 	_refresh()
 
 
@@ -132,10 +132,16 @@ func _build_ui() -> void:
 	_title = UI.label("", 22)
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(_title)
+	var legend := UI.label(tr("Elements: Fire > Wind > Earth > Water > Fire   |   Light <> Dark   (+20% / -20%)"), 12, UI.DIM)
+	legend.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(legend)  # in the header so it never pushes the buttons off-screen
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(16, 0)
+	top.add_child(gap)
 	_fate = UI.label("", 18, UI.GOLD)
 	top.add_child(_fate)
 
-	field.add_child(UI.label("ENEMIES  (tap Target to choose who your attacks hit)", 13, UI.DIM))
+	field.add_child(UI.label(tr("ENEMIES  (tap Target to choose who your attacks hit)"), 13, UI.DIM))
 	_monster_row = HBoxContainer.new()
 	_monster_row.add_theme_constant_override("separation", 12)
 	_monster_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -147,7 +153,7 @@ func _build_ui() -> void:
 
 	var party_head := HBoxContainer.new()
 	field.add_child(party_head)
-	var party_lbl := UI.label("YOUR PARTY  (tap a die to lock / unlock it)", 13, UI.DIM)
+	var party_lbl := UI.label(tr("YOUR PARTY  (tap a die to lock / unlock it)"), 13, UI.DIM)
 	party_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	party_head.add_child(party_lbl)
 	_pet_label = UI.label("", 15, Color("#b39ddb"))
@@ -166,17 +172,14 @@ func _build_ui() -> void:
 	field.add_child(buttons)
 	_reroll_btn = UI.button("", func(): _start_roll_anim(); combat.reroll())
 	_fate_btn = UI.button("", func(): combat.fate_reroll())
-	_end_btn = UI.button("END TURN", func(): combat.end_turn())
-	_flee_btn = UI.button("FLEE", func(): combat.flee(), 14)
+	_end_btn = UI.button(tr("END TURN"), func(): combat.end_turn())
+	_flee_btn = UI.button(tr("FLEE"), func(): combat.flee(), 14)
 	for b in [_reroll_btn, _fate_btn, _end_btn]:
 		b.custom_minimum_size = Vector2(200, 48)
 		buttons.add_child(b)
 	_flee_btn.custom_minimum_size = Vector2(90, 48)
-	_flee_btn.tooltip_text = "Run back two steps. The enemy stays. Possible from round 2."
+	_flee_btn.tooltip_text = tr("Run back two steps. The enemy stays. Possible from round 2.")
 	buttons.add_child(_flee_btn)
-	var legend := UI.label("Elements: Fire > Wind > Earth > Water > Fire   |   Light <> Dark   (+20% / -20%)", 12, UI.DIM)
-	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	field.add_child(legend)
 
 	var log_panel := UI.panel()
 	log_panel.custom_minimum_size = Vector2(230, 0)
@@ -214,7 +217,7 @@ func _build_ui() -> void:
 	_overlay_text = UI.label("", 30)
 	_overlay_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_overlay_text)
-	_overlay_btn = UI.button("Continue", func(): finished.emit(_victory), 20)
+	_overlay_btn = UI.button(tr("Continue"), func(): finished.emit(_victory), 20)
 	_overlay_btn.custom_minimum_size = Vector2(240, 52)
 	_overlay_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(_overlay_btn)
@@ -267,9 +270,9 @@ func _set_background(id: String) -> void:
 
 func _on_log(text: String) -> void:
 	# Sound hooks on the big moments.
-	if text.begins_with("COMBO!"):
+	if text.begins_with(tr("COMBO!")):
 		Sfx.play(self, "triple")
-	elif text.begins_with("Combo:") or text.contains("Fate twists") or text.contains("Fate overflows"):
+	elif text.begins_with(tr("Combo:")) or text.contains(tr("Fate twists")) or text.contains(tr("Fate overflows")):
 		Sfx.play(self, "fate")
 	elif text.begins_with("* "):
 		Sfx.play(self, "skill")
@@ -287,7 +290,7 @@ func _on_log(text: String) -> void:
 func _on_battle_ended(victory: bool) -> void:
 	_victory = victory
 	Sfx.play(self, "victory" if victory else "defeat")
-	_overlay_text.text = "Victory!" if victory else "Your party has fallen.\nThe dice show no mercy."
+	_overlay_text.text = tr("Victory!") if victory else tr("Your party has fallen.\nThe dice show no mercy.")
 	_overlay_text.add_theme_color_override("font_color", UI.GOLD if victory else UI.BLOOD)
 	# Let the last floating numbers play before covering the screen.
 	get_tree().create_timer(0.6).timeout.connect(func(): _overlay.show())
@@ -421,11 +424,11 @@ func _refresh() -> void:
 		if _last_round != -1 or combat.round_number == 1:
 			_start_roll_anim()
 		_last_round = combat.round_number
-	_title.text = "%s   -   Round %d" % [title, combat.round_number]
-	_fate.text = "Fate %d/%d" % [combat.fate, Combat.MAX_FATE]
-	_reroll_btn.text = "REROLL (%d left)" % combat.rerolls_left
+	_title.text = tr("%s   -   Round %d") % [title, combat.round_number]
+	_fate.text = tr("Fate %d/%d") % [combat.fate, Combat.MAX_FATE]
+	_reroll_btn.text = tr("REROLL (%d left)") % combat.rerolls_left
 	_reroll_btn.disabled = combat.finished or combat.rerolls_left <= 0
-	_fate_btn.text = "FATE REROLL (-%d Fate)" % Combat.FATE_REROLL_COST
+	_fate_btn.text = tr("FATE REROLL (-%d Fate)") % Combat.FATE_REROLL_COST
 	_fate_btn.disabled = combat.finished or combat.fate < Combat.FATE_REROLL_COST
 	_end_btn.disabled = combat.finished
 	_flee_btn.visible = combat.can_flee
@@ -434,18 +437,18 @@ func _refresh() -> void:
 		_pet_label.text = ""
 	else:
 		var pf: Dictionary = combat.pet["faces"][combat.pet["face"]]
-		_pet_label.text = "Pet %s rolled: %s" % [combat.pet["name"], UI.face_short(pf)]
+		_pet_label.text = tr("Pet %s rolled: %s") % [combat.pet["name"], UI.face_short(pf)]
 
 	var combos := combat.compute_combos()
 	var parts: Array[String] = []
 	for t in combos:
 		if combos[t] >= 3:
-			parts.append("TRIPLE %s  x2!" % UI.FACE_NAMES[t])
+			parts.append(tr("TRIPLE %s  x2!") % UI.face_name(t))
 		elif combos[t] >= 2:
-			parts.append("PAIR %s  +1 each" % UI.FACE_NAMES[t])
-	_combo.text = ("COMBO: " + "   ".join(parts)) if not parts.is_empty() else " "
+			parts.append(tr("PAIR %s  +1 each") % UI.face_name(t))
+	_combo.text = (tr("COMBO: ") + "   ".join(parts)) if not parts.is_empty() else " "
 	if combat.fate >= Combat.MAX_FATE and not combat.finished and parts.is_empty():
-		_combo.text = "FATE IS FULL - tap a face under a die to TWIST it!"
+		_combo.text = tr("FATE IS FULL - tap a face under a die to TWIST it!")
 		if _pulse == null or not _pulse.is_valid():
 			_pulse = _combo.create_tween().set_loops()
 			_pulse.tween_property(_combo, "modulate:a", 0.4, 0.5)
@@ -496,9 +499,9 @@ func _sprite_row(key: String, u: Dictionary, info: Control, is_hero: bool) -> Co
 func _status_text(u: Dictionary) -> String:
 	var parts: Array[String] = []
 	if u["shield"] > 0:
-		parts.append("Shield %d" % u["shield"])
+		parts.append(tr("Shield %d") % u["shield"])
 	if u["burn"] > 0:
-		parts.append("Burn %d" % u["burn"])
+		parts.append(tr("Burn %d") % u["burn"])
 	return "  ".join(parts) if not parts.is_empty() else " "
 
 
@@ -513,25 +516,25 @@ func _monster_card(m: Dictionary, index: int) -> Control:
 	panel.add_child(outer)
 	var box := VBoxContainer.new()
 	outer.add_child(_sprite_row("m%d" % index, m, box, false))
-	var name_text: String = ("[BOSS] " if m["boss"] else "") + m["name"]
+	var name_text: String = (tr("[BOSS] ") if m["boss"] else "") + m["name"]
 	if m.get("phased", false):
-		name_text += "  (enraged)"
+		name_text += tr("  (enraged)")
 	var nl := UI.label(name_text, 17)
 	nl.clip_text = true
 	box.add_child(nl)
 	box.add_child(UI.hp_bar(m["hp"], m["max_hp"]))
 	var weak := UI.element_weakness(m.get("element", ""))
-	box.add_child(UI.element_badge(m.get("element", ""), ("  -  weak to %s" % weak) if weak != "" else ""))
+	box.add_child(UI.element_badge(m.get("element", ""), (tr("  -  weak to %s") % weak) if weak != "" else ""))
 	box.add_child(UI.label(_status_text(m), 14, UI.DIM))
 	box = outer
 	if alive:
 		var face := Combat.current_face(m)
-		box.add_child(UI.label("Intent: " + combat.intent_text(m), 17, UI.FACE_COLORS[face["type"]].lightened(0.4)))
-		var btn := UI.button("TARGETED" if targeted else "Target", func(): combat.set_target(index))
+		box.add_child(UI.label(tr("Intent: ") + combat.intent_text(m), 17, UI.FACE_COLORS[face["type"]].lightened(0.4)))
+		var btn := UI.button(tr("TARGETED") if targeted else tr("Target"), func(): combat.set_target(index))
 		btn.disabled = targeted or combat.finished
 		box.add_child(btn)
 	else:
-		box.add_child(UI.label("Dead", 16, UI.DIM))
+		box.add_child(UI.label(tr("Dead"), 16, UI.DIM))
 	return panel
 
 
@@ -554,7 +557,7 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	info.add_child(status_row)
 	box.add_child(_sprite_row("h%d" % index, h, info, true))
 	if not alive:
-		box.add_child(UI.label("Fallen", 18, UI.DIM))
+		box.add_child(UI.label(tr("Fallen"), 18, UI.DIM))
 		return panel
 
 	var face := Combat.current_face(h)
@@ -563,12 +566,12 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	var twisting := combat.fate >= Combat.FATE_TWIST_COST and not combat.finished
 	die.custom_minimum_size = Vector2(0, 46 if twisting else 60)
 	die.add_theme_font_size_override("font_size", 20 if twisting else 22)
-	var face_text: String = UI.FACE_NAMES[face["type"]]
+	var face_text: String = UI.face_name(face["type"])
 	if face["type"] != "blank":
 		face_text += "  %d" % value
 		if value != int(face["value"]):
-			face_text += "  (base %d)" % int(face["value"])
-	die.text = face_text + ("\nLOCKED" if h["locked"] else "")
+			face_text += tr("  (base %d)") % int(face["value"])
+	die.text = face_text + (tr("\nLOCKED") if h["locked"] else "")
 	die.icon = UI.face_icon(face["type"])
 	die.expand_icon = true
 	die.add_theme_constant_override("icon_max_width", 40 if not twisting else 32)
@@ -585,12 +588,12 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	box.add_child(die)
 	if combat.fate >= Combat.FATE_TWIST_COST and not combat.finished:
 		# Fate Twist: click any face to set the die to it.
-		box.add_child(UI.label("Twist (-%d Fate): tap a face" % Combat.FATE_TWIST_COST, 12, UI.GOLD))
+		box.add_child(UI.label(tr("Twist (-%d Fate): tap a face") % Combat.FATE_TWIST_COST, 12, UI.GOLD))
 		var grid := GridContainer.new()
 		grid.columns = 3
 		for fi in h["faces"].size():
 			var f: Dictionary = h["faces"][fi]
-			var fb := UI.button(UI.face_short(f).replace("BLANK", "-"), func(): combat.fate_twist(index, fi), 12)
+			var fb := UI.button(UI.face_short(f).replace(tr("BLANK"), "-"), func(): combat.fate_twist(index, fi), 12)
 			fb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			fb.custom_minimum_size = Vector2(0, 32)
 			fb.icon = UI.face_icon(f["type"])
@@ -598,7 +601,7 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 			grid.add_child(fb)
 		box.add_child(grid)
 	else:
-		var faces := UI.wrap_label("Faces: " + " | ".join(h["faces"].map(UI.face_short)), 12, UI.DIM, 250)
+		var faces := UI.wrap_label(tr("Faces: ") + " | ".join(h["faces"].map(UI.face_short)), 12, UI.DIM, 250)
 		box.add_child(faces)
 	if not h["skill"].is_empty():
 		box.add_child(_skill_button(h, index))
@@ -612,8 +615,8 @@ func _skill_button(h: Dictionary, index: int) -> Control:
 	var hint := ""
 	if is_ready and h["skill"]["id"] == "broken_oath" and not combat.monsters.any(
 			func(m): return Combat.is_alive(m) and Combat.current_face(m)["type"] == "attack"):
-		hint = "  (no single attacks incoming)"
-	b.text = "%s  %s%s\n%s" % [h["skill"]["name"], "READY!" if is_ready else "(%d/%d)" % [h["charge"], cost], hint, h["skill"]["desc"]]
+		hint = tr("  (no single attacks incoming)")
+	b.text = "%s  %s%s\n%s" % [h["skill"]["name"], tr("READY!") if is_ready else "(%d/%d)" % [h["charge"], cost], hint, h["skill"]["desc"]]
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.add_theme_font_size_override("font_size", 12)
 	b.disabled = not is_ready

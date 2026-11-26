@@ -37,6 +37,7 @@ Hitting an element you beat deals +20% damage; hitting one that beats you deals 
 When charged, press the skill button. Every power has a price."""
 
 var _help: Control
+var _settings: Control
 
 
 func _ready() -> void:
@@ -81,22 +82,17 @@ func _build() -> void:
 	title.add_theme_constant_override("shadow_offset_x", 4)
 	title.add_theme_constant_override("shadow_offset_y", 4)
 	box.add_child(title)
-	box.add_child(_label("The gods' dice are broken. Every roll has a price.", 20, COL_TEXT))
+	box.add_child(_label(tr("The gods' dice are broken. Every roll has a price."), 20, COL_TEXT))
 
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 40)
 	box.add_child(spacer)
 
-	box.add_child(_menu_button("Play", _on_new_game))
-	box.add_child(_menu_button("How to Play", func(): _help.show()))
-	var Sfx = load("res://scripts/ui/sfx.gd")
-	var sound_btn := _menu_button("Sound: " + ("OFF" if Sfx.muted else "ON"), func(): pass)
-	sound_btn.pressed.connect(func():
-		Sfx.set_muted(not Sfx.muted)
-		sound_btn.text = "Sound: " + ("OFF" if Sfx.muted else "ON"))
-	box.add_child(sound_btn)
+	box.add_child(_menu_button(tr("Play"), _on_new_game))
+	box.add_child(_menu_button(tr("How to Play"), func(): _help.show()))
+	box.add_child(_menu_button(tr("Settings"), func(): _settings.show()))
 	if OS.get_name() != "Web":
-		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
+		box.add_child(_menu_button(tr("Quit"), func(): get_tree().quit()))
 
 	var version := _label("Version 3.1", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
@@ -117,6 +113,9 @@ func _build() -> void:
 	_help = _build_help()
 	add_child(_help)
 	_help.hide()
+	_settings = load("res://scripts/ui/settings_panel.gd").new()
+	add_child(_settings)
+	_settings.hide()
 
 
 func _on_new_game() -> void:
@@ -144,7 +143,7 @@ func _build_help() -> Control:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 16)
 	panel.add_child(box)
-	box.add_child(_label("How to Play", 30, COL_GOLD))
+	box.add_child(_label(tr("How to Play"), 30, COL_GOLD))
 	var text := RichTextLabel.new()
 	text.bbcode_enabled = true
 	text.fit_content = true
@@ -152,9 +151,10 @@ func _build_help() -> Control:
 	text.add_theme_font_size_override("normal_font_size", 17)
 	text.add_theme_font_size_override("bold_font_size", 17)
 	text.add_theme_color_override("default_color", COL_TEXT)
-	text.text = HOW_TO_PLAY
+	var translated := tr("help.how_to_play")
+	text.text = HOW_TO_PLAY if translated == "help.how_to_play" else translated
 	box.add_child(text)
-	var close := _menu_button("Close", func(): dim.hide())
+	var close := _menu_button(tr("Close"), func(): dim.hide())
 	close.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(close)
 	return dim
@@ -214,3 +214,11 @@ func _label(text: String, size: int, color: Color) -> Label:
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", color)
 	return l
+
+
+func on_back() -> bool:
+	for overlay in [_help, _settings]:
+		if overlay.visible:
+			overlay.hide()
+			return true
+	return false

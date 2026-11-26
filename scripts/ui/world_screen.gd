@@ -155,7 +155,7 @@ func _build_world() -> void:
 		if big:
 			a.scale = Vector2(1.3, 1.3)
 			var crown := Label.new()
-			crown.text = "BOSS: " + w_name(e["group"][0])
+			crown.text = tr("BOSS: ") + w_name(e["group"][0])
 			crown.add_theme_font_size_override("font_size", 8)
 			crown.add_theme_color_override("font_color", Color("#f2c443"))
 			crown.add_theme_color_override("font_shadow_color", Color.BLACK)
@@ -239,7 +239,7 @@ func _build_hud() -> void:
 	_minimap.stretch_mode = TextureRect.STRETCH_SCALE
 	_minimap.size = Vector2(192, 192)
 	_minimap.position = Vector2(1072, 16)
-	_minimap.tooltip_text = "Tap for the world map"
+	_minimap.tooltip_text = tr("Tap for the world map")
 	_minimap.gui_input.connect(func(ev): if ev is InputEventMouseButton and ev.pressed: _big_map.visible = not _big_map.visible)
 	_hud.add_child(_minimap)
 	_mini_dot = ColorRect.new()
@@ -264,10 +264,10 @@ func _build_hud() -> void:
 	row.add_child(_bag_label)
 	var col := VBoxContainer.new()
 	row.add_child(col)
-	var map_btn := UI.button("World Map", func(): _big_map.visible = not _big_map.visible, 14)
+	var map_btn := UI.button(tr("World Map"), func(): _big_map.visible = not _big_map.visible, 14)
 	map_btn.custom_minimum_size = Vector2(200, 36)
 	col.add_child(map_btn)
-	var home := UI.choice_button("Return to Ashfall", _return_to_town, UI.GOLD)
+	var home := UI.choice_button(tr("Return to Ashfall"), _return_to_town, UI.GOLD)
 	home.autowrap_mode = TextServer.AUTOWRAP_OFF
 	home.custom_minimum_size = Vector2(200, 44)
 	col.add_child(home)
@@ -313,12 +313,12 @@ func _build_big_map(tex: Texture2D) -> Control:
 	map.position = Vector2(360, 100)
 	map.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	dim.add_child(map)
-	var title := UI.label("The Cursed Isle  -  tap anywhere to close", 24, UI.GOLD)
+	var title := UI.label(tr("The Cursed Isle  -  tap anywhere to close"), 24, UI.GOLD)
 	title.position = Vector2(360, 52)
 	dim.add_child(title)
 	var scale := 560.0 / world.size
 	for c in world.countries:
-		var l := UI.label("%s\nTier %s" % [c["name"], ["I", "II", "III", "IV", "V"][int(c["tier"]) - 1]], 15, TIER_COLORS[int(c["tier"])])
+		var l := UI.label(tr("%s\nTier %s") % [c["name"], ["I", "II", "III", "IV", "V"][int(c["tier"]) - 1]], 15, TIER_COLORS[int(c["tier"])])
 		l.add_theme_color_override("font_shadow_color", Color.BLACK)
 		l.add_theme_constant_override("shadow_offset_x", 2)
 		l.add_theme_constant_override("shadow_offset_y", 2)
@@ -327,7 +327,7 @@ func _build_big_map(tex: Texture2D) -> Control:
 		l.position = map.position + Vector2(c["center"][0], c["center"][1]) * scale - Vector2(90, 20)
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dim.add_child(l)
-		var mineral := UI.label("%s, %s\nBoss: %s" % [c["mineral"]["name"], c["wood"]["name"], world.monster_defs[c["boss"]]["name"]], 11, Color("#d8c8f0"))
+		var mineral := UI.label(tr("%s, %s\nBoss: %s") % [c["mineral"]["name"], c["wood"]["name"], world.monster_defs[c["boss"]]["name"]], 11, Color("#d8c8f0"))
 		mineral.position = l.position + Vector2(20, 38)
 		mineral.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dim.add_child(mineral)
@@ -340,13 +340,13 @@ func _refresh_hud() -> void:
 		var c: Dictionary = world.countries[ci]
 		var tier := int(c["tier"])
 		_country_label.text = c["name"]
-		_tier_label.text = "Tier %s   -   %s   -   Mineral: %s" % [["I", "II", "III", "IV", "V"][tier - 1],
-			"Danger: fall here and you lose your bag" if world.is_dangerous(c) else "Safe: your bag is kept if you fall", c["mineral"]["name"]]
+		_tier_label.text = tr("Tier %s   -   %s   -   Mineral: %s") % [["I", "II", "III", "IV", "V"][tier - 1],
+			tr("Danger: fall here and you lose your bag") if world.is_dangerous(c) else tr("Safe: your bag is kept if you fall"), c["mineral"]["name"]]
 		_tier_label.add_theme_color_override("font_color", TIER_COLORS[tier])
-		var rec: String = ["", "any party", "SR gear recommended", "SR gear and 2-star heroes recommended", "SSR gear recommended", "SSR gear and 3-star heroes recommended"][tier]
-		_desc_label.text = "%s  Recommended: %s." % [c["desc"], rec]
+		var rec: String = ["", tr("any party"), tr("SR gear recommended"), tr("SR gear and 2-star heroes recommended"), tr("SSR gear recommended"), tr("SSR gear and 3-star heroes recommended")][tier]
+		_desc_label.text = tr("%s  Recommended: %s.") % [c["desc"], rec]
 		if ci != _last_country and _last_country != -1:
-			_show_toast("Entering %s" % c["name"], TIER_COLORS[tier])
+			_show_toast(tr("Entering %s") % c["name"], TIER_COLORS[tier])
 		if not _in_combat:
 			Sfx.music(self, c["biome"])
 		_last_country = ci
@@ -363,7 +363,7 @@ func _refresh_hud() -> void:
 	var parts: Array[String] = []
 	for id in world.bag:
 		parts.append("%s x%d" % [world.material_name(id), int(world.bag[id])])
-	_bag_label.text = "Bag: " + (", ".join(parts) if not parts.is_empty() else "empty - tap a vein to mine, a marked tree to chop, hunt beasts for hides")
+	_bag_label.text = tr("Bag: ") + (", ".join(parts) if not parts.is_empty() else tr("empty - tap a vein to mine, a marked tree to chop, hunt beasts for hides"))
 
 
 func _show_toast(text: String, color: Color = UI.GOLD) -> void:
@@ -450,7 +450,7 @@ func _process(delta: float) -> void:
 			_gather_bar.hide()
 			if not got.is_empty():
 				Sfx.play(self, "triple" if got["rare"] else "fate")
-				_show_toast(("RARE! " if got["rare"] else "") + "+%d %s" % [got["amount"], got["name"]], Color("#b07cf0") if got["rare"] else UI.GOLD)
+				_show_toast((tr("RARE! ") if got["rare"] else "") + "+%d %s" % [got["amount"], got["name"]], Color("#b07cf0") if got["rare"] else UI.GOLD)
 				_refresh_world_objects()
 				_refresh_hud()
 				_save()
@@ -463,7 +463,7 @@ func _process(delta: float) -> void:
 		if e.get("boss", false):
 			if d < 60.0 and _boss_warned != e["id"]:
 				_boss_warned = e["id"]
-				_show_toast("%s guards this lair. Tap it to challenge (Tier %d)." % [w_name(e["group"][0]), int(world.countries[e["country"]]["tier"])], Color("#f2c443"))
+				_show_toast(tr("%s guards this lair. Tap it to challenge (Tier %d).") % [w_name(e["group"][0]), int(world.countries[e["country"]]["tier"])], Color("#f2c443"))
 			if d < 16.0 and _challenge_boss == e["id"]:
 				_challenge_boss = ""
 				_start_fight(e)
@@ -484,7 +484,7 @@ func _start_fight(e: Dictionary) -> void:
 	var look: Array = BATTLE_SCENES[c["biome"]]
 	var combat := world.start_fight(e, rng.randi())
 	_combat_view.show()
-	_combat_view.bind(combat, "%s - Tier %d" % [c["name"], int(c["tier"])], look[0], look[1])
+	_combat_view.bind(combat, tr("%s - Tier %d") % [c["name"], int(c["tier"])], look[0], look[1])
 
 
 func _on_combat_finished(victory: bool) -> void:
@@ -499,16 +499,16 @@ func _on_combat_finished(victory: bool) -> void:
 		var loot: Array[String] = []
 		for id in r.get("drops", {}):
 			loot.append("%s x%d" % [world.material_name(id), int(r["drops"][id])])
-		_show_toast(("BOSS DEFEATED! " if r.get("boss", false) else "Victory! ") + "+%d Embers%s%s" % [r["embers"],
-			(", +%d Dust" % r["dust"]) if r["dust"] > 0 else "", ("  |  " + ", ".join(loot)) if not loot.is_empty() else ""])
+		_show_toast((tr("BOSS DEFEATED! ") if r.get("boss", false) else tr("Victory! ")) + tr("+%d Embers%s%s") % [r["embers"],
+			(tr(", +%d Dust") % r["dust"]) if r["dust"] > 0 else "", ("  |  " + ", ".join(loot)) if not loot.is_empty() else ""])
 	elif fled:
 		_player.position = _ground.map_to_local(world.player_cell)
 		_target = _player.position
-		_show_toast("You got away. The enemy is still there.", Color("#e8d66a"))
+		_show_toast(tr("You got away. The enemy is still there."), Color("#e8d66a"))
 	else:
 		_player.position = _ground.map_to_local(world.player_cell)
 		_target = _player.position
-		_show_toast("Your party was carried back to Ashfall%s" % (" - your bag is lost!" if r["lost_bag"] else "."), UI.BLOOD)
+		_show_toast(tr("Your party was carried back to Ashfall%s") % (tr(" - your bag is lost!") if r["lost_bag"] else "."), UI.BLOOD)
 	if r.get("carved", "") != "":
 		var tw := create_tween()
 		tw.tween_interval(2.4)

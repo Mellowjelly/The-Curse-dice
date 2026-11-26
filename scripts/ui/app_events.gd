@@ -5,6 +5,7 @@ extends Node
 ## - When the app is paused, hidden or closed, the current screen saves (save_state()).
 
 const UI = preload("res://scripts/ui/ui_kit.gd")
+const Settings = preload("res://scripts/ui/settings.gd")
 const TITLE_SCENE := "res://scenes/title.tscn"
 const CONFIRM_TIME := 2.0
 
@@ -14,6 +15,8 @@ var _toast: Label
 
 
 func _ready() -> void:
+	Settings.load_settings()
+	Settings.apply()
 	get_tree().quit_on_go_back = false
 	get_tree().auto_accept_quit = false
 	_layer = CanvasLayer.new()
@@ -62,7 +65,7 @@ func _on_back() -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	if now > _armed_until:
 		_armed_until = now + CONFIRM_TIME
-		_show("Press Back again to quit" if at_title else "Press Back again to return to the title (progress is saved)")
+		_show(tr("Press Back again to quit") if at_title else tr("Press Back again to return to the title (progress is saved)"))
 		return
 	_armed_until = 0.0
 	_toast.hide()

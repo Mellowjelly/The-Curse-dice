@@ -44,6 +44,7 @@ static func play(node: Node, sound: String, volume_db: float = VOLUME_DB) -> voi
 	p.stream = stream
 	p.volume_db = volume_db
 	p.autoplay = true
+	p.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
 	p.finished.connect(p.queue_free)
 	node.get_tree().root.add_child.call_deferred(p)  # deferred: the root may be busy while a scene starts
 
@@ -66,6 +67,7 @@ static func music(node: Node, mood: String = "town") -> void:
 		_music_player.stream = _music_cache[mood]
 	_music_player.volume_db = -40.0
 	_music_player.autoplay = true
+	_music_player.bus = "Music" if AudioServer.get_bus_index("Music") != -1 else "Master"
 	root.add_child.call_deferred(_music_player)  # deferred: the root is busy while the first scene starts
 	var tw := root.create_tween()
 	tw.tween_property(_music_player, "volume_db", -13.0, 1.5)
