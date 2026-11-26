@@ -37,9 +37,9 @@ const OATH_HP_COST := 2
 const HOLLOW_FLAME_DAMAGE := 4
 const HOLLOW_FLAME_BURN := 1
 const HOLLOW_FLAME_HP_COST := 3
-const LAST_RITE_HEAL := 3
-const LAST_RITE_REVIVE_HP := 4
-const LAST_RITE_HP_COST := 3
+const LAST_RITE_HEAL := 4
+const LAST_RITE_REVIVE_HP := 6
+const LAST_RITE_HP_COST := 2
 
 var rng := RandomNumberGenerator.new()
 var heroes: Array = []    # Array[Dictionary] (units)
@@ -288,8 +288,8 @@ func use_skill(hero_index: int) -> bool:
 					best = fi
 			h["face"] = best
 			h["locked"] = true
-			fate = min(MAX_FATE, fate + 2)
-			_log("%s's die lands on %s. +2 Fate" % [who, String(h["faces"][best]["type"]).to_upper()])
+			_log("%s's die lands on %s." % [who, String(h["faces"][best]["type"]).to_upper()])
+			gain_fate(2, "Loaded Dice:")
 			_pay_hp(h, 3, "Luck is never free for %s" % who)
 		_:
 			push_error("Unknown skill id: %s" % h["skill"]["id"])
@@ -390,6 +390,9 @@ func _start_round() -> void:
 
 
 const BACKSTAB_DAMAGE := 9
+const BOSS_HARDEN_HIT := 12
+const BOSS_HARDEN_SHIELD := 6
+const OVERKILL_SPILL := 0.34
 
 
 ## Pays an HP price for a skill; never kills the hero.
@@ -402,6 +405,32 @@ func _pay_hp(h: Dictionary, amount: int, text: String) -> void:
 
 static func _face_power(f: Dictionary) -> int:
 	return 0 if f["type"] == "blank" else int(f["value"])
+
+
+## Half of the overkill from a big hit spills onto the next enemy.
+func _spill(overkill: int, who: String, h: Dictionary) -> void:
+	var spill := int(overkill * OVERKILL_SPILL)
+	if spill <= 0:
+		return
+	var next := _get_target()
+	if not next.is_empty():
+		_log("The blow carries on!")
+		_damage(next, spill, who, false, h)
+
+
+## Flee from a fight on the Cursed Isle (from round 2). The caller decides what fleeing costs.
+var can_flee := false
+var fled := false
+
+func flee() -> bool:
+	if finished or not can_flee or round_number < 2:
+		return false
+	fled = true
+	finished = true
+	_log("You break away and run!")
+	state_changed.emit()
+	battle_ended.emit(false)
+	return true
 
 
 func _gain_charge(combos: Dictionary) -> void:
@@ -421,7 +450,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 	match face["type"]:
 		"attack":
 			var t := _get_target()
-			_damage(t, value, who, false, h)
+			_spill(_damage(t, value, who, false, h), who, h)
 		"fire":
 			var t := _get_target()
 			_damage(t, value, who, false, h)
@@ -432,7 +461,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 			var t := _get_target()
 			if t.is_empty():
 				return
-			_damage(t, value, who + " (blood magic)", false, h)
+			_spill(_damage(t, value, who + " (blood magic)", false, h), who, h)
 			# Dark price: blood magic hurts the caster, but never kills them.
 			var cost: int = min(BLOOD_SELF_DAMAGE, h["hp"] - 1)
 			if cost > 0:
@@ -598,9 +627,10 @@ static func element_multiplier(attacker: String, target: String) -> float:
 	return 1.0
 
 
-func _damage(unit: Dictionary, amount: int, source: String, pierce := false, attacker: Dictionary = {}) -> void:
+## Deals damage and returns the overkill (damage beyond the unit's remaining HP).
+func _damage(unit: Dictionary, amount: int, source: String, pierce := false, attacker: Dictionary = {}) -> int:
 	if unit.is_empty() or not is_alive(unit):
-		return
+		return 0
 	var mult := element_multiplier(attacker.get("element", ""), unit.get("element", ""))
 	unit["last_eff"] = mult
 	if mult != 1.0:
@@ -610,21 +640,27 @@ func _damage(unit: Dictionary, amount: int, source: String, pierce := false, att
 	var absorbed: int = 0 if pierce else min(unit["shield"], amount)
 	unit["shield"] -= absorbed
 	var dealt := amount - absorbed
+	var overkill: int = max(0, dealt - int(unit["hp"]))
 	unit["hp"] = max(0, unit["hp"] - dealt)
 	var text := "%s hits %s for %d" % [source, unit["name"], dealt]
-	if mult > 1.0:
+	if mult > 1.0 and dealt > 0:
 		text += " (super effective!)"
-	elif mult < 1.0:
+	elif mult < 1.0 and dealt > 0:
 		text += " (resisted)"
 	if absorbed > 0:
 		text += " (%d blocked)" % absorbed
 	_log(text)
 	damaged.emit(unit, dealt, absorbed)
+	# Bosses harden after a huge single hit, so one lucky combo cannot end the fight.
+	if unit.get("boss", false) and dealt >= BOSS_HARDEN_HIT and is_alive(unit) and heroes.has(attacker):
+		unit["shield"] += BOSS_HARDEN_SHIELD
+		_log("%s hardens against the blow (+%d shield)" % [unit["name"], BOSS_HARDEN_SHIELD])
 	_check_phase(unit)
 	if not is_alive(unit):
 		unit["burn"] = 0
 		unit["shield"] = 0
 		_log("%s falls!" % unit["name"])
+	return overkill
 
 
 ## Marks a boss for its second phase when its HP drops low enough.

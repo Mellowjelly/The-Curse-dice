@@ -33,7 +33,7 @@ const HELP := """COMMANDS
        equip_loot <weapon#> <hero#> | buy <item> | leave | rest heal|carve
  WORLD: look | goto <x> <y> | gather | fight | home
  COMBAT (road or world): lock <hero#> | reroll | fate_reroll | twist <hero#> <face#> | skill <hero#>
-       target <enemy#> | end"""
+       target <enemy#> | end | flee (Isle only, from round 2)"""
 
 
 func _init() -> void:
@@ -107,6 +107,10 @@ func _combat() -> Combat:
 # ---------------------------------------------------------------- town
 
 func _town_cmd(c: String, p: PackedStringArray) -> void:
+	var gate := {"summon": "summon", "recipes": "forge", "craft": "forge", "equip": "forge", "sell": "storage", "grind": "storage", "explore": "isle"}
+	if gate.has(c) and not profile.feature_unlocked(gate[c]):
+		say("Locked. " + profile.unlock_hint(gate[c]))
+		return
 	match c:
 		"party":
 			var ids := Array(p.slice(1))
@@ -124,7 +128,7 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 		"summon":
 			var banner := p[1] if p.size() > 1 else "heroes"
 			var r := profile.summon_roll(rng_summon, banner)
-			say(r["text"] if not r.is_empty() else "Cannot summon (need %d Grave Dice, or the banner is complete)." % int(profile.summon["cost"]))
+			say(r["text"] if not r.is_empty() else "Cannot summon (need %d Grave Dice, or the banner is complete)." % profile.banner_cost(banner))
 		"talk":
 			_talk(p[1] if p.size() > 1 else "")
 		"accept":
@@ -176,7 +180,8 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 			world = World.new()
 			if not profile.world_state.is_empty():
 				world.load_dict(profile.world_state)
-			world.setup_party(profile.party, profile.stars, profile.owned_pets[0] if not profile.owned_pets.is_empty() else "", profile.gear_bonuses())
+			world.setup_party(profile.party, profile.stars, profile.owned_pets[0] if not profile.owned_pets.is_empty() else "", profile.gear_bonuses(), profile.level("chapel"))
+			world.time_of_day = profile.time_name()
 			mode = "world"
 			say("You walk out of the gate onto the Cursed Isle.")
 			say(_world_look())
@@ -274,7 +279,9 @@ func _road_state() -> String:
 				s.append("  -> roll")
 			else:
 				for i in run.move_options.size():
-					s.append("  move %d = %d steps -> %s" % [i, run.move_options[i], run.board[run.destination(run.move_options[i])]["type"]])
+					var dest := run.destination(run.move_options[i])
+					s.append("  move %d = die %d -> %d steps -> %s%s" % [i, run.move_options[i], dest - run.pos, run.board[dest]["type"],
+						" (the party must stop here)" if dest - run.pos < run.move_options[i] else ""])
 		"pet":
 			for i in run.pet_offers.size():
 				s.append("  pick %d: %s - %s" % [i, run.pet_offers[i]["name"], run.pet_offers[i]["desc"]])
@@ -318,6 +325,9 @@ func _combat_cmd(cb: Combat, c: String, p: PackedStringArray) -> void:
 		"fate_reroll": cb.fate_reroll()
 		"twist": cb.fate_twist(n, int(p[2]) if p.size() > 2 else 0)
 		"skill": cb.use_skill(n)
+		"flee":
+			if not cb.flee():
+				say("You can only flee from Isle fights, from round 2.")
 		"target": cb.set_target(n)
 		"end": cb.end_turn()
 		_: say("Unknown combat command. Type help.")
@@ -328,12 +338,12 @@ func _combat_cmd(cb: Combat, c: String, p: PackedStringArray) -> void:
 			_after_road()
 		else:
 			var won: bool = cb.monsters.all(func(m): return not Combat.is_alive(m))
-			var r := world.finish_fight(wenemy, won, rng_world)
-			profile.record_world_fight(wenemy["group"], won, cb.twists)
+			var r := world.flee_fight(wenemy) if cb.fled else world.finish_fight(wenemy, won, rng_world)
+			profile.record_world_fight(wenemy["group"], won, cb.twists, wenemy.get("boss", false))
 			profile.embers += int(r["embers"])
 			profile.star_dust += int(r["dust"])
-			say("FIGHT OVER: %s. +%d embers, +%d dust, drops %s%s" % ["VICTORY" if r["victory"] else "DEFEAT", r["embers"], r["dust"], str(r.get("drops", {})),
-				" - YOUR BAG WAS LOST" if r["lost_bag"] else ""])
+			say("FIGHT OVER: %s. +%d embers, +%d dust, drops %s%s%s" % ["FLED" if cb.fled else ("VICTORY" if r["victory"] else "DEFEAT"), r["embers"], r["dust"], str(r.get("drops", {})),
+				" - YOUR BAG WAS LOST" if r["lost_bag"] else "", ("  | " + r["carved"]) if r.get("carved", "") != "" else ""])
 			profile.world_state = world.to_dict()
 			profile.save()
 			wcombat = null
@@ -392,6 +402,7 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 			say("No monster within 1 cell.")
 		"home":
 			var moved := profile.bank(world)
+			profile.advance_time()
 			world.rest_in_town()
 			world.player_cell = Vector2i(int(world.countries[0]["center"][0]), int(world.countries[0]["center"][1]))
 			profile.world_state = world.to_dict()

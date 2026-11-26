@@ -21,6 +21,9 @@ var bag := {}                      # material id -> amount (lost if you fall in 
 var player_cell := Vector2i(22, 48)
 var clock := 0.0                   # seconds of world time (for respawns)
 var monster_defs: Dictionary
+var time_of_day := ""             # set from the town when you set out
+var trip_carvings := 0            # Isle wins sharpen the party's dice until they go home
+const MAX_TRIP_CARVINGS := 3
 
 
 func _init(world_seed: int = -1) -> void:
@@ -138,8 +141,9 @@ func is_dangerous(country: Dictionary) -> bool:
 # ---------------------------------------------------------------- party
 
 ## Builds the travelling party from the profile (stars applied). Call when leaving town.
-func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dictionary = {}) -> void:
+func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dictionary = {}, bonus_hp: int = 0) -> void:
 	party = []
+	trip_carvings = 0
 	var by_id := {}
 	for d in GameData.load_heroes():
 		by_id[d["id"]] = d
@@ -148,6 +152,8 @@ func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dicti
 		Run.apply_hero_stars(u, int(stars.get("hero:" + id, 1)))
 		u["weapon"] = {}
 		Run.apply_gear(u, gear.get(id, {}))
+		u["max_hp"] += bonus_hp  # the town Chapel, same as on the road
+		u["hp"] += bonus_hp
 		party.append(u)
 	pet = {}
 	for p in GameData.load_pets():
@@ -241,7 +247,8 @@ func fight_defs(e: Dictionary) -> Array:
 		var d: Dictionary = monster_defs[id].duplicate(true)
 		# Early bosses get a big boost; late bosses are already huge and are meant for crafted gear.
 		var boss_hp := (1.35 if tier <= 2 else 1.0) if is_boss else 1.0
-		d["hp"] = int(round(float(d["hp"]) * (1.0 + 0.22 * (tier - 1)) * boss_hp))
+		var night := 1.2 if time_of_day == "night" else 1.0
+		d["hp"] = int(round(float(d["hp"]) * (1.0 + 0.22 * (tier - 1)) * boss_hp * night))
 		var bonus := tier / 2 + (1 if is_boss and tier <= 2 else 0) - (1 if is_boss and tier >= 3 else 0)
 		for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:
 			for f in faces:
@@ -253,12 +260,21 @@ func fight_defs(e: Dictionary) -> Array:
 
 func start_fight(e: Dictionary, seed_value: int) -> Combat:
 	var c := Combat.new(seed_value)
+	c.can_flee = true
 	c.pet = pet.duplicate(true) if not pet.is_empty() else {}
 	c.start_battle(party, fight_defs(e))
 	return c
 
 
 ## After a fight. Returns a summary { "victory", "embers", "dust", "lost_bag" }.
+## The party ran: no loss, but the enemy stays and the party steps back.
+func flee_fight(e: Dictionary) -> Dictionary:
+	var back := player_cell + Vector2i(sign(player_cell.x - e["cell"].x), sign(player_cell.y - e["cell"].y)) * 2
+	if is_walkable(back):
+		player_cell = back
+	return {"victory": false, "fled": true, "embers": 0, "dust": 0, "lost_bag": false, "drops": {}, "boss": e.get("boss", false)}
+
+
 func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> Dictionary:
 	var tier := int(countries[e["country"]]["tier"])
 	if victory:
@@ -273,15 +289,36 @@ func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> D
 			var hide: String = monster_defs[id].get("hide", "")
 			if hide != "":
 				drops[hide] = int(drops.get(hide, 0)) + (1 if is_boss else rng.randi_range(1, 2))
+		var c: Dictionary = countries[e["country"]]
 		if is_boss:
-			var c: Dictionary = countries[e["country"]]
 			drops[c["mineral"]["id"]] = int(drops.get(c["mineral"]["id"], 0)) + 6
 			drops[c["rare"]["id"]] = int(drops.get(c["rare"]["id"], 0)) + 1
+		elif drops.is_empty():
+			drops[c["mineral"]["id"]] = rng.randi_range(1, 2)  # every fight leaves something behind
 		for id in drops:
 			bag[id] = int(bag.get(id, 0)) + drops[id]
 		var dust := (3 + tier) if is_boss else (1 if rng.randf() < 0.25 * tier else 0)
-		var embers := (30 * tier) if is_boss else 4 * tier + rng.randi_range(0, 3 * tier)
-		return {"victory": true, "embers": embers, "dust": dust, "lost_bag": false, "drops": drops, "boss": is_boss}
+		var embers := (30 * tier) if is_boss else 10 * tier + rng.randi_range(0, 5 * tier)
+		if time_of_day == "night":
+			embers = int(embers * 1.4)
+		# Battle-hardened: the party's dice sharpen a little (until they go home).
+		var carved := ""
+		if trip_carvings < MAX_TRIP_CARVINGS:
+			var alive := party.filter(func(h): return Combat.is_alive(h))
+			if not alive.is_empty():
+				var h: Dictionary = alive[rng.randi_range(0, alive.size() - 1)]
+				var options: Array = []
+				for i in 4:
+					if h["faces"][i]["type"] != "blank":
+						options.append(i)
+				if not options.is_empty():
+					var fi: int = options[rng.randi_range(0, options.size() - 1)]
+					var nf: Dictionary = h["faces"][fi].duplicate()
+					nf["value"] = int(nf["value"]) + 1
+					h["faces"][fi] = nf
+					trip_carvings += 1
+					carved = "%s's %s face sharpens to %d (until you go home)" % [Combat.short_name(h), String(nf["type"]).to_upper(), nf["value"]]
+		return {"victory": true, "embers": embers, "dust": dust, "lost_bag": false, "drops": drops, "boss": is_boss, "carved": carved}
 	var lost := is_dangerous(countries[e["country"]]) and not bag.is_empty()
 	if lost:
 		bag.clear()

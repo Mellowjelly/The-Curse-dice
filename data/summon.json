@@ -24,5 +24,10 @@
 	"dice_per_run": 1,
 	"dice_per_elite": 1,
 	"dice_per_victory": 2,
-	"dice_per_quest": 1
+	"dice_per_quest": 1,
+	"banner_costs": {
+		"heroes": 3,
+		"relics": 2,
+		"pets": 2
+	}
 }

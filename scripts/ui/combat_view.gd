@@ -28,6 +28,7 @@ var _log: RichTextLabel
 var _reroll_btn: Button
 var _fate_btn: Button
 var _end_btn: Button
+var _flee_btn: Button
 var _overlay: Control
 var _overlay_text: Label
 var _overlay_btn: Button
@@ -166,9 +167,16 @@ func _build_ui() -> void:
 	_reroll_btn = UI.button("", func(): _start_roll_anim(); combat.reroll())
 	_fate_btn = UI.button("", func(): combat.fate_reroll())
 	_end_btn = UI.button("END TURN", func(): combat.end_turn())
+	_flee_btn = UI.button("FLEE", func(): combat.flee(), 14)
 	for b in [_reroll_btn, _fate_btn, _end_btn]:
 		b.custom_minimum_size = Vector2(200, 48)
 		buttons.add_child(b)
+	_flee_btn.custom_minimum_size = Vector2(90, 48)
+	_flee_btn.tooltip_text = "Run back two steps. The enemy stays. Possible from round 2."
+	buttons.add_child(_flee_btn)
+	var legend := UI.label("Elements: Fire > Wind > Earth > Water > Fire   |   Light <> Dark   (+20% / -20%)", 12, UI.DIM)
+	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	field.add_child(legend)
 
 	var log_panel := UI.panel()
 	log_panel.custom_minimum_size = Vector2(230, 0)
@@ -420,6 +428,8 @@ func _refresh() -> void:
 	_fate_btn.text = "FATE REROLL (-%d Fate)" % Combat.FATE_REROLL_COST
 	_fate_btn.disabled = combat.finished or combat.fate < Combat.FATE_REROLL_COST
 	_end_btn.disabled = combat.finished
+	_flee_btn.visible = combat.can_flee
+	_flee_btn.disabled = combat.finished or combat.round_number < 2
 	if combat.pet.is_empty():
 		_pet_label.text = ""
 	else:

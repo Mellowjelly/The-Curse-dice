@@ -259,11 +259,12 @@ func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 	var sc: Dictionary = region.get("scaling", {}).get(kind if kind in ["elite", "boss"] else tier, {})
 	var curse := curse_level()
 	var night := time_of_day() == "night"
-	if sc.is_empty() and curse == 0 and not night:
+	var gear_k := gear_scaling()
+	if sc.is_empty() and curse == 0 and not night and gear_k == 1.0:
 		return def
 	var d := def.duplicate(true)
 	# Curse rules (see CURSE_RULES): I hungry dead, II sharpened bones, IV the Bishop wakes early.
-	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.15 if curse >= 1 else 1.0) * (1.2 if night else 1.0)))
+	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.15 if curse >= 1 else 1.0) * (1.2 if night else 1.0) * gear_k))
 	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 and kind == "elite" else 0) 
 	if curse >= 4 and d.has("phase2"):
 		d["phase2"]["at"] = 0.7
@@ -359,6 +360,15 @@ const CURSE_RULES := [
 ## Time of day the journey began ("dawn", "day", "dusk", "night" or "" when not set).
 func time_of_day() -> String:
 	return String(upgrades.get("time", ""))
+
+
+## Crafted gear makes the road answer in kind: +6% enemy HP per SR item, +12% per SSR (max +30%).
+func gear_scaling() -> float:
+	var bonus := 0.0
+	for hero in upgrades.get("gear", {}):
+		for slot in upgrades["gear"][hero]:
+			bonus += 0.12 if upgrades["gear"][hero][slot].get("grade", "SR") == "SSR" else 0.06
+	return 1.0 + min(bonus, 0.3)
 
 
 func curse_level() -> int:

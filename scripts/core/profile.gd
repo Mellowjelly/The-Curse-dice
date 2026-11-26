@@ -173,7 +173,7 @@ func record_run(run) -> Dictionary:
 	if won and int(run.upgrades.get("curse", 0)) >= 1:
 		_add("cursed_level_wins", 1)
 	# Single-journey goals for villagers' requests.
-	var per_run := {"run_elites": s["elites"], "run_carves": s["carves"],
+	var per_run := {"run_elites": s["elites"], "run_carves": s["carves"], "run_tile": run.pos,
 		"night_tile": run.pos if run.upgrades.get("time", "") == "night" else 0}
 	for npc_id in npc_active:
 		var req := npc_request(npc_id)
@@ -233,7 +233,11 @@ const BANNERS := ["heroes", "relics", "pets"]
 
 
 func can_summon(banner: String = "heroes") -> bool:
-	return grave_dice >= int(summon["cost"]) and not locked_in(banner).is_empty()
+	return grave_dice >= banner_cost(banner) and not locked_in(banner).is_empty()
+
+
+func banner_cost(banner: String) -> int:
+	return int(summon.get("banner_costs", {}).get(banner, summon["cost"]))
 
 
 func locked_heroes() -> Array:
@@ -264,7 +268,7 @@ func pity_count(banner: String) -> int:
 func summon_roll(rng: RandomNumberGenerator, banner: String = "heroes") -> Dictionary:
 	if not can_summon(banner):
 		return {}
-	grave_dice -= int(summon["cost"])
+	grave_dice -= banner_cost(banner)
 	summon_pity[banner] = pity_count(banner) + 1
 	var pool := locked_in(banner)
 	var hit: bool = pity_count(banner) >= int(summon["pity"]) or rng.randi_range(1, 100) <= int(summon["new_chance"])
@@ -295,10 +299,12 @@ func summon_roll(rng: RandomNumberGenerator, banner: String = "heroes") -> Dicti
 
 
 ## Open-world fights count for lifetime stats and villagers' requests too.
-func record_world_fight(group: Array, victory: bool, twists: int) -> void:
+func record_world_fight(group: Array, victory: bool, twists: int, boss: bool = false) -> void:
 	if victory:
 		for id in group:
 			_add("kills_" + id, 1)
+		if boss:
+			grave_dice += 1  # Isle bosses pay a Grave Die
 	_add("fate_twists", twists)
 	save()
 
@@ -441,8 +447,32 @@ func bank(world) -> Dictionary:
 	for id in moved:
 		materials[id] = int(materials.get(id, 0)) + int(moved[id])
 	world.bag.clear()
+	_add("isle_trips", 1)
 	save()
 	return moved
+
+
+# ---------------------------------------------------------------- staged unlocks (v3.0)
+# A new player sees only the Hollow Road, the party and the buildings. The rest opens as they play,
+# so the town is not a wall of tabs on the first visit. Old saves already meet every condition.
+
+func feature_unlocked(feature: String) -> bool:
+	var runs := int(stats.get("runs", 0))
+	match feature:
+		"summon", "collection", "isle":
+			return runs >= 1 or grave_dice > 0 or star_dust > 0
+		"forge", "storage":
+			return int(stats.get("isle_trips", 0)) >= 1 or not materials.is_empty() or not gear.is_empty()
+	return true
+
+
+func unlock_hint(feature: String) -> String:
+	match feature:
+		"summon", "collection", "isle":
+			return "Finish one journey on the Hollow Road to unlock."
+		"forge", "storage":
+			return "Return from the Cursed Isle once to unlock."
+	return ""
 
 
 ## Sells `amount` of a banked material for Soul Embers ("embers") or Star Dust ("dust").

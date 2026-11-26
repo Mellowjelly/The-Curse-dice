@@ -32,12 +32,12 @@
 			{
 				"id": "tobin_fields",
 				"title": "Walk the Far Fields",
-				"ask": "My son went past the withered fields and never came back. Go further than tile 20 and look for him.",
+				"ask": "My son went past the withered fields and never came back. Go further than tile 20 on a journey and look for him.",
 				"done": "Nothing but his hat? ... Thank you for looking. His golden rat followed you back. Keep it, he would want that.",
 				"goal": {
-					"stat": "best_tile",
+					"stat": "run_tile",
 					"amount": 20,
-					"scope": "total"
+					"scope": "run"
 				},
 				"reward": {
 					"kind": "pet",

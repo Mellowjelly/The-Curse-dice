@@ -73,7 +73,8 @@ func _ready() -> void:
 		world.load_dict(profile.world_state)
 	# The party always sets out with its current gear and stars from town.
 	var pet_id: String = profile.owned_pets[0] if not profile.owned_pets.is_empty() else ""
-	world.setup_party(profile.party, profile.stars, pet_id, profile.gear_bonuses())
+	world.setup_party(profile.party, profile.stars, pet_id, profile.gear_bonuses(), profile.level("chapel"))
+	world.time_of_day = profile.time_name()
 	_build_world()
 	_build_hud()
 	_player.position = _ground.map_to_local(world.player_cell)
@@ -342,7 +343,8 @@ func _refresh_hud() -> void:
 		_tier_label.text = "Tier %s   -   %s   -   Mineral: %s" % [["I", "II", "III", "IV", "V"][tier - 1],
 			"Danger: fall here and you lose your bag" if world.is_dangerous(c) else "Safe: your bag is kept if you fall", c["mineral"]["name"]]
 		_tier_label.add_theme_color_override("font_color", TIER_COLORS[tier])
-		_desc_label.text = c["desc"]
+		var rec: String = ["", "any party", "SR gear recommended", "SR gear and 2-star heroes recommended", "SSR gear recommended", "SSR gear and 3-star heroes recommended"][tier]
+		_desc_label.text = "%s  Recommended: %s." % [c["desc"], rec]
 		if ci != _last_country and _last_country != -1:
 			_show_toast("Entering %s" % c["name"], TIER_COLORS[tier])
 		if not _in_combat:
@@ -488,8 +490,9 @@ func _start_fight(e: Dictionary) -> void:
 func _on_combat_finished(victory: bool) -> void:
 	_combat_view.hide()
 	_in_combat = false
-	var r := world.finish_fight(_fight_enemy, victory, rng)
-	profile.record_world_fight(_fight_enemy["group"], victory, _combat_view.combat.twists)
+	var fled: bool = _combat_view.combat.fled
+	var r := world.flee_fight(_fight_enemy) if fled else world.finish_fight(_fight_enemy, victory, rng)
+	profile.record_world_fight(_fight_enemy["group"], victory, _combat_view.combat.twists, _fight_enemy.get("boss", false))
 	if victory:
 		profile.embers += int(r["embers"])
 		profile.star_dust += int(r["dust"])
@@ -498,10 +501,18 @@ func _on_combat_finished(victory: bool) -> void:
 			loot.append("%s x%d" % [world.material_name(id), int(r["drops"][id])])
 		_show_toast(("BOSS DEFEATED! " if r.get("boss", false) else "Victory! ") + "+%d Embers%s%s" % [r["embers"],
 			(", +%d Dust" % r["dust"]) if r["dust"] > 0 else "", ("  |  " + ", ".join(loot)) if not loot.is_empty() else ""])
+	elif fled:
+		_player.position = _ground.map_to_local(world.player_cell)
+		_target = _player.position
+		_show_toast("You got away. The enemy is still there.", Color("#e8d66a"))
 	else:
 		_player.position = _ground.map_to_local(world.player_cell)
 		_target = _player.position
 		_show_toast("Your party was carried back to Ashfall%s" % (" - your bag is lost!" if r["lost_bag"] else "."), UI.BLOOD)
+	if r.get("carved", "") != "":
+		var tw := create_tween()
+		tw.tween_interval(2.4)
+		tw.tween_callback(func(): _show_toast(r["carved"], Color("#b07cf0")))
 	_refresh_world_objects()
 	_refresh_hud()
 	_save()
@@ -516,6 +527,7 @@ func _save() -> void:
 
 func _return_to_town() -> void:
 	var moved := profile.bank(world)
+	profile.advance_time()  # a trip to the Isle takes time
 	world.rest_in_town()
 	world.player_cell = Vector2i(int(world.countries[0]["center"][0]), int(world.countries[0]["center"][1]))
 	_save()

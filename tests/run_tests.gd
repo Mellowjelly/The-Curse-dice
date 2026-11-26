@@ -46,6 +46,7 @@ func _init() -> void:
 	test_world()
 	test_elements()
 	test_v22_player_bugs()
+	test_v30_changes()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -353,7 +354,7 @@ func test_profile_and_quests() -> void:
 	run.stats["fights"] = 3
 	run.stats["kills"] = {"ghoul": 30}
 	var res := p.record_run(run)
-	check(res["embers"] == 8 + 3 + 15 + 20, "embers = tiles*0.4 + fights + quests (got %d)" % res["embers"])
+	check(res["embers"] == 12 + 3 + 15 + 20, "embers = tiles*0.6 + fights + quests (got %d)" % res["embers"])
 	check("first_steps" in p.quests_done and "ghoul_hunter" in p.quests_done, "quests complete from run stats")
 	var again := Profile.new(path)
 	again.load_profile()
@@ -747,3 +748,48 @@ func test_v22_player_bugs() -> void:
 	run.last_reward_text = "Victory! +9 gold."
 	run.buy("carving")
 	check(not run.last_reward_text.begins_with("Victory"), "shop carving does not show an old victory message")
+
+
+## v3.0 changes from the player + critic review.
+func test_v30_changes() -> void:
+	var c := Combat.new(130)
+	c.start_battle(_heroes(), [_monster("plague_rat"), _monster("ghoul")])
+	var rat: Dictionary = c.monsters[0]
+	var ghoul: Dictionary = c.monsters[1]
+	c.target_index = 0
+	c._apply_hero_face(c.heroes[0], {"type": "attack", "value": 15}, 15)
+	check(not Combat.is_alive(rat) and ghoul["hp"] < ghoul["max_hp"], "overkill spills onto the next enemy")
+	var c2 := Combat.new(131)
+	c2.start_battle(_heroes(), [_monster("rotting_bishop")])
+	c2._damage(c2.monsters[0], 14, "test", true, c2.heroes[0])
+	check(c2.monsters[0]["shield"] == Combat.BOSS_HARDEN_SHIELD, "bosses harden after a 12+ hit")
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	w.setup_party(["varek", "lys", "aldric"], {}, "", {}, 2)
+	check(w.party[0]["max_hp"] == 30, "the Chapel bonus applies on the Isle too")
+	var e: Dictionary = w.enemies.filter(func(x): return not x["boss"] and x["country"] == 0)[0]
+	var fight = w.start_fight(e, 1)
+	check(not fight.flee(), "no fleeing in round 1")
+	fight.round_number = 2
+	check(fight.flee() and fight.fled and fight.finished, "fleeing works from round 2")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2
+	var r: Dictionary = w.finish_fight(e, true, rng)
+	check(not r["drops"].is_empty(), "every Isle fight drops something")
+	check(r["embers"] >= 10, "Isle fights pay at least 10 embers per tier")
+	check(r["carved"] != "", "an Isle win sharpens a die")
+	var p := _fresh_profile("test_v30")
+	check(p.banner_cost("pets") == 2 and p.banner_cost("heroes") == 3, "pet and relic banners are cheaper")
+	check(int(p.star_cost("hero", "varek")[0]) == 25 and int(p.star_cost("hero", "varek")[1]) == 4, "first stars cost mostly Star Dust")
+	var plain := Run.new(132)
+	var gp := _fresh_profile("test_v30_gear")
+	var sw: Dictionary = gp.recipe("alpha_fang_blade")
+	var sa: Dictionary = gp.recipe("bog_heart_charm")
+	var geared := Run.new(132, {"gear": {"varek": {"weapon": sw, "armor": sa}, "lys": {"weapon": sw}}})
+	check(abs(geared.gear_scaling() - 1.3) < 0.001, "gear scaling caps at +30%")
+	var g: Dictionary = plain.monster_defs["ghoul"]
+	var np := _fresh_profile("test_v30_unlock")
+	check(not np.feature_unlocked("forge") and not np.feature_unlocked("isle"), "a new player starts with a small town")
+	np.stats["runs"] = 1
+	check(np.feature_unlocked("isle") and np.feature_unlocked("summon"), "one journey opens the Isle and the Summon tab")
+	check(geared.scaled_monster(g, "fight", "early")["hp"] > plain.scaled_monster(g, "fight", "early")["hp"], "the road answers crafted gear")

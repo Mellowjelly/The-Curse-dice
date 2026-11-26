@@ -55,7 +55,7 @@
 	},
 	{
 		"id": "aldric",
-		"skill": {"id": "last_rite", "name": "Last Rite", "cost": 6, "desc": "Heal all allies 3. Revive one fallen ally with 4 HP. Costs Aldric 3 HP."},
+		"skill": {"id": "last_rite", "name": "Last Rite", "cost": 5, "desc": "Heal all allies 4. Revive one fallen ally with 6 HP. Costs Aldric 2 HP."},
 		"name": "Brother Aldric",
 		"role": "support",
 		"hp": 22,
@@ -114,7 +114,7 @@
 		"role": "plague doctor",
 		"hp": 21,
 		"starter": false,
-		"lore": "Her beak mask hides a smile. The plague taught her that fire cures everything.",
+		"lore": "Her beak mask hides a smile. The plague taught her that scalding water cures everything.",
 		"carve_pool": [
 			{ "type": "fire", "value": 3 },
 			{ "type": "heal", "value": 3 },

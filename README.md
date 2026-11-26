@@ -1,4 +1,4 @@
-# Cursed Dice: ลูกเต๋าต้องสาป — เวอร์ชัน 2.2
+# Cursed Dice: ลูกเต๋าต้องสาป — เวอร์ชัน 3.0
 
 เกมโร้กไลต์ดาร์กแฟนตาซี ต่อสู้ด้วยลูกเต๋า 2D สร้างด้วย Godot 4
 ภูมิภาคแรก **The Hollow Road** เล่นจบได้ครบ: เมือง → ถนน 42 ช่อง → บอส The Rotting Bishop
@@ -23,7 +23,7 @@
 - เกมเซฟอัตโนมัติ ปิดแล้วกลับมาเล่นต่อได้
 
 ## ทีม AI และวงจรทดสอบ
-ทีม AI อยู่ใน `.claude/agents/`: `game-designer`, `programmer`, `writer`, `art-director`, `qa-tester`, `playtester`
+ทีม AI อยู่ใน `.claude/agents/`: `game-designer`, `programmer`, `writer`, `art-director`, `qa-tester`, `playtester`, `game-player` (ผู้เล่น AI), `game-critic` (นักวิจารณ์ AI), `game-developer` (นักพัฒนาอาวุโส)
 
 ทุกเวอร์ชันผ่านวงจรนี้:
 1. บอท 3 สไตล์ (มือใหม่ / นักวางแผน / สายบ้าระห่ำ) เล่น 300 รันต่อสไตล์ + แคมเปญ 20 รัน
