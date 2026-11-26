@@ -41,10 +41,14 @@ const HELP := """COMMANDS
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.is_empty():
-		print("usage: -- session.txt [tail_lines]")
+		print("usage: -- session.txt [tail_lines] [th]")
 		quit()
 		return
 	var tail := int(args[1]) if args.size() > 1 else 60
+	if "th" in args:  # optional 3rd argument: show the game's own text (combat log, intents, story) in Thai
+		var Settings = load("res://scripts/ui/settings.gd")
+		Settings.language = "th"
+		Settings.apply()
 	var path := "user://cli_profile.save"
 	GameData.safe_delete(path)
 	profile = Profile.new(path)
