@@ -128,6 +128,10 @@ func _tactician_wants_skill(c: Combat, i: int, id: String) -> bool:
 		"last_rite":
 			var dead := c.heroes.any(func(x): return not Combat.is_alive(x))
 			return dead or _party_missing_hp(c) >= 12
+		"ash_feast":
+			# Eat Fate only when it is a real meal, or when it finishes the target.
+			var t: Dictionary = c._get_target()
+			return c.fate >= 3 or (not t.is_empty() and t["hp"] <= c.fate * Combat.ASH_FEAST_PER_FATE)
 		_:
 			return true
 

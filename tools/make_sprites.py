@@ -190,6 +190,39 @@ def mordecai():
     return frames(c.img, 24)
 
 
+def wren():
+    """3.4 hero: the town's bell-ringer, grey before her time, a hand-bell on a rope."""
+    c = Canvas()
+    c.poly([(12, 12), (9, 31), (22, 31), (19, 12)], ROBE_D)                   # mourning dress
+    c.poly([(15, 13), (14, 31), (17, 31), (16, 13)], ROBE)
+    c.ell(12, 4, 19, 12, PALE)                                                # gaunt face
+    c.px(14, 8, K); c.px(17, 8, K); c.rect(15, 10, 16, 10, PALE_D)
+    c.poly([(11, 3), (15, 0), (20, 3), (21, 14), (19, 6), (12, 6), (10, 14)], PALE_D)  # grey hair, hooded
+    c.rect(19, 15, 22, 16, ROBE_D); c.px(23, 16, PALE)                        # arm
+    c.line([(23, 17), (23, 20)], BROWN)                                       # bell rope
+    c.poly([(21, 21), (25, 21), (26, 26), (20, 26)], GOLD_D)                  # hand-bell
+    c.rect(22, 22, 23, 24, GOLD); c.px(23, 27, ST_D)                          # clapper
+    return frames(c.img, 24)
+
+
+def osric():
+    """3.4 hero: a big man grey with ash, mouth and hands stained black."""
+    c = Canvas()
+    c.rect(11, 25, 14, 31, BROWN_D); c.rect(17, 25, 20, 31, BROWN_D)         # legs
+    c.rect(9, 13, 22, 26, ROBE); c.rect(10, 14, 13, 20, PALE_D)               # broad ash-grey body
+    for x, y in ((12, 22), (18, 17), (20, 23), (15, 15)):
+        c.px(x, y, CLOTH)                                                     # soot smudges
+    c.rect(11, 12, 20, 13, BROWN)                                             # rope belt across the shoulders
+    c.rect(12, 4, 19, 12, PALE_D)                                             # face
+    c.px(14, 7, EMBER); c.px(17, 7, EMBER)                                    # eyes still glowing
+    c.rect(13, 9, 18, 11, CLOTH); c.px(15, 10, K)                             # ash-black mouth
+    c.rect(12, 2, 19, 4, CLOTH_L)                                             # cropped hair
+    c.rect(21, 16, 24, 18, ROBE); c.ell(23, 15, 27, 19, CLOTH)                # blackened fist
+    for x, y in ((26, 12), (24, 10), (27, 9)):
+        c.px(x, y, PALE)                                                      # ash drifting up
+    return frames(c.img, 24)
+
+
 # ---------------------------------------------------------------- monsters (drawn facing right)
 
 def ghoul():
@@ -590,7 +623,7 @@ BOSSES = {
 
 
 SPRITES = {
-    "varek": varek, "lys": lys, "aldric": aldric, "rook": rook, "vael": vael, "mordecai": mordecai,
+    "varek": varek, "lys": lys, "aldric": aldric, "rook": rook, "vael": vael, "mordecai": mordecai, "wren": wren, "osric": osric,
     "ghoul": ghoul, "cultist": cultist, "bone_hound": bone_hound, "plague_rat": plague_rat,
     "weeping_nun": weeping_nun, "grave_knight": grave_knight, "bone_colossus": bone_colossus,
     "rotting_bishop": rotting_bishop, "rotting_bishop_enraged": lambda: rotting_bishop(True),

@@ -160,5 +160,59 @@
 		],
 		"grade": "SSR",
 		"element": "wind"
+	},
+	{
+		"id": "wren",
+		"skill": {"id": "death_knell", "name": "Death Knell", "cost": 4, "desc": "Deal 3 to ALL enemies, 6 to those below half HP (ignores shields). The bell takes a year from Wren: -1 max HP for this journey."},
+		"name": "Wren the Bell-Ringer",
+		"role": "executioner",
+		"hp": 22,
+		"starter": false,
+		"lore": "She rang the bell for every burial in Ashfall. Each toll took a year from her, and she has rung a great many.",
+		"carve_pool": [
+			{ "type": "attack", "value": 4 },
+			{ "type": "cleave", "value": 2 },
+			{ "type": "guard", "value": 2 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "blood", "value": 6 },
+			{ "type": "heal", "value": 2 }
+		],
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 2 },
+			{ "type": "guard", "value": 1 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "shield", "value": 2 }
+		],
+		"grade": "SR",
+		"element": "wind"
+	},
+	{
+		"id": "osric",
+		"skill": {"id": "ash_feast", "name": "Ash Feast", "cost": 4, "desc": "Spend ALL your Fate: deal 3 per Fate to the target (ignores shields). Osric loses 1 HP per Fate eaten. Needs 1 Fate."},
+		"name": "Osric the Ash-Eater",
+		"role": "devourer",
+		"hp": 26,
+		"starter": false,
+		"lore": "He ate the ashes of his burned village so that nothing of it would be lost. He has been hungry ever since.",
+		"carve_pool": [
+			{ "type": "attack", "value": 4 },
+			{ "type": "blood", "value": 7 },
+			{ "type": "shield", "value": 4 },
+			{ "type": "guard", "value": 2 },
+			{ "type": "fire", "value": 3 },
+			{ "type": "attack", "value": 5 }
+		],
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "blood", "value": 7 },
+			{ "type": "shield", "value": 2 }
+		],
+		"grade": "SSR",
+		"element": "earth"
 	}
 ]

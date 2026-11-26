@@ -54,6 +54,7 @@ func _init() -> void:
 	test_v33_changes()
 	test_v34_road()
 	test_v34_isle_sharpening()
+	test_v34_new_heroes()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -427,7 +428,7 @@ func test_summon_roll() -> void:
 		check(p.locked_in(banner).is_empty(), "banner %s can be completed" % banner)
 		check(max_gap <= int(p.summon["pity"]), "pity guarantees something new in %s within %d rolls (gap %d)" % [banner, p.summon["pity"], max_gap])
 		check(not p.can_summon(banner), "a completed banner cannot be rolled")
-	check(p.owned_heroes.size() == 6, "all heroes unlocked")
+	check(p.owned_heroes.size() == GameData.load_heroes().size(), "all heroes unlocked")
 	check(p.owned_pets.size() == 7, "all pets unlocked")
 	var run := Run.new(30, p.run_options(), ["rook", "vael", "mordecai"])
 	check(run.heroes.map(func(h): return h["id"]) == ["rook", "vael", "mordecai"], "the chosen party is used")
@@ -977,7 +978,7 @@ func test_v32_translations() -> void:
 	check(ResourceLoader.exists("res://assets/fonts/NotoSansThai-Regular.woff2"), "Thai font is bundled")
 	# Every player-facing text in data/ has a Thai line (proper names of heroes and places may stay English).
 	var keep_english := ["Varek the Oathbroken", "Lys the Hollow", "Brother Aldric", "Rook the Gravedigger",
-		"Sister Vael", "Mordecai the Gambler", "The Hollow Road"]
+		"Sister Vael", "Mordecai the Gambler", "The Hollow Road", "Wren the Bell-Ringer", "Osric the Ash-Eater"]
 	var missing: Array[String] = []
 	for f in DirAccess.get_files_at("res://data"):
 		if f.ends_with(".json") and not f.begins_with("lang_"):
@@ -1174,3 +1175,57 @@ func test_v34_isle_sharpening() -> void:
 	check(faces.size() == w.sharpen_offers.size() and w.sharpen_offers.size() >= 2, "offers never repeat a face (%d offers)" % w.sharpen_offers.size())
 	w.finish_fight(e, false, rng)
 	check(w.sharpen_offers.is_empty(), "a lost fight leaves no sharpening")
+
+
+## 3.4: Wren the Bell-Ringer (Death Knell) and Osric the Ash-Eater (Ash Feast).
+func test_v34_new_heroes() -> void:
+	var by_id := {}
+	for d in GameData.load_heroes():
+		by_id[d["id"]] = d
+	for id in ["wren", "osric"]:
+		check(by_id.has(id) and not by_id[id].get("starter", false), "%s is a new hero to summon" % id)
+		check(ResourceLoader.exists("res://assets/sprites/%s.png" % id), "%s has a sprite" % id)
+	var c := Combat.new(34)
+	var party := ["wren", "osric", "aldric"].map(func(id): return Combat.make_unit(by_id[id]))
+	c.start_battle(party, [_monster("ghoul"), _monster("rotting_bishop")])
+	var ghoul: Dictionary = c.monsters[0]
+	var boss: Dictionary = c.monsters[1]
+	boss["hp"] = boss["max_hp"] / 2 - 1
+	boss["shield"] = 10
+	var ghoul_hp: int = ghoul["hp"]
+	var boss_hp: int = boss["hp"]
+	var wren: Dictionary = c.heroes[0]
+	var max_before: int = wren["max_hp"]
+	wren["charge"] = Combat.skill_cost(wren)
+	check(c.use_skill(0), "Wren can ring the bell")
+	check(ghoul["hp"] == max(0, ghoul_hp - Combat.DEATH_KNELL_DAMAGE), "Death Knell hits a healthy enemy for 3")
+	var dealt: int = boss_hp - boss["hp"]
+	check(dealt >= Combat.DEATH_KNELL_EXECUTE - 2 and boss["shield"] == 10, "Death Knell hits a wounded enemy much harder, through shields (dealt %d)" % dealt)
+	check(wren["max_hp"] == max_before - Combat.DEATH_KNELL_MAX_HP_COST and wren["hp"] <= wren["max_hp"], "the bell takes 1 max HP from Wren")
+	var osric: Dictionary = c.heroes[1]
+	osric["charge"] = Combat.skill_cost(osric)
+	c.fate = 0
+	check(not c.can_use_skill(1), "Ash Feast needs at least 1 Fate")
+	c.fate = 3
+	c.target_index = 1
+	var bhp: int = boss["hp"]
+	var ohp: int = osric["hp"]
+	check(c.use_skill(1), "Osric eats the Fate")
+	check(c.fate == 0, "Ash Feast spends all Fate")
+	check(bhp - boss["hp"] >= 3 * Combat.ASH_FEAST_PER_FATE - 2 and boss["shield"] == 10, "3 Fate become about 9 damage, through shields")
+	check(osric["hp"] == ohp - 3 * Combat.ASH_FEAST_HP_PER_FATE, "Osric pays 1 HP per Fate")
+	osric["hp"] = 2
+	osric["charge"] = Combat.skill_cost(osric)
+	c.fate = 5
+	c.use_skill(1)
+	check(osric["hp"] == 1, "Ash Feast never kills Osric")
+	# A full run with the new heroes finishes without errors.
+	var PlayerBot = load("res://tools/bots/player_bot.gd")
+	for style in ["newbie", "tactician"]:
+		var run := Run.new(3434, {}, ["wren", "osric", "vael"])
+		var bot = PlayerBot.new(style, 3434)
+		var steps := 0
+		while not run.is_over() and steps < 3000:
+			bot.play_run_step(run)
+			steps += 1
+		check(run.is_over(), "a %s run with Wren and Osric reaches an end" % style)

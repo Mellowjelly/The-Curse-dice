@@ -40,6 +40,11 @@ const HOLLOW_FLAME_HP_COST := 3
 const LAST_RITE_HEAL := 4
 const LAST_RITE_REVIVE_HP := 6
 const LAST_RITE_HP_COST := 2
+const DEATH_KNELL_DAMAGE := 3       # Wren (3.4): to every enemy...
+const DEATH_KNELL_EXECUTE := 6      # ...or this much to enemies below half HP
+const DEATH_KNELL_MAX_HP_COST := 1  # dark price: max HP lost for the rest of the journey
+const ASH_FEAST_PER_FATE := 3       # Osric (3.4): damage per Fate eaten
+const ASH_FEAST_HP_PER_FATE := 1    # dark price: HP per Fate eaten (never kills)
 
 var rng := RandomNumberGenerator.new()
 var heroes: Array = []    # Array[Dictionary] (units)
@@ -221,6 +226,8 @@ func can_use_skill(hero_index: int) -> bool:
 	if finished or hero_index < 0 or hero_index >= heroes.size():
 		return false
 	var h: Dictionary = heroes[hero_index]
+	if h["skill"].get("id", "") == "ash_feast" and fate < 1:
+		return false  # nothing to eat
 	return is_alive(h) and not h["skill"].is_empty() and h["charge"] >= skill_cost(h)
 
 
@@ -292,6 +299,23 @@ func use_skill(hero_index: int) -> bool:
 			_log(tr("%s's die lands on %s.") % [who, String(h["faces"][best]["type"]).to_upper()])
 			gain_fate(2, tr("Loaded Dice") + ":")
 			_pay_hp(h, 3, tr("Luck is never free for %s") % who)
+		"death_knell":
+			for m in monsters:
+				if is_alive(m):
+					var low: bool = m["hp"] * 2 < m["max_hp"]
+					_damage(m, DEATH_KNELL_EXECUTE if low else DEATH_KNELL_DAMAGE, who, true, h)
+			# Dark price: each toll takes a year of her life (max HP, for the rest of the journey).
+			if h["max_hp"] > 5:
+				h["max_hp"] -= DEATH_KNELL_MAX_HP_COST
+				h["hp"] = min(h["hp"], h["max_hp"])
+				_log(tr("The bell takes a year from %s (max HP %d)") % [who, h["max_hp"]])
+		"ash_feast":
+			var eaten := fate
+			fate = 0
+			var t := _get_target()
+			_log(tr("%s eats %d Fate") % [who, eaten])
+			_damage(t, eaten * ASH_FEAST_PER_FATE, who, true, h)
+			_pay_hp(h, eaten * ASH_FEAST_HP_PER_FATE, tr("The ashes burn %s inside") % who)
 		_:
 			push_error("Unknown skill id: %s" % h["skill"]["id"])
 	if _all_dead(monsters):
