@@ -33,7 +33,7 @@ const HELP := """COMMANDS
        road (start a Hollow Road journey) | explore (go out to the Cursed Isle)
  ROAD (map): roll | move 0|1 | reroll_move | pick <n> (pet/carving/event option/close event) | skip
        equip_loot <weapon#> <hero#> | buy <item> | leave | rest heal|carve
- WORLD: look | goto <x> <y> | gather | fight | home
+ WORLD: look | goto <x> <y> | gather | fight | home | sharpen <n>|skip (after a win: pick 1 of 3 sharpenings)
  COMBAT (road or world): lock <hero#> | reroll | fate_reroll | twist <hero#> <face#> | skill <hero#>
        target <enemy#> | end | flee (Isle only, from round 2)"""
 
@@ -383,6 +383,8 @@ func _combat_cmd(cb: Combat, c: String, p: PackedStringArray) -> void:
 			profile.star_dust += int(r["dust"])
 			say("FIGHT OVER: %s. +%d embers, +%d dust, drops %s%s%s" % ["FLED" if cb.fled else ("VICTORY" if r["victory"] else "DEFEAT"), r["embers"], r["dust"], str(r.get("drops", {})),
 				" - YOUR BAG WAS LOST" if r["lost_bag"] else "", ("  | " + r["carved"]) if r.get("carved", "") != "" else ""])
+			if r.get("sharpen", false):
+				say(_sharpen_text())
 			profile.world_state = world.to_dict()
 			profile.save()
 			wcombat = null
@@ -412,6 +414,13 @@ func _combat_state(cb: Combat) -> String:
 
 # ---------------------------------------------------------------- the Cursed Isle
 
+func _sharpen_text() -> String:
+	var s: Array[String] = ["BATTLE-HARDENED: pick 1 sharpening (+1 until you go home) with `sharpen <n>`, or `sharpen skip`:"]
+	for i in world.sharpen_offers.size():
+		s.append("   %d: %s" % [i, world.sharpen_offers[i]["text"]])
+	return "\n".join(s)
+
+
 func _world_cmd(c: String, p: PackedStringArray) -> void:
 	match c:
 		"look":
@@ -439,6 +448,16 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 					_start_world_fight(e)
 					return
 			say("No monster within 1 cell.")
+		"sharpen":
+			if world.sharpen_offers.is_empty():
+				say("Nothing to sharpen. Win an Isle fight first (max %d per trip)." % world.MAX_TRIP_CARVINGS)
+				return
+			if p.size() > 1 and p[1] == "skip":
+				world.skip_sharpening()
+				say("You leave your dice as they are.")
+				return
+			var msg := world.choose_sharpening(int(p[1]) if p.size() > 1 else -1)
+			say(msg if msg != "" else "sharpen <0-%d> or sharpen skip" % (world.sharpen_offers.size() - 1))
 		"home":
 			var moved := profile.bank(world)
 			profile.advance_time()

@@ -53,6 +53,7 @@ func _init() -> void:
 	test_v32_player_bugs()
 	test_v33_changes()
 	test_v34_road()
+	test_v34_isle_sharpening()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -785,7 +786,7 @@ func test_v30_changes() -> void:
 	var r: Dictionary = w.finish_fight(e, true, rng)
 	check(not r["drops"].is_empty(), "every Isle fight drops something")
 	check(r["embers"] >= 10, "Isle fights pay at least 10 embers per tier")
-	check(r["carved"] != "", "an Isle win sharpens a die")
+	check(r["sharpen"] and w.sharpen_offers.size() == 3, "an Isle win offers 3 sharpenings")
 	var p := _fresh_profile("test_v30")
 	check(p.banner_cost("pets") == 2 and p.banner_cost("heroes") == 3, "pet and relic banners are cheaper")
 	check(int(p.star_cost("hero", "varek")[0]) == 25 and int(p.star_cost("hero", "varek")[1]) == 4, "first stars cost mostly Star Dust")
@@ -1131,3 +1132,45 @@ func test_v34_road() -> void:
 	check(p.road_boss()["id"] == "wick_mother", "town shows the Wick-Mother at night after a win")
 	p.stats["kills_wick_mother"] = 1
 	check(p._complete_quests().any(func(q): return q["id"] == "wick_snuffed"), "Lights Out completes when the Wick-Mother falls")
+
+
+## 3.4: after an Isle win the player picks 1 of 3 sharpenings (critique 3.2 #7).
+func test_v34_isle_sharpening() -> void:
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	w.setup_party(["varek", "lys", "aldric"], {}, "", {}, 0)
+	var e: Dictionary = w.enemies.filter(func(x): return not x["boss"] and x["country"] == 0)[0]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 34
+	var before: Array = w.party.map(func(h): return h["faces"].duplicate(true))
+	var r: Dictionary = w.finish_fight(e, true, rng)
+	check(r["sharpen"] and w.sharpen_offers.size() == World.SHARPEN_OFFERS, "a win offers 3 sharpenings")
+	var heroes := {}
+	for o in w.sharpen_offers:
+		heroes[o["hero"]] = true
+		check(o["face"] < 4 and w.party[o["hero"]]["faces"][o["face"]]["type"] != "blank", "only faces 1-4 that are not blank sharpen")
+		check(int(o["new"]["value"]) == int(w.party[o["hero"]]["faces"][o["face"]]["value"]) + 1, "a sharpening is +1")
+	check(heroes.size() == 3, "the 3 offers are for 3 different heroes")
+	check(w.party.map(func(h): return h["faces"]) == before, "nothing changes until the player picks")
+	var o: Dictionary = w.sharpen_offers[1]
+	var text: String = w.choose_sharpening(1)
+	check(text != "" and w.party[o["hero"]]["faces"][o["face"]] == o["new"], "the picked sharpening is applied")
+	check(w.trip_carvings == 1 and w.sharpen_offers.is_empty(), "picking uses one of the trip's sharpenings")
+	check(w.choose_sharpening(0) == "", "an offer cannot be taken twice")
+	w.finish_fight(e, true, rng)
+	w.skip_sharpening()
+	check(w.trip_carvings == 1 and w.sharpen_offers.is_empty(), "skipping costs nothing")
+	w.trip_carvings = World.MAX_TRIP_CARVINGS
+	r = w.finish_fight(e, true, rng)
+	check(not r["sharpen"] and w.sharpen_offers.is_empty(), "no more than %d sharpenings per trip" % World.MAX_TRIP_CARVINGS)
+	# A party with one hero standing still gets 3 different faces to choose from.
+	w.trip_carvings = 0
+	w.party[0]["hp"] = 0
+	w.party[1]["hp"] = 0
+	w.finish_fight(e, true, rng)
+	var faces := {}
+	for so in w.sharpen_offers:
+		faces["%d:%d" % [so["hero"], so["face"]]] = true
+	check(faces.size() == w.sharpen_offers.size() and w.sharpen_offers.size() >= 2, "offers never repeat a face (%d offers)" % w.sharpen_offers.size())
+	w.finish_fight(e, false, rng)
+	check(w.sharpen_offers.is_empty(), "a lost fight leaves no sharpening")

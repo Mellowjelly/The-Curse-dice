@@ -58,6 +58,8 @@ var _bag_label: Label
 var _minimap: TextureRect
 var _mini_dot: ColorRect
 var _big_map: Control
+var _sharpen_panel: PanelContainer  # 3.4: pick 1 of 3 sharpenings after an Isle win
+var _sharpen_box: VBoxContainer
 var _toast: Label
 var _gather_bar: ProgressBar
 var _combat_view: CombatView
@@ -288,6 +290,14 @@ func _build_hud() -> void:
 	_gather_bar.max_value = GATHER_TIME
 	_gather_bar.hide()
 	_hud.add_child(_gather_bar)
+	_sharpen_panel = UI.panel(Color("#b07cf0"), 2)
+	_sharpen_panel.position = Vector2(390, 200)
+	_sharpen_panel.custom_minimum_size = Vector2(500, 0)
+	_sharpen_box = VBoxContainer.new()
+	_sharpen_box.add_theme_constant_override("separation", 8)
+	_sharpen_panel.add_child(_sharpen_box)
+	_hud.add_child(_sharpen_panel)
+	_sharpen_panel.hide()
 	_hud.add_child(_big_map)  # last, so it covers the rest of the HUD
 	_big_map.hide()
 
@@ -378,7 +388,7 @@ func _show_toast(text: String, color: Color = UI.GOLD) -> void:
 # ---------------------------------------------------------------- input and movement
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _in_combat or _big_map.visible:
+	if _in_combat or _big_map.visible or _sharpen_panel.visible:
 		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var p := get_global_mouse_position()
@@ -405,7 +415,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
-	if _in_combat:
+	if _in_combat or _sharpen_panel.visible:
 		return
 	world.clock += delta
 	_regen += delta
@@ -509,11 +519,35 @@ func _on_combat_finished(victory: bool) -> void:
 		_player.position = _ground.map_to_local(world.player_cell)
 		_target = _player.position
 		_show_toast(tr("Your party was carried back to Ashfall%s") % (tr(" - your bag is lost!") if r["lost_bag"] else "."), UI.BLOOD)
-	if r.get("carved", "") != "":
-		var tw := create_tween()
-		tw.tween_interval(2.4)
-		tw.tween_callback(func(): _show_toast(r["carved"], Color("#b07cf0")))
+	if r.get("sharpen", false):
+		_show_sharpen()
 	_refresh_world_objects()
+	_refresh_hud()
+	_save()
+
+
+# ---------------------------------------------------------------- sharpening chooser (3.4)
+
+func _show_sharpen() -> void:
+	for ch in _sharpen_box.get_children():
+		ch.queue_free()
+	_sharpen_box.add_child(UI.label(tr("Battle-hardened"), 20, Color("#b07cf0")))
+	_sharpen_box.add_child(UI.wrap_label(tr("The fight left its mark. Sharpen one face by +1 until you go home (%d of %d this trip).") % [
+		world.trip_carvings + 1, World.MAX_TRIP_CARVINGS], 13, UI.DIM, 460))
+	for i in world.sharpen_offers.size():
+		var idx := i
+		_sharpen_box.add_child(UI.choice_button(world.sharpen_offers[i]["text"], func(): _pick_sharpen(idx), Color("#b07cf0")))
+	_sharpen_box.add_child(UI.button(tr("Skip"), func(): _pick_sharpen(-1), 14))
+	_sharpen_panel.show()
+
+
+func _pick_sharpen(index: int) -> void:
+	var text := world.choose_sharpening(index) if index >= 0 else ""
+	world.skip_sharpening()
+	_sharpen_panel.hide()
+	if text != "":
+		_show_toast(text, Color("#b07cf0"))
+		Sfx.play(self, "fate")
 	_refresh_hud()
 	_save()
 

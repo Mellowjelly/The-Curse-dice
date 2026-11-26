@@ -24,6 +24,8 @@ var monster_defs: Dictionary
 var time_of_day := ""             # set from the town when you set out
 var trip_carvings := 0            # Isle wins sharpen the party's dice until they go home
 const MAX_TRIP_CARVINGS := 3
+const SHARPEN_OFFERS := 3         # 3.4: after an Isle win the player picks 1 of 3 sharpenings
+var sharpen_offers: Array = []    # [{ "hero": int, "face": int, "new": Dictionary, "text": String }]
 
 
 func _init(world_seed: int = -1) -> void:
@@ -144,6 +146,7 @@ func is_dangerous(country: Dictionary) -> bool:
 func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dictionary = {}, bonus_hp: int = 0) -> void:
 	party = []
 	trip_carvings = 0
+	sharpen_offers = []
 	var by_id := {}
 	for d in GameData.load_heroes():
 		by_id[d["id"]] = d
@@ -302,24 +305,11 @@ func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> D
 		var embers := (30 * tier) if is_boss else 10 * tier + rng.randi_range(0, 5 * tier)
 		if time_of_day == "night":
 			embers = int(embers * 1.4)
-		# Battle-hardened: the party's dice sharpen a little (until they go home).
-		var carved := ""
-		if trip_carvings < MAX_TRIP_CARVINGS:
-			var alive := party.filter(func(h): return Combat.is_alive(h))
-			if not alive.is_empty():
-				var h: Dictionary = alive[rng.randi_range(0, alive.size() - 1)]
-				var options: Array = []
-				for i in 4:
-					if h["faces"][i]["type"] != "blank":
-						options.append(i)
-				if not options.is_empty():
-					var fi: int = options[rng.randi_range(0, options.size() - 1)]
-					var nf: Dictionary = h["faces"][fi].duplicate()
-					nf["value"] = int(nf["value"]) + 1
-					h["faces"][fi] = nf
-					trip_carvings += 1
-					carved = tr("%s's %s face sharpens to %d (until you go home)") % [Combat.short_name(h), tr(String(nf["type"]).to_upper()), nf["value"]]
-		return {"victory": true, "embers": embers, "dust": dust, "lost_bag": false, "drops": drops, "boss": is_boss, "carved": carved}
+		# Battle-hardened: the party's dice sharpen a little (until they go home). 3.4: the player picks 1 of 3.
+		sharpen_offers = _make_sharpen_offers(rng) if trip_carvings < MAX_TRIP_CARVINGS else []
+		return {"victory": true, "embers": embers, "dust": dust, "lost_bag": false, "drops": drops, "boss": is_boss, "carved": "",
+			"sharpen": not sharpen_offers.is_empty()}
+	sharpen_offers = []
 	var lost := is_dangerous(countries[e["country"]]) and not bag.is_empty()
 	if lost:
 		bag.clear()
@@ -328,6 +318,58 @@ func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> D
 	for h in party:
 		h["hp"] = max(1, h["max_hp"] / 2)
 	return {"victory": false, "embers": 0, "dust": 0, "lost_bag": lost, "drops": {}, "boss": e.get("boss", false)}
+
+
+# ---------------------------------------------------------------- sharpening after an Isle win
+
+## Up to 3 offers of "+1 on one face (1-4)", each on a different hero when possible, never the same face twice.
+func _make_sharpen_offers(rng: RandomNumberGenerator) -> Array:
+	var alive: Array = []
+	for i in party.size():
+		if Combat.is_alive(party[i]):
+			alive.append(i)
+	var candidates: Array = []  # [[hero index, face index], ...] ordered so different heroes come first
+	for pass_n in 4:
+		for hi in alive:
+			var faces: Array = []
+			for fi in 4:
+				if party[hi]["faces"][fi]["type"] != "blank" and not candidates.any(func(c): return c[0] == hi and c[1] == fi):
+					faces.append(fi)
+			if not faces.is_empty():
+				candidates.append([hi, faces[rng.randi_range(0, faces.size() - 1)]])
+	# Shuffle the heroes' first offers, so the first offer is not always the party leader.
+	var first: Array = candidates.slice(0, min(alive.size(), candidates.size()))
+	for k in range(first.size() - 1, 0, -1):
+		var j := rng.randi_range(0, k)
+		var t = first[k]
+		first[k] = first[j]
+		first[j] = t
+	candidates = first + candidates.slice(first.size())
+	var offers: Array = []
+	for c in candidates.slice(0, SHARPEN_OFFERS):
+		var h: Dictionary = party[c[0]]
+		var f: Dictionary = h["faces"][c[1]]
+		var nf: Dictionary = f.duplicate()
+		nf["value"] = int(f["value"]) + 1
+		offers.append({"hero": c[0], "face": c[1], "new": nf,
+			"text": "%s: %s %d -> %d" % [Combat.short_name(h), tr(String(f["type"]).to_upper()), int(f["value"]), int(nf["value"])]})
+	return offers
+
+
+## Applies the chosen sharpening. Returns the message to show ("" if the choice is not valid).
+func choose_sharpening(index: int) -> String:
+	if index < 0 or index >= sharpen_offers.size():
+		return ""
+	var o: Dictionary = sharpen_offers[index]
+	sharpen_offers = []
+	var h: Dictionary = party[o["hero"]]
+	h["faces"][o["face"]] = o["new"]
+	trip_carvings += 1
+	return tr("%s's %s face sharpens to %d (until you go home)") % [Combat.short_name(h), tr(String(o["new"]["type"]).to_upper()), int(o["new"]["value"])]
+
+
+func skip_sharpening() -> void:
+	sharpen_offers = []
 
 
 # ---------------------------------------------------------------- save
