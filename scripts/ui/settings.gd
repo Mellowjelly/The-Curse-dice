@@ -109,11 +109,35 @@ static func _load_translations() -> void:
 			continue
 		var t := Translation.new()
 		t.locale = code
+		var hints: bool = code == "th" and DisplayServer.get_name() != "headless"
 		for key in data:
 			if key.begins_with("_"):
 				continue  # "_comment" and similar notes for translators
-			t.add_message(key, str(data[key]))
+			t.add_message(key, thai_break_hints(str(data[key])) if hints else str(data[key]))
 		TranslationServer.add_translation(t)
+
+
+## Godot 4.3 Labels wrap Thai text wrongly: at a word break inside a run of Thai letters the next line
+## repeats or loses a few letters (a bug with "trim edge spaces"). An invisible zero-width space at every
+## Thai word break gives the wrapper a real break point and the text wraps cleanly. Display only (not headless).
+static func thai_break_hints(text: String) -> String:
+	var ts := TextServerManager.get_primary_interface()
+	if ts == null or not ts.has_feature(TextServer.FEATURE_BREAK_ITERATORS):
+		return text
+	var br := ts.string_get_word_breaks(text, "th")
+	var cuts := {}
+	for i in range(1, br.size(), 2):
+		cuts[br[i]] = true
+	var out := ""
+	for i in text.length():
+		if i > 0 and cuts.has(i) and _is_thai(text.unicode_at(i)) and _is_thai(text.unicode_at(i - 1)):
+			out += "\u200b"
+		out += text[i]
+	return out
+
+
+static func _is_thai(c: int) -> bool:
+	return c >= 0x0E00 and c <= 0x0E7F
 
 
 static func set_tutorial_step(step: int) -> void:

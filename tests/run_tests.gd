@@ -55,6 +55,7 @@ func _init() -> void:
 	test_v34_road()
 	test_v34_isle_sharpening()
 	test_v34_new_heroes()
+	test_v35_thai_layout()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1175,6 +1176,20 @@ func test_v34_isle_sharpening() -> void:
 	check(faces.size() == w.sharpen_offers.size() and w.sharpen_offers.size() >= 2, "offers never repeat a face (%d offers)" % w.sharpen_offers.size())
 	w.finish_fight(e, false, rng)
 	check(w.sharpen_offers.is_empty(), "a lost fight leaves no sharpening")
+
+
+## 3.5: screenshot fixes - Thai word-break hints (Godot 4.3 Label wrap bug) and hero roles in Thai.
+func test_v35_thai_layout() -> void:
+	var Settings = load("res://scripts/ui/settings.gd")
+	var hinted: String = Settings.thai_break_hints("เหมือนเทียนที่ใกล้ดับ Wick-Mother 5")
+	check(hinted.contains("\u200b"), "Thai text gets invisible break points")
+	check(hinted.replace("\u200b", "") == "เหมือนเทียนที่ใกล้ดับ Wick-Mother 5", "break hints change nothing visible")
+	check(Settings.thai_break_hints("Wick-Mother %s") == "Wick-Mother %s", "English text gets no break hints")
+	var th: Dictionary = GameData.load_json("res://data/lang_th.json")
+	for h in GameData.load_heroes():
+		check(th.has(h["role"]), "hero role '%s' has Thai" % h["role"])
+	var UI = load("res://scripts/ui/ui_kit.gd")
+	check(UI.wrapped_height("one\ntwo\nthree", 12, 200) > UI.wrapped_height("one", 12, 200) * 2.5, "wrapped text height counts lines")
 
 
 ## 3.4: Wren the Bell-Ringer (Death Knell) and Osric the Ash-Eater (Ash Feast).

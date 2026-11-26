@@ -817,12 +817,15 @@
 	"Battle-hardened": "ผ่านศึกมาแล้ว",
 	"The fight left its mark. Sharpen one face by +1 until you go home (%d of %d this trip).": "การต่อสู้ทิ้งร่องรอยไว้ ลับหน้าเต๋า 1 หน้าให้ +1 จนกว่าจะกลับเมือง (ครั้งที่ %d จาก %d ของทริปนี้)",
 	"Death Knell": "ระฆังมรณะ",
-	"Deal 3 to ALL enemies, 6 to those below half HP (ignores shields). The bell takes a year from Wren: -1 max HP for this journey.": "ตีศัตรูทุกตัว 3 และตัวที่เลือดต่ำกว่าครึ่ง 6 (ทะลุโล่) ระฆังพรากหนึ่งปีจาก Wren: HP สูงสุด -1 ตลอดการเดินทางนี้",
+	"Deal 3 to ALL enemies, 6 to those below half HP (ignores shields). The bell takes a year from Wren: -1 max HP for this journey.": "ตีศัตรูทุกตัว 3 ตัวที่เลือดต่ำกว่าครึ่งโดน 6 (ทะลุโล่) ราคา: Wren HP สูงสุด -1 จนจบการเดินทาง",
 	"She rang the bell for every burial in Ashfall. Each toll took a year from her, and she has rung a great many.": "นางตีระฆังให้ทุกงานศพใน Ashfall เสียงระฆังแต่ละครั้งพรากชีวิตนางไปหนึ่งปี และนางตีมาแล้วมากมายเหลือเกิน",
 	"Ash Feast": "งานเลี้ยงเถ้าถ่าน",
-	"Spend ALL your Fate: deal 3 per Fate to the target (ignores shields). Osric loses 1 HP per Fate eaten. Needs 1 Fate.": "ใช้ชะตาทั้งหมด: ตีเป้าหมาย 3 ต่อชะตา 1 แต้ม (ทะลุโล่) Osric เสีย 1 HP ต่อชะตาที่กิน ต้องมีชะตาอย่างน้อย 1",
+	"Spend ALL your Fate: deal 3 per Fate to the target (ignores shields). Osric loses 1 HP per Fate eaten. Needs 1 Fate.": "กินชะตาทั้งหมด: ตีเป้า 3 ต่อชะตา 1 (ทะลุโล่) Osric เสีย 1 HP ต่อชะตา ต้องมีชะตาอย่างน้อย 1",
 	"He ate the ashes of his burned village so that nothing of it would be lost. He has been hungry ever since.": "เขากินเถ้าของหมู่บ้านที่ถูกเผา เพื่อไม่ให้สิ่งใดของมันสูญหาย ตั้งแต่นั้นเขาก็หิวอยู่เสมอ",
 	"The bell takes a year from %s (max HP %d)": "ระฆังพรากหนึ่งปีจาก %s (HP สูงสุด %d)",
 	"%s eats %d Fate": "%s กินชะตา %d แต้ม",
-	"The ashes burn %s inside": "เถ้าถ่านแผดเผา %s จากข้างใน"
+	"The ashes burn %s inside": "เถ้าถ่านแผดเผา %s จากข้างใน",
+	"executioner": "เพชฌฆาต",
+	"devourer": "ผู้กลืนกิน",
+	"You pick up the trail where you left it.": "คุณออกเดินต่อจากจุดที่ทิ้งไว้"
 }

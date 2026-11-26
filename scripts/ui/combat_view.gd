@@ -630,7 +630,7 @@ func _skill_button(h: Dictionary, index: int) -> Control:
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.add_theme_font_size_override("font_size", 12)
 	b.disabled = not is_ready
-	b.custom_minimum_size = Vector2(250, 0)
+	b.custom_minimum_size = Vector2(250, UI.wrapped_height(b.text, 12, 236) + 14)  # 3.5: long (Thai) skill text stays inside
 	b.pressed.connect(func(): combat.use_skill(index))
 	var style := UI.box(Color("#4a3a12") if is_ready else Color("#221c28"), UI.GOLD if is_ready else UI.BORDER, 2 if is_ready else 1, 4, 6)
 	for state in ["normal", "hover", "pressed", "focus", "disabled"]:

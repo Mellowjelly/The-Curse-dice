@@ -47,6 +47,15 @@ static func wrap_label(text: String, size: int = 16, color: Color = TEXT, min_wi
 	return l
 
 
+## Height of `text` wrapped at `width` (Godot 4.3 Buttons do not grow to fit wrapped text by themselves).
+static func wrapped_height(text: String, font_size: int, width: float) -> float:
+	var p := TextParagraph.new()
+	p.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
+	p.add_string(text, ThemeDB.fallback_font, font_size)
+	p.width = width
+	return p.get_size().y
+
+
 static func button(text: String, on_press: Callable, size: int = 16) -> Button:
 	var b := Button.new()
 	b.text = text
