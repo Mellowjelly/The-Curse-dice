@@ -1,0 +1,73 @@
+{
+	"star_max": 5,
+	"costs": {
+		"SR": [
+			[
+				40,
+				2
+			],
+			[
+				80,
+				4
+			],
+			[
+				140,
+				7
+			],
+			[
+				220,
+				12
+			]
+		],
+		"SSR": [
+			[
+				60,
+				3
+			],
+			[
+				120,
+				6
+			],
+			[
+				200,
+				10
+			],
+			[
+				300,
+				16
+			]
+		]
+	},
+	"hero": {
+		"hp_per_star": 2,
+		"face_bonus_at": [
+			3
+		],
+		"charge_at": 5
+	},
+	"dust_per_run": 1,
+	"dust_per_victory": 2,
+	"desc": {
+		"hero": [
+			"",
+			"+2 max HP",
+			"+1 to the weakest face (faces 1-4)",
+			"+2 max HP",
+			"Start every fight with +1 skill charge"
+		],
+		"pet": [
+			"",
+			"+1 to a d4 face",
+			"+1 to a d4 face",
+			"+1 to a d4 face",
+			"Blank face becomes ATK 2"
+		],
+		"relic": [
+			"",
+			"+1 to face 5",
+			"+1 to face 6",
+			"+1 to face 5",
+			"+1 to face 6"
+		]
+	}
+}

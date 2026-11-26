@@ -113,7 +113,7 @@ func start_battle(hero_units: Array, monster_defs: Array) -> void:
 		h["shield"] = 0
 		h["burn"] = 0
 		h["locked"] = false
-		h["charge"] = START_CHARGE
+		h["charge"] = START_CHARGE + int(h.get("charge_bonus", 0))
 	finished = false
 	round_number = 0
 	target_index = 0

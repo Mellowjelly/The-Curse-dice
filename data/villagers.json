@@ -1,0 +1,248 @@
+[
+	{
+		"id": "tobin",
+		"name": "Old Tobin",
+		"title": "the farmer",
+		"sprite": "villager_farmer",
+		"times": [
+			"dawn",
+			"day",
+			"dusk"
+		],
+		"greeting": [
+			"The fields grow nothing but bones these days.",
+			"You again? Good. The road needs walking."
+		],
+		"requests": [
+			{
+				"id": "tobin_rats",
+				"title": "Rats in the Grain",
+				"ask": "Plague rats ate what little grain I had. Kill some on the road for me, would you?",
+				"done": "Ha! That will teach the little devils. Take this, it was my father's.",
+				"goal": {
+					"stat": "kills_plague_rat",
+					"amount": 6,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "dust",
+					"amount": 3
+				}
+			},
+			{
+				"id": "tobin_fields",
+				"title": "Walk the Far Fields",
+				"ask": "My son went past the withered fields and never came back. Go further than tile 20 and look for him.",
+				"done": "Nothing but his hat? ... Thank you for looking. His golden rat followed you back. Keep it, he would want that.",
+				"goal": {
+					"stat": "best_tile",
+					"amount": 20,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "pet",
+					"id": "gilded_rat"
+				}
+			},
+			{
+				"id": "tobin_harvest",
+				"title": "A Harvest of Elites",
+				"ask": "The big ones walk the road like lords. Bring down two elites in a single journey.",
+				"done": "Two of them! Here, the Reliquary owed me a favour. This blade is yours.",
+				"goal": {
+					"stat": "run_elites",
+					"amount": 2,
+					"scope": "run"
+				},
+				"reward": {
+					"kind": "relic",
+					"id": "plague_lance"
+				}
+			}
+		]
+	},
+	{
+		"id": "marla",
+		"name": "Widow Marla",
+		"title": "who sells at the market",
+		"sprite": "villager_woman",
+		"times": [
+			"dawn",
+			"day",
+			"dusk"
+		],
+		"greeting": [
+			"Fresh bread? No. There is no fresh anything.",
+			"My husband rests in the chapel yard. I talk to him sometimes."
+		],
+		"requests": [
+			{
+				"id": "marla_camps",
+				"title": "Warm Fires",
+				"ask": "Travellers who rest live longer. Rest at three campfires for me (all journeys count).",
+				"done": "You listened. Not many do. Here, a little stardust from the old shrine.",
+				"goal": {
+					"stat": "camps",
+					"amount": 3,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "dust",
+					"amount": 4
+				}
+			},
+			{
+				"id": "marla_twist",
+				"title": "Bend Your Luck",
+				"ask": "My husband always said fate bends for those who dare. Twist your dice four times.",
+				"done": "He would have liked you. Take his old lantern-friend, it never liked me anyway.",
+				"goal": {
+					"stat": "fate_twists",
+					"amount": 4,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "pet",
+					"id": "lantern_wisp"
+				}
+			},
+			{
+				"id": "marla_bishop",
+				"title": "Rest for the Dead",
+				"ask": "The Bishop keeps the dead from sleeping. Defeat him, and my husband can finally rest.",
+				"done": "...He is quiet now. Thank you. A sister of the chapel wants to walk with you.",
+				"goal": {
+					"stat": "wins",
+					"amount": 1,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "hero",
+					"id": "vael"
+				}
+			}
+		]
+	},
+	{
+		"id": "pip",
+		"name": "Little Pip",
+		"title": "who never sleeps",
+		"sprite": "villager_child",
+		"times": [
+			"dawn",
+			"day"
+		],
+		"greeting": [
+			"Are you a real hero? You look tired.",
+			"I found a shiny bone! Do you want it? No, it is mine."
+		],
+		"requests": [
+			{
+				"id": "pip_events",
+				"title": "Strange Stories",
+				"ask": "Tell me stories! Find three strange things on the road (events count) and come back.",
+				"done": "A drowned bell?! Wooow. Here, I found these sparkly bits for you.",
+				"goal": {
+					"stat": "events",
+					"amount": 3,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "dust",
+					"amount": 3
+				}
+			},
+			{
+				"id": "pip_carve",
+				"title": "Make Me a Die",
+				"ask": "Can you carve dice? Carve five times in one journey. I want to learn!",
+				"done": "So that is how it is done! Look, a lizard that breathes fire followed me home. It likes you more.",
+				"goal": {
+					"stat": "run_carves",
+					"amount": 5,
+					"scope": "run"
+				},
+				"reward": {
+					"kind": "pet",
+					"id": "ember_salamander"
+				}
+			},
+			{
+				"id": "pip_night",
+				"title": "Brave in the Dark",
+				"ask": "Mama says nobody comes back from the road at night. Prove her wrong! Finish a journey that starts at night and reach tile 30.",
+				"done": "You did it! You are the bravest. The funny man with the hat said to give you this.",
+				"goal": {
+					"stat": "night_tile",
+					"amount": 30,
+					"scope": "run"
+				},
+				"reward": {
+					"kind": "hero",
+					"id": "mordecai"
+				}
+			}
+		]
+	},
+	{
+		"id": "hesk",
+		"name": "Captain Hesk",
+		"title": "of the night watch",
+		"sprite": "villager_guard",
+		"times": [
+			"dusk",
+			"night"
+		],
+		"greeting": [
+			"Keep your voice down. Things listen at night.",
+			"The gate stays shut after dark. Unless you have business."
+		],
+		"requests": [
+			{
+				"id": "hesk_ghouls",
+				"title": "Thin the Ghouls",
+				"ask": "Ghouls scratch at the gate every night. Destroy eight of them.",
+				"done": "The scratching stopped. For now. Here, the watch's pay. Do not spend it on drink.",
+				"goal": {
+					"stat": "kills_ghoul",
+					"amount": 8,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "dice",
+					"amount": 3
+				}
+			},
+			{
+				"id": "hesk_knight",
+				"title": "The Grave Knight",
+				"ask": "A knight in rusted armour leads the dead. He was one of mine, once. Put him down.",
+				"done": "...Thank you. He was a good man. Take his old partner's blade. It is cursed with moonlight.",
+				"goal": {
+					"stat": "kills_grave_knight",
+					"amount": 1,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "relic",
+					"id": "moonlit_sickle"
+				}
+			},
+			{
+				"id": "hesk_curse",
+				"title": "Into the Curse",
+				"ask": "You are strong. Strong enough to walk the road under a curse? Win a journey at Curse I or higher.",
+				"done": "Mad, and alive. The gravedigger wants to work with you. I told him you are trouble. He liked that.",
+				"goal": {
+					"stat": "cursed_level_wins",
+					"amount": 1,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "hero",
+					"id": "rook"
+				}
+			}
+		]
+	}
+]

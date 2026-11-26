@@ -388,8 +388,10 @@ func _refresh_modal() -> void:
 			_modal_text("Something small and loyal watches you from the ditch. Its die is a d4: it rolls every round and acts after your heroes.")
 			for i in run.pet_offers.size():
 				var p: Dictionary = run.pet_offers[i]
-				var text := "%s  [%s]\n%s" % [p["name"], " ".join(p["faces"].map(UI.face_short)), p["desc"]]
-				_modal_box.add_child(UI.choice_button(text, func(): run.choose_pet(i), UI.GOLD))
+				var grade: String = p.get("grade", "SR")
+				var st := run.star_of("pet", p["id"])
+				var text := "[%s] %s  %s  [%s]\n%s" % [grade, p["name"], UI.stars_text(st), " ".join(p["faces"].map(UI.face_short)), p["desc"]]
+				_modal_box.add_child(UI.choice_button(text, func(): run.choose_pet(i), UI.grade_color(grade)))
 		"loot":
 			_modal_title("Weapons")
 			if run.last_reward_text != "":

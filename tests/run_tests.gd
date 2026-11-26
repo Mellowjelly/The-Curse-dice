@@ -41,6 +41,8 @@ func _init() -> void:
 	test_party_and_new_skills()
 	test_gates_stop_movement()
 	test_time_of_day()
+	test_villager_requests()
+	test_stars()
 	test_new_pets()
 	test_tile_snapshot_reload()
 	print("\n%d checks, %d failed" % [_checks, _failures])
@@ -515,3 +517,69 @@ func test_ui_scripts_compile() -> void:
 		if f.ends_with(".gd"):
 			var scr: GDScript = load("res://scripts/ui/" + f)
 			check(scr != null and scr.can_instantiate(), "UI script compiles: " + f)
+
+
+func _fresh_profile(name: String) -> Profile:
+	var path := "user://%s.save" % name
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	return Profile.new(path)
+
+
+func test_villager_requests() -> void:
+	var p := _fresh_profile("test_villagers")
+	check(p.villagers.size() == 4, "4 villagers live in Ashfall")
+	for v in p.villagers:
+		check(v["requests"].size() == 3, "%s has a chain of 3 requests" % v["id"])
+		for r in v["requests"]:
+			if r["reward"]["kind"] in ["hero", "pet", "relic"]:
+				check(not p.item_def(r["reward"]["kind"], r["reward"]["id"]).is_empty(), "reward exists: " + r["reward"]["id"])
+	# Total-scope request: kill rats after accepting.
+	check(p.npc_request("tobin")["id"] == "tobin_rats", "Tobin starts with the rat request")
+	p.stats["kills_plague_rat"] = 10
+	check(p.accept_request("tobin"), "a request can be accepted")
+	check(p.request_progress("tobin") == 0, "kills before accepting do not count")
+	p.stats["kills_plague_rat"] = 16
+	check(p.is_request_done("tobin"), "6 more kills finishes it")
+	var dust := p.star_dust
+	var r := p.claim_request("tobin")
+	check(r["kind"] == "dust" and p.star_dust == dust + 3, "reward handed over")
+	check(p.npc_request("tobin")["id"] == "tobin_fields", "the next request in the chain unlocks")
+	# Run-scope request: needs it in ONE journey.
+	p.npc_step["pip"] = 1
+	p.accept_request("pip")
+	var run := Run.new(80)
+	run.phase = "defeat"
+	run.stats["carves"] = 3
+	p.record_run(run)
+	check(not p.is_request_done("pip"), "3 carvings is not enough")
+	run.stats["carves"] = 5
+	p.record_run(run)
+	check(p.is_request_done("pip"), "5 carvings in one journey completes it")
+	r = p.claim_request("pip")
+	check(r["kind"] == "pet" and "ember_salamander" in p.owned_pets and r["grade"] == "SSR", "Pip gives an SSR pet")
+	# Owned rewards become Star Dust.
+	dust = p.star_dust
+	r = p.grant({"kind": "pet", "id": "ember_salamander"})
+	check(r["kind"] == "dust" and p.star_dust == dust + 8, "a duplicate SSR becomes 8 Star Dust")
+	check(p.npc_is_out("hesk") == (p.time_name() in ["dusk", "night"]), "the night watch keeps its hours")
+
+
+func test_stars() -> void:
+	var p := _fresh_profile("test_stars")
+	check(p.star("hero", "varek") == 1, "heroes start at 1 star")
+	check(not p.can_upgrade_star("hero", "varek"), "upgrades cost embers and dust")
+	p.embers = 5000
+	p.star_dust = 500
+	for i in 4:
+		check(p.upgrade_star("hero", "varek"), "upgrade to star %d" % (i + 2))
+	check(p.star("hero", "varek") == 5 and p.star_cost("hero", "varek").is_empty(), "5 stars is the max")
+	check(p.star_cost("hero", "vael")[0] > p.star_cost("hero", "lys")[0], "SSR upgrades cost more")
+	var run := Run.new(81, p.run_options())
+	var v: Dictionary = run.heroes[0]
+	check(v["max_hp"] == 28 + 4 and v.get("charge_bonus", 0) == 1, "a 5-star Varek has +4 HP and +1 charge")
+	var pet := {"faces": [{"type": "attack", "value": 1}, {"type": "blank", "value": 0}]}
+	Run.apply_pet_stars(pet, 5)
+	check(pet["faces"][1]["type"] == "attack", "a 5-star pet loses its blank face")
+	var w := Run.apply_relic_stars({"name": "X", "faces": [{"type": "fire", "value": 3}, {"type": "guard", "value": 3}]}, 3)
+	check(w["faces"][0]["value"] == 4 and w["faces"][1]["value"] == 4 and w["name"] == "X +2", "relic stars raise both faces")

@@ -48,6 +48,10 @@ const PARTY_SPOTS := [Vector2(104, 470), Vector2(318, 448), Vector2(336, 560)]
 const IDLE_SPOTS := [Vector2(444, 584), Vector2(544, 584), Vector2(10, 590)]
 
 var _scene_layer: Control
+var _collection: VBoxContainer
+var _dialog: PanelContainer
+var _dialog_npc := ""
+var _dialog_reveal: Dictionary = {}
 var _art: TextureRect
 var _time_box: HBoxContainer
 var _banner := "heroes"
@@ -60,12 +64,9 @@ const TIME_LOOK := {
 	"dusk": ["town_day", Color(0.85, 0.6, 0.6)],
 	"night": ["town", Color(1, 1, 1)],
 }
-# Who walks the square at each time of day: [sprite, from x, to x, y]
-const WALKERS := {
-	"dawn": [["villager_farmer", 380, 600, 430], ["villager_woman", 120, 360, 410]],
-	"day": [["villager_farmer", 380, 600, 430], ["villager_woman", 120, 360, 410]],
-	"dusk": [["villager_woman", 140, 380, 410], ["villager_guard", 400, 600, 430]],
-	"night": [["villager_guard", 380, 620, 430]],
+# Where each villager walks: [from x, to x, y]. Who is out depends on the time of day (villagers.json "times").
+const LANES := {
+	"tobin": [380, 600, 430], "marla": [120, 360, 410], "pip": [150, 290, 606], "hesk": [400, 620, 424],
 }
 var _building_marks := {}
 
@@ -122,9 +123,17 @@ func _build() -> void:
 	_tabs.add_theme_font_size_override("font_size", 16)
 	root.add_child(_tabs)
 	_party_box = _tab("Party")
+	_collection = _tab("Collection")
 	_buildings = _tab("Buildings")
-	_summon_box = _tab("Summon Roll")
+	_summon_box = _tab("Summon")
 	_quests = _tab("Quests")
+
+	# Dialogue box for talking to villagers (over the town scene).
+	_dialog = UI.panel(UI.GOLD, 2)
+	_dialog.position = Vector2(20, 400)
+	_dialog.size = Vector2(624, 300)
+	add_child(_dialog)
+	_dialog.hide()
 
 	_go = UI.choice_button("", _set_out, UI.GOLD)
 	_go.position = Vector2(664, 648)
@@ -220,7 +229,7 @@ func _refresh_scene() -> void:
 		spot.add_theme_stylebox_override("pressed", hover)
 		spot.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 		spot.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-		spot.pressed.connect(func(): _tabs.current_tab = 1; Sfx.play(self, "click"))
+		spot.pressed.connect(func(): _tabs.current_tab = 2; Sfx.play(self, "click"))
 		if lv == 0:
 			# Not built yet: the building stands dark and ruined.
 			var dark := ColorRect.new()
@@ -239,12 +248,30 @@ func _refresh_scene() -> void:
 		_shadow(sign)
 		_scene_layer.add_child(sign)
 	var US = load("res://scripts/ui/unit_sprite.gd")
-	# Villagers going about their day (only the watch is out at night).
-	for w in WALKERS[profile.time_name()]:
+	# Villagers going about their day. Tap one to talk.
+	for vdef in profile.villagers:
+		var vid: String = vdef["id"]
+		if not profile.npc_is_out(vid) or not LANES.has(vid):
+			continue
+		var w: Array = [vdef["sprite"]] + LANES[vid]
 		var v: Control = US.create(w[0], 96, false)
 		v.set_meta("dynamic", true)
 		v.position = Vector2(w[1], w[3])
 		_scene_layer.add_child(v)
+		var talk := Button.new()
+		talk.flat = true
+		talk.size = Vector2(70, 96)
+		talk.position = Vector2(13, 0)
+		talk.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		talk.tooltip_text = "%s %s" % [vdef["name"], vdef["title"]]
+		for st in ["normal", "hover", "pressed", "focus"]:
+			talk.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+		talk.pressed.connect(func(): _open_dialog(vid))
+		v.add_child(talk)
+		var mark := _npc_marker(vid)
+		if mark != null:
+			mark.position = Vector2(36, -18)
+			v.add_child(mark)
 		var speed := 38.0
 		var dur: float = abs(float(w[2]) - float(w[1])) / speed
 		var tw := v.create_tween().set_loops()
@@ -255,7 +282,7 @@ func _refresh_scene() -> void:
 		tw.tween_property(v, "position:x", float(w[1]), dur)
 		tw.tween_interval(randf_range(0.5, 2.0))
 	# Companions rest near the fire.
-	var pet_spots := [Vector2(24, 646), Vector2(170, 652), Vector2(520, 404)]
+	var pet_spots := [Vector2(24, 646), Vector2(520, 404), Vector2(588, 412)]
 	var shown := 0
 	for pid in profile.owned_pets:
 		if shown >= pet_spots.size():
@@ -325,7 +352,7 @@ func _hero_def(id: String) -> Dictionary:
 
 
 func _refresh() -> void:
-	_embers.text = "Soul Embers %d    Grave Dice %d" % [profile.embers, profile.grave_dice]
+	_embers.text = "Soul Embers %d    Grave Dice %d    Star Dust %d" % [profile.embers, profile.grave_dice, profile.star_dust]
 	var tod := profile.time_name()
 	_art.texture = load("res://assets/backgrounds/%s.png" % TIME_LOOK[tod][0])
 	_art.modulate = TIME_LOOK[tod][1]
@@ -343,7 +370,10 @@ func _refresh() -> void:
 	_go.text = "Continue your journey" if saved else ("Set out on the Hollow Road" if profile.party.size() == 3 else "Choose 3 heroes to set out")
 	_go.disabled = not saved and profile.party.size() != 3
 	_refresh_party()
+	_refresh_collection()
 	_refresh_buildings()
+	if _dialog.visible:
+		_render_dialog()
 	_refresh_summon()
 	_refresh_quests()
 
@@ -379,8 +409,10 @@ func _refresh_party() -> void:
 		var chosen: bool = id in profile.party
 		var text := "%s  (%s)\nHP %d   Skill: %s\n%s" % [h["name"], h["role"], int(h["hp"]), h["skill"]["name"],
 			" ".join(h["faces"].map(UI.face_short))] if owned else "???\nNot yet summoned\n(Summon Roll tab)"
-		var b := UI.choice_button(text, func(): _toggle_party(id), UI.GOLD if chosen else UI.BORDER, owned)
-		b.custom_minimum_size = Vector2(276, 112)
+		if owned:
+			text = "[%s] %s\n%s" % [h.get("grade", "SR"), UI.stars_text(profile.star("hero", id)), text]
+		var b := UI.choice_button(text, func(): _toggle_party(id), UI.GOLD if chosen else UI.grade_color(h.get("grade", "SR")) if owned else UI.BORDER, owned)
+		b.custom_minimum_size = Vector2(276, 140)
 		if owned:
 			b.icon = load("res://scripts/ui/unit_sprite.gd").portrait(id)
 			b.expand_icon = true
@@ -469,7 +501,10 @@ func _refresh_summon() -> void:
 
 ## The prize, shown with its picture.
 func _reveal_card(r: Dictionary) -> Control:
-	var panel := UI.panel(UI.GOLD if r["new"] else UI.BORDER, 2)
+	var grade: String = r.get("grade", "")
+	if grade == "" and r["kind"] in ["hero", "pet", "relic"]:
+		grade = profile.item_def(r["kind"], r["id"]).get("grade", "SR")
+	var panel := UI.panel(UI.grade_color(grade) if grade != "" else UI.BORDER, 3)
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 12)
 	panel.add_child(hb)
@@ -495,8 +530,9 @@ func _reveal_card(r: Dictionary) -> Control:
 	hb.add_child(pic)
 	var txt := VBoxContainer.new()
 	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	txt.add_child(UI.label(("NEW!  " if r["new"] else "") + r["name"], 20, UI.GOLD if r["new"] else UI.TEXT))
-	txt.add_child(UI.wrap_label(r["text"], 13, Color("#d8c8f0"), 400))
+	txt.add_child(UI.label(("NEW!  " if r["new"] else "") + (("[%s] " % grade) if grade != "" else "") + r["name"], 20,
+		UI.grade_color(grade) if grade != "" else UI.TEXT))
+	txt.add_child(UI.wrap_label(r["text"], 13, Color("#d8c8f0"), 260))
 	hb.add_child(txt)
 	# Pop-in reveal.
 	panel.pivot_offset = Vector2(280, 60)
@@ -525,3 +561,150 @@ func _refresh_quests() -> void:
 		var line := "%s %s  (%d/%d)  +%d Embers" % ["[done]" if done else "-", q["name"], profile.quest_progress(q), int(q["goal"]), int(q["reward"])]
 		_quests.add_child(UI.label(line, 15, UI.GREEN if done else UI.TEXT))
 		_quests.add_child(UI.wrap_label("     " + q["desc"], 12, UI.DIM, 540))
+
+
+# ---------------------------------------------------------------- villagers: talking
+
+## "!" = has a request for you, "?" = your request is done (come claim), "..." = in progress.
+func _npc_marker(vid: String) -> Label:
+	var req := profile.npc_request(vid)
+	if req.is_empty():
+		return null
+	var text := "!"
+	var color := UI.GOLD
+	if profile.is_request_done(vid):
+		text = "?"
+		color = UI.GREEN
+	elif profile.is_request_active(vid):
+		text = "..."
+		color = UI.DIM
+	var l := UI.label(text, 26, color)
+	_shadow(l)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tw := l.create_tween().set_loops()
+	tw.tween_property(l, "position:y", -24.0, 0.5)
+	tw.tween_property(l, "position:y", -18.0, 0.5)
+	return l
+
+
+func _open_dialog(vid: String) -> void:
+	_dialog_npc = vid
+	_dialog_reveal = {}
+	Sfx.play(self, "click")
+	_dialog.show()
+	_render_dialog()
+
+
+func _render_dialog() -> void:
+	for c in _dialog.get_children():
+		c.queue_free()
+	var v := profile.npc(_dialog_npc)
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	_dialog.add_child(hb)
+	var US = load("res://scripts/ui/unit_sprite.gd")
+	hb.add_child(US.create(v["sprite"], 96, false))
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 6)
+	hb.add_child(box)
+	box.add_child(UI.label("%s, %s" % [v["name"], v["title"]], 18, UI.GOLD))
+	var req := profile.npc_request(_dialog_npc)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 8)
+	if not _dialog_reveal.is_empty():
+		box.add_child(UI.wrap_label("\"%s\"" % profile.npc(_dialog_npc)["requests"][int(profile.npc_step.get(_dialog_npc, 1)) - 1]["done"], 14, UI.TEXT, 460))
+		box.add_child(_reveal_card(_dialog_reveal))
+	elif req.is_empty():
+		box.add_child(UI.wrap_label("\"You have done so much for us. Ashfall will not forget you.\"", 14, UI.TEXT, 460))
+	elif profile.is_request_done(_dialog_npc):
+		box.add_child(UI.wrap_label("\"You did it? Truly?\"", 14, UI.TEXT, 460))
+		box.add_child(UI.label("%s  -  done!" % req["title"], 15, UI.GREEN))
+		buttons.add_child(_dialog_button("Claim reward", _claim_dialog))
+	elif profile.is_request_active(_dialog_npc):
+		box.add_child(UI.wrap_label("\"%s\"" % v["greeting"][randi() % v["greeting"].size()], 14, UI.TEXT, 460))
+		box.add_child(UI.label("%s:  %d / %d" % [req["title"], profile.request_progress(_dialog_npc), int(req["goal"]["amount"])], 15, UI.GOLD))
+		box.add_child(UI.wrap_label(req["ask"], 12, UI.DIM, 460))
+	else:
+		box.add_child(UI.wrap_label("\"%s\"" % req["ask"], 14, UI.TEXT, 460))
+		box.add_child(UI.label("Request: " + req["title"], 15, UI.GOLD))
+		box.add_child(_reward_line(req["reward"]))
+		buttons.add_child(_dialog_button("I will help", func(): profile.accept_request(_dialog_npc); Sfx.play(self, "fate"); _refresh()))
+	var bye := UI.button("Goodbye", func(): _dialog.hide(); _refresh(), 14)
+	bye.custom_minimum_size = Vector2(110, 40)
+	buttons.add_child(bye)
+	box.add_child(buttons)
+
+
+func _dialog_button(text: String, action: Callable) -> Button:
+	var b := UI.choice_button(text, action, UI.GOLD)
+	b.autowrap_mode = TextServer.AUTOWRAP_OFF
+	b.custom_minimum_size = Vector2(180, 44)
+	return b
+
+
+func _reward_line(r: Dictionary) -> Control:
+	var kind: String = r["kind"]
+	if kind in ["hero", "pet", "relic"]:
+		var d := profile.item_def(kind, r["id"])
+		var grade: String = d.get("grade", "SR")
+		return UI.label("Reward: [%s] %s (%s)" % [grade, d.get("name", r["id"]), {"hero": "hero", "pet": "companion", "relic": "relic weapon"}[kind]], 15, UI.grade_color(grade))
+	var names := {"dust": "Star Dust", "dice": "Grave Dice", "embers": "Soul Embers"}
+	return UI.label("Reward: %d %s" % [int(r["amount"]), names[kind]], 15, Color("#d8c8f0"))
+
+
+func _claim_dialog() -> void:
+	var r := profile.claim_request(_dialog_npc)
+	if r.is_empty():
+		return
+	_dialog_reveal = r
+	Sfx.play(self, "triple" if r.get("new", false) else "fate")
+	_refresh()
+
+
+# ---------------------------------------------------------------- collection: grades and stars
+
+func _refresh_collection() -> void:
+	_clear(_collection)
+	_collection.add_child(UI.wrap_label("Upgrade your heroes, companions and relics with Soul Embers and Star Dust (from villagers' requests, journeys and duplicates). SR = purple, SSR = gold.", 13, UI.DIM, 540))
+	_collection.add_child(UI.label("Star Dust: %d     Soul Embers: %d" % [profile.star_dust, profile.embers], 15, Color("#d8c8f0")))
+	var sections := [["hero", "Heroes", GameData.load_heroes(), profile.owned_heroes],
+		["pet", "Companions", GameData.load_pets(), profile.owned_pets],
+		["relic", "Relics", GameData.load_weapons().filter(func(w): return w.get("locked", false)), profile.unlocked_weapons]]
+	var US = load("res://scripts/ui/unit_sprite.gd")
+	for sec in sections:
+		var kind: String = sec[0]
+		_collection.add_child(UI.label(sec[1], 18, UI.GOLD))
+		for d in sec[2]:
+			var id: String = d["id"]
+			var owned: bool = id in sec[3]
+			var grade: String = d.get("grade", "SR")
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 8)
+			var pic := TextureRect.new()
+			pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			pic.stretch_mode = TextureRect.STRETCH_SCALE
+			pic.custom_minimum_size = Vector2(48, 48)
+			pic.texture = US.portrait(id) if kind != "relic" else UI.face_icon(d["faces"][0]["type"])
+			pic.modulate = Color.WHITE if owned else Color(0, 0, 0, 0.8)
+			row.add_child(pic)
+			var info := VBoxContainer.new()
+			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			if owned:
+				var st := profile.star(kind, id)
+				info.add_child(UI.label("[%s] %s   %s" % [grade, d["name"], UI.stars_text(st)], 15, UI.grade_color(grade)))
+				var nxt := st + 1
+				var desc: Array = profile.star_rules["desc"][kind]
+				info.add_child(UI.wrap_label(("Next star: " + desc[st]) if nxt <= 5 else "Fully upgraded.", 12, UI.DIM, 330))
+			else:
+				info.add_child(UI.label("[%s] ???" % grade, 15, UI.DIM))
+				info.add_child(UI.label("Not yet found (summon or villagers' rewards)", 12, UI.DIM))
+			row.add_child(info)
+			if owned:
+				var cost := profile.star_cost(kind, id)
+				var btn := UI.button("MAX" if cost.is_empty() else "Upgrade\n%d Embers + %d Dust" % [int(cost[0]), int(cost[1])],
+					func(): if profile.upgrade_star(kind, id): Sfx.play(self, "triple"); _refresh(), 12)
+				btn.disabled = not profile.can_upgrade_star(kind, id)
+				btn.custom_minimum_size = Vector2(150, 44)
+				row.add_child(btn)
+			_collection.add_child(row)

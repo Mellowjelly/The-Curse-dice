@@ -79,6 +79,7 @@ func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []
 		var bonus_hp := int(upgrades.get("chapel", 0))
 		u["max_hp"] += bonus_hp
 		u["hp"] += bonus_hp
+		apply_hero_stars(u, star_of("hero", u["id"]))
 		heroes.append(u)
 	var unlocked: Array = upgrades.get("unlocked_weapons", [])
 	weapons_db = GameData.load_weapons().filter(func(w): return not w.get("locked", false) or w["id"] in unlocked)
@@ -270,6 +271,64 @@ func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 			if f["type"] in ["attack", "sweep"]:
 				f["value"] = int(f["value"]) + bonus
 	return d
+
+
+# ---------------------------------------------------------------- stars from the town's Collection
+
+func star_of(kind: String, id: String) -> int:
+	return int(upgrades.get("stars", {}).get("%s:%s" % [kind, id], 1))
+
+
+## Hero stars: 2 = +2 max HP, 3 = +1 to the weakest face (1-4), 4 = +2 max HP, 5 = +1 skill charge each fight.
+static func apply_hero_stars(u: Dictionary, star: int) -> void:
+	var hp := (2 if star >= 2 else 0) + (2 if star >= 4 else 0)
+	u["max_hp"] += hp
+	u["hp"] += hp
+	if star >= 3:
+		var best := -1
+		for i in 4:
+			var f: Dictionary = u["faces"][i]
+			if f["type"] != "blank" and (best < 0 or int(f["value"]) < int(u["faces"][best]["value"])):
+				best = i
+		if best >= 0:
+			var nf: Dictionary = u["faces"][best].duplicate()
+			nf["value"] = int(nf["value"]) + 1
+			u["faces"][best] = nf
+	if star >= 5:
+		u["charge_bonus"] = 1
+	u["star"] = star
+
+
+## Pet stars: each star after the first adds +1 to a non-blank d4 face; star 5 turns the blank into ATK 2.
+static func apply_pet_stars(p: Dictionary, star: int) -> void:
+	var faces: Array = p["faces"]
+	var non_blank: Array = []
+	for i in faces.size():
+		if faces[i]["type"] != "blank":
+			non_blank.append(i)
+	for k in range(min(star - 1, 3)):
+		if non_blank.is_empty():
+			break
+		var i: int = non_blank[k % non_blank.size()]
+		faces[i] = {"type": faces[i]["type"], "value": int(faces[i]["value"]) + 1}
+	if star >= 5:
+		for i in faces.size():
+			if faces[i]["type"] == "blank":
+				faces[i] = {"type": "attack", "value": 2}
+				break
+	p["star"] = star
+
+
+## Relic stars: alternate +1 between the two weapon faces.
+static func apply_relic_stars(w: Dictionary, star: int) -> Dictionary:
+	for k in range(star - 1):
+		var i := k % 2
+		var f: Dictionary = w["faces"][i]
+		if f["type"] != "blank":
+			w["faces"][i] = {"type": f["type"], "value": int(f["value"]) + 1}
+	if star > 1:
+		w["name"] = "%s +%d" % [w["name"], star - 1]
+	return w
 
 
 ## Opt-in difficulty rules. Each level adds one rule on top of the previous ones.
@@ -587,6 +646,7 @@ func choose_pet(index: int) -> void:
 	if phase != "pet" or index < 0 or index >= pet_offers.size():
 		return
 	var p: Dictionary = pet_offers[index].duplicate(true)
+	apply_pet_stars(p, star_of("pet", p["id"]))
 	p["face"] = 0
 	combat.pet = p
 	_log("%s follows you." % p["name"])
@@ -618,7 +678,7 @@ func _offer_loot(count: int, then: String, only_rarity: String = "") -> void:
 		if only_rarity != "" and w["rarity"] != only_rarity:
 			continue
 		if not weapon_offers.any(func(x): return x["id"] == w["id"]):
-			weapon_offers.append(w)
+			weapon_offers.append(apply_relic_stars(w.duplicate(true), star_of("relic", w["id"])))
 	phase = "loot"
 	changed.emit()
 

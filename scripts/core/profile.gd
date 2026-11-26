@@ -20,6 +20,12 @@ var summons_since_hero := 0      # (old single-banner pity, kept for old saves)
 var summon_pity := {}             # banner -> rolls since its last new item
 var owned_pets: Array = []        # pet ids; starter pets are always owned
 var time_of_day := 1              # index into TIMES (starts at Day)
+var star_dust := 0                # upgrade material
+var stars := {}                   # "hero:varek" / "pet:ash_crow" / "relic:plague_lance" -> 1..5
+var npc_step := {}                # villager id -> index of their next request
+var npc_active := {}              # villager id -> { "base": int, "run_best": int } for the accepted request
+var villagers: Array
+var star_rules: Dictionary
 var curse := 0                    # chosen Curse level (opt-in difficulty, unlocked by wins)
 const MAX_CURSE := 4
 const CURSE_EMBER_BONUS := 0.25
@@ -33,6 +39,8 @@ func _init(save_path: String = DEFAULT_PATH) -> void:
 	town = GameData.load_json("res://data/town.json")
 	quests = GameData.load_json("res://data/quests.json")
 	summon = GameData.load_json("res://data/summon.json")
+	villagers = GameData.load_json("res://data/villagers.json")
+	star_rules = GameData.load_json("res://data/stars.json")
 	for h in GameData.load_heroes():
 		if h.get("starter", false):
 			owned_heroes.append(h["id"])
@@ -68,6 +76,10 @@ func load_profile() -> void:
 		if not id in owned_pets:
 			owned_pets.append(id)
 	time_of_day = d.get("time_of_day", 1)
+	star_dust = d.get("star_dust", 0)
+	stars = d.get("stars", {})
+	npc_step = d.get("npc_step", {})
+	npc_active = d.get("npc_active", {})
 
 
 func save() -> void:
@@ -75,7 +87,8 @@ func save() -> void:
 	f.store_var({"version": 2, "embers": embers, "levels": levels, "stats": stats, "quests_done": quests_done,
 		"grave_dice": grave_dice, "owned_heroes": owned_heroes, "unlocked_weapons": unlocked_weapons,
 		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
-		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day})
+		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
+		"star_dust": star_dust, "stars": stars, "npc_step": npc_step, "npc_active": npc_active})
 
 
 # ---------------------------------------------------------------- town
@@ -144,6 +157,19 @@ func record_run(run) -> Dictionary:
 		_add("kills_" + id, s["kills"][id])
 	if won and run.heroes.any(func(h): return h.get("weapon", {}).get("rarity", "") == "cursed"):
 		_add("cursed_wins", 1)
+	_add("camps", int(s["tiles"].get("rest", 0)))
+	_add("events", int(s["events"]))
+	if won and int(run.upgrades.get("curse", 0)) >= 1:
+		_add("cursed_level_wins", 1)
+	# Single-journey goals for villagers' requests.
+	var per_run := {"run_elites": s["elites"], "run_carves": s["carves"],
+		"night_tile": run.pos if run.upgrades.get("time", "") == "night" else 0}
+	for npc_id in npc_active:
+		var req := npc_request(npc_id)
+		if not req.is_empty() and req["goal"]["scope"] == "run":
+			var a: Dictionary = npc_active[npc_id]
+			a["run_best"] = max(int(a.get("run_best", 0)), int(per_run.get(req["goal"]["stat"], 0)))
+	star_dust += int(star_rules["dust_per_run"]) + (int(star_rules["dust_per_victory"]) if won else 0)
 	# Per-run quest stats are checked against this run only.
 	var run_stats := {"run_elites": s["elites"], "run_carves": s["carves"]}
 	var completed: Array = []
@@ -181,6 +207,7 @@ func run_options() -> Dictionary:
 	o["curse"] = curse
 	o["owned_pets"] = owned_pets.duplicate()
 	o["time"] = time_name()
+	o["stars"] = stars.duplicate()
 	o["unlocked_weapons"] = unlocked_weapons.duplicate()
 	return o
 
@@ -253,6 +280,136 @@ func summon_roll(rng: RandomNumberGenerator, banner: String = "heroes") -> Dicti
 			"text": "Embers swirl from the dice: +%d Soul Embers. (%d/%d toward a guaranteed find)" % [amount, pity_count(banner), int(summon["pity"])]}
 	save()
 	return result
+
+
+# ---------------------------------------------------------------- villagers and their requests
+
+func npc(id: String) -> Dictionary:
+	for v in villagers:
+		if v["id"] == id:
+			return v
+	return {}
+
+
+## The villager's current request, or {} when they have nothing more to ask.
+func npc_request(id: String) -> Dictionary:
+	var v := npc(id)
+	var i := int(npc_step.get(id, 0))
+	return v["requests"][i] if not v.is_empty() and i < v["requests"].size() else {}
+
+
+func npc_is_out(id: String) -> bool:
+	return time_name() in npc(id).get("times", [])
+
+
+func is_request_active(id: String) -> bool:
+	return npc_active.has(id)
+
+
+func request_progress(id: String) -> int:
+	var req := npc_request(id)
+	if req.is_empty() or not npc_active.has(id):
+		return 0
+	var g: Dictionary = req["goal"]
+	var value: int
+	if g["scope"] == "run":
+		value = int(npc_active[id].get("run_best", 0))
+	elif g["stat"] == "best_tile":
+		value = stat("best_tile")
+	else:
+		value = stat(g["stat"]) - int(npc_active[id].get("base", 0))
+	return min(value, int(g["amount"]))
+
+
+func is_request_done(id: String) -> bool:
+	var req := npc_request(id)
+	return not req.is_empty() and npc_active.has(id) and request_progress(id) >= int(req["goal"]["amount"])
+
+
+func accept_request(id: String) -> bool:
+	var req := npc_request(id)
+	if req.is_empty() or npc_active.has(id):
+		return false
+	npc_active[id] = {"base": stat(req["goal"]["stat"]), "run_best": 0}
+	save()
+	return true
+
+
+## Hands over the reward. Returns a result like summon_roll's, or {} if not finished.
+func claim_request(id: String) -> Dictionary:
+	if not is_request_done(id):
+		return {}
+	var req := npc_request(id)
+	npc_active.erase(id)
+	npc_step[id] = int(npc_step.get(id, 0)) + 1
+	var result := grant(req["reward"])
+	save()
+	return result
+
+
+## Gives a reward. Items you already own turn into Star Dust instead.
+func grant(r: Dictionary) -> Dictionary:
+	var kind: String = r["kind"]
+	match kind:
+		"dust":
+			star_dust += int(r["amount"])
+			return {"kind": "dust", "id": "", "name": "Star Dust x%d" % int(r["amount"]), "new": false, "text": "+%d Star Dust" % int(r["amount"])}
+		"dice":
+			grave_dice += int(r["amount"])
+			return {"kind": "dice", "id": "", "name": "Grave Dice x%d" % int(r["amount"]), "new": false, "text": "+%d Grave Dice" % int(r["amount"])}
+		"embers":
+			embers += int(r["amount"])
+			return {"kind": "embers", "id": "", "name": "Soul Embers x%d" % int(r["amount"]), "new": false, "text": "+%d Soul Embers" % int(r["amount"])}
+	var id: String = r["id"]
+	var def := item_def(kind, id)
+	var owned_list: Array = {"hero": owned_heroes, "pet": owned_pets, "relic": unlocked_weapons}[kind]
+	if id in owned_list:
+		var dust := 8 if def.get("grade", "SR") == "SSR" else 5
+		star_dust += dust
+		return {"kind": "dust", "id": id, "name": def.get("name", id), "new": false, "grade": def.get("grade", "SR"),
+			"text": "%s is already with you, so it turns into %d Star Dust." % [def.get("name", id), dust]}
+	owned_list.append(id)
+	return {"kind": kind, "id": id, "name": def.get("name", id), "new": true, "grade": def.get("grade", "SR"),
+		"text": "%s joins you!" % def.get("name", id)}
+
+
+func item_def(kind: String, id: String) -> Dictionary:
+	var list: Array = {"hero": GameData.load_heroes(), "pet": GameData.load_pets(), "relic": GameData.load_weapons()}[kind]
+	for x in list:
+		if x["id"] == id:
+			return x
+	return {}
+
+
+# ---------------------------------------------------------------- stars (upgrades)
+
+func star(kind: String, id: String) -> int:
+	return int(stars.get("%s:%s" % [kind, id], 1))
+
+
+## [embers, dust] for the next star, or [] when maxed.
+func star_cost(kind: String, id: String) -> Array:
+	var s := star(kind, id)
+	if s >= int(star_rules["star_max"]):
+		return []
+	var grade: String = item_def(kind, id).get("grade", "SR")
+	return star_rules["costs"][grade][s - 1]
+
+
+func can_upgrade_star(kind: String, id: String) -> bool:
+	var c := star_cost(kind, id)
+	return not c.is_empty() and embers >= int(c[0]) and star_dust >= int(c[1])
+
+
+func upgrade_star(kind: String, id: String) -> bool:
+	if not can_upgrade_star(kind, id):
+		return false
+	var c := star_cost(kind, id)
+	embers -= int(c[0])
+	star_dust -= int(c[1])
+	stars["%s:%s" % [kind, id]] = star(kind, id) + 1
+	save()
+	return true
 
 
 # ---------------------------------------------------------------- time of day

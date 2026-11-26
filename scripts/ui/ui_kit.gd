@@ -116,6 +116,18 @@ const TIME_TINT := {
 	"night": Color(0.72, 0.78, 1.0), "": Color(1, 1, 1),
 }
 
+## SR = purple, SSR = gold.
+const GRADE_COLORS := {"SR": Color("#b07cf0"), "SSR": Color("#f2c443")}
+
+
+static func grade_color(grade: String) -> Color:
+	return GRADE_COLORS.get(grade, BORDER)
+
+
+static func stars_text(star: int, max_star: int = 5) -> String:
+	return "★".repeat(star) + "☆".repeat(max_star - star)
+
+
 static var _icons := {}
 
 ## 16x16 pixel icon for a face type (assets/icons/face_<type>.png), or null.
