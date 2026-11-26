@@ -1,0 +1,468 @@
+TRANSCRIPT - bot style: newbie, seed 7
+Lines starting with [NEWBIE] are the player's own reasoning; '>> STATE' is what the screen shows at the start of a combat round.
+[NEWBIE] adopts pet Grave Pup
+Grave Pup follows you.
+[NEWBIE] moves 4 -> tile 4 (fight). Options: ["fight", "chest"]
+== Fight ==
+Grave Pup hits Ash Cultist for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 28/28hp [attack 3] chg 0/4, Lys 18/18hp [blank 0] chg 0/5, Aldric 22/22hp [heal 3] chg 0/6 | enemies: Ghoul 14/14hp (Hesitates), Ash Cultist 7/10hp (Attack 3 -> Varek), Plague Rat 5/5hp (Attack 2 -> Lys) | fate 0
+[NEWBIE] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 3
+Varek hits Ghoul for 3
+Lys (blood magic) hits Ghoul for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 2
+Aldric's prayer wards Lys (+1 shield)
+Grave Pup hits Ghoul for 3
+Ghoul hesitates
+Ash Cultist hits Varek the Oathbroken for 3
+Plague Rat hits Lys the Hollow for 1 (1 blocked)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 25/28hp [attack 3] chg 1/4, Lys 17/18hp [fire 2] chg 1/5, Aldric 22/22hp [attack 2] chg 1/6 | enemies: Ghoul 2/14hp (Attack 3 -> Lys), Ash Cultist 7/10hp (Attack 2 -> Varek), Plague Rat 5/5hp (Attack 3 -> Varek) | fate 0
+[NEWBIE] ends turn with: Varek attack 3, Lys fire 2, Aldric attack 2
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate +1 Fate
+Varek hits Ghoul for 4
+Ghoul falls!
+Lys hits Ash Cultist for 2
+Ash Cultist is burning (2)
+Aldric hits Ash Cultist for 3
+Ash Cultist burns for 2
+Ash Cultist is reduced to ash!
+Plague Rat hits Varek the Oathbroken for 3
+--- Round 3 ---
+>> STATE R3  heroes: Varek 22/28hp [blank 0] chg 3/4, Lys 17/18hp [blank 0] chg 2/5, Aldric 22/22hp [attack 2] chg 3/6 | enemies: Plague Rat 5/5hp (Hesitates) | fate 1
+[NEWBIE] ends turn with: Varek blank 0, Lys fire 3, Aldric attack 2
+Varek rolls nothing... +1 Fate
+Lys hits Plague Rat for 3
+Plague Rat is burning (2)
+Aldric hits Plague Rat for 2
+Plague Rat falls!
+VICTORY!
+[NEWBIE] carves: Lys: FIRE 2 -> FIRE 3
+Carved: Lys: FIRE 2 -> FIRE 3
+[NEWBIE] moves 5 -> tile 9 (fight). Options: ["fight", "event"]
+== Fight ==
+Grave Pup hits Plague Rat for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 22/28hp [guard 2] chg 0/4, Lys 17/18hp [fire 3] chg 0/5, Aldric 22/22hp [heal 2] chg 0/6 | enemies: Ghoul 14/14hp (Hesitates), Plague Rat 2/5hp (Attack 2 -> Aldric) | fate 3
+[NEWBIE] ends turn with: Varek guard 2, Lys fire 3, Aldric heal 2
+Varek guards the party (+2 shield all)
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric heals Varek for 2
+Grave Pup hits Ghoul for 3
+Ghoul burns for 2
+Ghoul hesitates
+Plague Rat hits Brother Aldric for 0 (2 blocked)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 24/28hp [shield 4] chg 1/4, Lys 17/18hp [blank 0] chg 1/5, Aldric 22/22hp [heal 2] chg 1/6 | enemies: Ghoul 6/14hp (Shield 2), Plague Rat 2/5hp (Attack 2 -> Aldric) | fate 3
+[NEWBIE] ends turn with: Varek shield 4, Lys blank 0, Aldric heal 2
+Varek raises a shield (4)
+Lys rolls nothing... +1 Fate
+Aldric heals Varek for 2
+Grave Pup hits Ghoul for 2
+Ghoul burns for 1
+Ghoul shields itself (2)
+Plague Rat hits Brother Aldric for 2
+--- Round 3 ---
+>> STATE R3  heroes: Varek 26/28hp [blank 0] chg 2/4, Lys 17/18hp [fire 3] chg 2/5, Aldric 20/22hp [heal 2] chg 2/6 | enemies: Ghoul 3/14hp (Shield 2), Plague Rat 2/5hp (Hesitates) | fate 4
+[NEWBIE] ends turn with: Varek attack 2, Lys fire 3, Aldric heal 2
+Varek hits Ghoul for 0 (2 blocked)
+Lys hits Ghoul for 3
+Ghoul falls!
+Aldric heals Aldric for 2
+Plague Rat hesitates
+--- Round 4 ---
+>> STATE R4  heroes: Varek 26/28hp [blank 0] chg 3/4, Lys 17/18hp [attack 4] chg 3/5, Aldric 22/22hp [guard 1] chg 3/6 | enemies: Plague Rat 2/5hp (Attack 2 -> Varek) | fate 4
+[NEWBIE] ends turn with: Varek shield 3, Lys attack 4, Aldric guard 1
+Varek raises a shield (3)
+Lys hits Plague Rat for 4
+Plague Rat falls!
+VICTORY!
+[NEWBIE] carves: Aldric: HEAL 2 -> HEAL 3
+Carved: Aldric: HEAL 2 -> HEAL 3
+[NEWBIE] moves 4 -> tile 13 (rest). Options: ["rest", "fight"]
+[NEWBIE] rests: heal (party HP 96%)
+The party rests by the fire.
+[NEWBIE] moves 3 -> tile 16 (event). Options: ["event", "rest"]
+[NEWBIE] event 'The Drowned Bell': picks "Do not wake what sleeps below."
+You move on.
+[NEWBIE] moves 6 -> tile 22 (fight). Options: ["fight", "elite"]
+== Fight ==
+Grave Pup hits Ghoul for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 28/28hp [shield 4] chg 0/4, Lys 18/18hp [blank 0] chg 0/5, Aldric 22/22hp [blank 0] chg 0/6 | enemies: Ghoul 16/16hp (Attack 5 -> Lys), Ghoul 13/16hp (Hesitates), Ash Cultist 12/12hp (Heal 3) | fate 5
+[NEWBIE] ends turn with: Varek shield 4, Lys blank 0, Aldric guard 1
+Varek raises a shield (4)
+Lys rolls nothing... Fate overflows: +1 free reroll next round
+Aldric guards the party (+1 shield all)
+Grave Pup hits Ghoul for 2
+Ghoul hits Lys the Hollow for 4 (1 blocked)
+Ghoul hesitates
+Ash Cultist heals Ghoul for 3
+--- Round 2 ---
+>> STATE R2  heroes: Varek 28/28hp [attack 2] chg 1/4, Lys 14/18hp [blank 0] chg 1/5, Aldric 22/22hp [heal 4] chg 1/6 | enemies: Ghoul 14/16hp (Attack 4 -> Aldric), Ghoul 16/16hp (Attack 3 -> Varek), Ash Cultist 12/12hp (Hesitates) | fate 5
+[NEWBIE] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 4
+Varek hits Ghoul for 2
+Lys (blood magic) hits Ghoul for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Grave Pup hits Ghoul for 2
+Ghoul hits Brother Aldric for 4
+Ghoul hits Varek the Oathbroken for 3
+Ash Cultist hesitates
+--- Round 3 ---
+>> STATE R3  heroes: Varek 25/28hp [shield 3] chg 2/4, Lys 16/18hp [blank 0] chg 2/5, Aldric 18/22hp [heal 3] chg 2/6 | enemies: Ghoul 4/16hp (Hesitates), Ghoul 16/16hp (Attack 5 -> Varek), Ash Cultist 12/12hp (Hesitates) | fate 5
+[NEWBIE] ends turn with: Varek shield 3, Lys fire 3, Aldric heal 3
+Varek raises a shield (3)
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric heals Aldric for 3
+Ghoul burns for 2
+Ghoul is reduced to ash!
+Ghoul hits Varek the Oathbroken for 2 (3 blocked)
+Ash Cultist hesitates
+--- Round 4 ---
+>> STATE R4  heroes: Varek 23/28hp [guard 2] chg 3/4, Lys 16/18hp [blank 0] chg 3/5, Aldric 21/22hp [heal 3] chg 3/6 | enemies: Ghoul 16/16hp (Shield 2), Ash Cultist 12/12hp (Attack 3 -> Varek) | fate 5
+[NEWBIE] ends turn with: Varek guard 2, Lys fire 3, Aldric heal 3
+Varek guards the party (+2 shield all)
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric heals Varek for 3
+Grave Pup hits Ghoul for 3
+Ghoul burns for 2
+Ghoul shields itself (2)
+Ash Cultist hits Varek the Oathbroken for 1 (2 blocked)
+--- Round 5 ---
+>> STATE R5  heroes: Varek 25/28hp [guard 2] chg 4/4, Lys 16/18hp [fire 3] chg 4/5, Aldric 21/22hp [guard 1] chg 4/6 | enemies: Ghoul 8/16hp (Attack 3 -> Varek), Ash Cultist 12/12hp (Attack 3 -> Varek) | fate 5
+[NEWBIE] uses broken_oath (incoming 6, party missing 6 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[NEWBIE] ends turn with: Varek guard 2, Lys fire 3, Aldric guard 1
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek guards the party (+3 shield all)
+Lys hits Ghoul for 1 (2 blocked)
+Ghoul is burning (3)
+Aldric guards the party (+2 shield all)
+Grave Pup hits Ghoul for 2
+Ghoul burns for 3
+Ghoul hits Varek the Oathbroken for 0 (3 blocked)
+Ash Cultist hits Varek the Oathbroken for 0 (3 blocked)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 23/28hp [attack 3] chg 2/4, Lys 16/18hp [blank 0] chg 5/5, Aldric 21/22hp [heal 3] chg 6/6 | enemies: Ghoul 2/16hp (Attack 6 -> Varek), Ash Cultist 12/12hp (Heal 3) | fate 5
+[NEWBIE] uses hollow_flame (incoming 6, party missing 8 HP)
+* Lys uses Hollow Flame!
+Lys hits Ghoul for 4
+Ghoul falls!
+Lys hits Ash Cultist for 4
+The flame feeds on Lys (-3 HP)
+[NEWBIE] uses last_rite (incoming 0, party missing 11 HP)
+* Aldric uses Last Rite!
+All allies heal 3
+Aldric's faith is paid in blood (-3 HP)
+[NEWBIE] ends turn with: Varek attack 3, Lys attack 4, Aldric heal 3
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek hits Ash Cultist for 4
+Lys hits Ash Cultist for 5
+Ash Cultist falls!
+VICTORY!
+[NEWBIE] carves: Lys: ATTACK 4 -> ATTACK 5
+Carved: Lys: ATTACK 4 -> ATTACK 5
+[NEWBIE] moves 6 -> tile 28 (fight). Options: ["fight", "event"]
+== Fight ==
+Grave Pup hits Ghoul for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 26/28hp [shield 3] chg 0/4, Lys 16/18hp [blood 6] chg 0/5, Aldric 19/22hp [blank 0] chg 0/6 | enemies: Ghoul 15/18hp (Shield 2), Weeping Nun 18/18hp (Sweep 3 -> ALL), Ash Cultist 13/13hp (Attack 5 -> Lys) | fate 5
+[NEWBIE] ends turn with: Varek shield 3, Lys blood 6, Aldric heal 3
+Varek raises a shield (3)
+Lys (blood magic) hits Ghoul for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Ghoul for 2
+Ghoul shields itself (2)
+Weeping Nun sweeps the whole party!
+Weeping Nun hits Varek the Oathbroken for 0 (3 blocked)
+Weeping Nun hits Lys the Hollow for 3
+Weeping Nun hits Brother Aldric for 3
+Ash Cultist hits Lys the Hollow for 5
+--- Round 2 ---
+>> STATE R2  heroes: Varek 26/28hp [attack 2] chg 1/4, Lys 9/18hp [fire 3] chg 1/5, Aldric 16/22hp [guard 1] chg 1/6 | enemies: Ghoul 7/18hp (Attack 3 -> Lys), Weeping Nun 18/18hp (Heal 4), Ash Cultist 13/13hp (Attack 3 -> Aldric) | fate 5
+[NEWBIE] ends turn with: Varek attack 2, Lys fire 3, Aldric guard 1
+Varek hits Ghoul for 0 (2 blocked)
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric guards the party (+1 shield all)
+Grave Pup hits Ghoul for 2
+Ghoul burns for 2
+Ghoul is reduced to ash!
+Weeping Nun wards Weeping Nun (+4 shield)
+Ash Cultist hits Brother Aldric for 2 (1 blocked)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 26/28hp [shield 4] chg 2/4, Lys 9/18hp [fire 3] chg 2/5, Aldric 14/22hp [blank 0] chg 2/6 | enemies: Weeping Nun 18/18hp (Heal 4), Ash Cultist 13/13hp (Attack 3 -> Varek) | fate 5
+[NEWBIE] ends turn with: Varek shield 4, Lys fire 3, Aldric heal 4
+Varek raises a shield (4)
+Lys hits Weeping Nun for 0 (3 blocked)
+Weeping Nun is burning (2)
+Aldric heals Lys for 4
+Grave Pup hits Weeping Nun for 2 (1 blocked)
+Weeping Nun burns for 2
+Weeping Nun heals Weeping Nun for 4
+Ash Cultist hits Varek the Oathbroken for 0 (3 blocked)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 26/28hp [attack 2] chg 3/4, Lys 13/18hp [blood 6] chg 3/5, Aldric 14/22hp [heal 3] chg 3/6 | enemies: Weeping Nun 18/18hp (Heal 4), Ash Cultist 13/13hp (Heal 3) | fate 5
+[NEWBIE] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 3
+Varek hits Weeping Nun for 2
+Lys (blood magic) hits Weeping Nun for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Weeping Nun for 2
+Weeping Nun burns for 1
+Weeping Nun heals Weeping Nun for 4
+Ash Cultist heals Weeping Nun for 3
+--- Round 5 ---
+>> STATE R5  heroes: Varek 26/28hp [guard 2] chg 4/4, Lys 14/18hp [fire 3] chg 4/5, Aldric 14/22hp [attack 2] chg 4/6 | enemies: Weeping Nun 14/18hp (Attack 4 -> Lys), Ash Cultist 13/13hp (Attack 4 -> Lys) | fate 5
+[NEWBIE] uses broken_oath (incoming 8, party missing 14 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[NEWBIE] ends turn with: Varek guard 2, Lys fire 3, Aldric attack 2
+Varek guards the party (+2 shield all)
+Lys hits Weeping Nun for 3
+Weeping Nun is burning (2)
+Aldric hits Weeping Nun for 2
+Grave Pup hits Weeping Nun for 3
+Weeping Nun burns for 2
+Weeping Nun hits Varek the Oathbroken for 0 (4 blocked)
+Ash Cultist hits Varek the Oathbroken for 1 (3 blocked)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 23/28hp [shield 3] chg 1/4, Lys 14/18hp [fire 3] chg 5/5, Aldric 14/22hp [heal 3] chg 5/6 | enemies: Weeping Nun 4/18hp (Sweep 3 -> ALL), Ash Cultist 13/13hp (Hesitates) | fate 5
+[NEWBIE] uses hollow_flame (incoming 9, party missing 17 HP)
+* Lys uses Hollow Flame!
+Lys hits Weeping Nun for 4
+Weeping Nun falls!
+Lys hits Ash Cultist for 4
+The flame feeds on Lys (-3 HP)
+[NEWBIE] ends turn with: Varek shield 3, Lys fire 3, Aldric heal 3
+Varek raises a shield (3)
+Lys hits Ash Cultist for 3
+Ash Cultist is burning (3)
+Aldric heals Lys for 3
+Grave Pup hits Ash Cultist for 3
+Ash Cultist burns for 3
+Ash Cultist is reduced to ash!
+VICTORY!
+[NEWBIE] carves: Varek: ATTACK 2 -> ATTACK 3
+Carved: Varek: ATTACK 2 -> ATTACK 3
+[NEWBIE] moves 4 -> tile 32 (fight). Options: ["fight", "rest"]
+== Fight ==
+Grave Pup hits Bone Hound for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 23/28hp [attack 3] chg 0/4, Lys 14/18hp [fire 3] chg 0/5, Aldric 14/22hp [blank 0] chg 0/6 | enemies: Weeping Nun 18/18hp (Attack 4 -> Varek), Bone Hound 12/15hp (Attack 5 -> Aldric), Bone Hound 15/15hp (Attack 3 -> Lys) | fate 5
+[NEWBIE] ends turn with: Varek attack 3, Lys fire 3, Aldric guard 1
+Varek hits Weeping Nun for 3
+Lys hits Weeping Nun for 3
+Weeping Nun is burning (2)
+Aldric guards the party (+1 shield all)
+Grave Pup hits Weeping Nun for 3
+Weeping Nun burns for 2
+Weeping Nun hits Varek the Oathbroken for 3 (1 blocked)
+Bone Hound hits Brother Aldric for 4 (1 blocked)
+Bone Hound hits Lys the Hollow for 2 (1 blocked)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 20/28hp [guard 2] chg 1/4, Lys 12/18hp [blank 0] chg 1/5, Aldric 10/22hp [heal 3] chg 1/6 | enemies: Weeping Nun 7/18hp (Heal 4), Bone Hound 12/15hp (Hesitates), Bone Hound 15/15hp (Attack 4 -> Aldric) | fate 5
+[NEWBIE] ends turn with: Varek guard 2, Lys fire 3, Aldric heal 3
+Varek guards the party (+2 shield all)
+Lys hits Weeping Nun for 3
+Weeping Nun is burning (3)
+Aldric heals Aldric for 3
+Grave Pup hits Weeping Nun for 2
+Weeping Nun burns for 3
+Weeping Nun is reduced to ash!
+Bone Hound hesitates
+Bone Hound hits Brother Aldric for 2 (2 blocked)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 20/28hp [attack 3] chg 2/4, Lys 12/18hp [attack 5] chg 2/5, Aldric 11/22hp [attack 2] chg 2/6 | enemies: Bone Hound 12/15hp (Attack 5 -> Lys), Bone Hound 15/15hp (Hesitates) | fate 5
+[NEWBIE] ends turn with: Varek attack 3, Lys attack 5, Aldric attack 2
+COMBO! Triple ATTACK - values doubled
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek hits Bone Hound for 6
+Lys hits Bone Hound for 10
+Bone Hound falls!
+Aldric hits Bone Hound for 4
+Grave Pup hits Bone Hound for 2
+Bone Hound hesitates
+--- Round 4 ---
+>> STATE R4  heroes: Varek 20/28hp [attack 3] chg 4/4, Lys 12/18hp [blank 0] chg 4/5, Aldric 11/22hp [attack 2] chg 4/6 | enemies: Bone Hound 9/15hp (Attack 5 -> Lys) | fate 5
+[NEWBIE] uses broken_oath (incoming 5, party missing 25 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[NEWBIE] ends turn with: Varek attack 3, Lys blank 0, Aldric attack 2
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek hits Bone Hound for 4
+Lys rolls nothing... Fate overflows: +1 free reroll next round
+Aldric hits Bone Hound for 3
+Grave Pup hits Bone Hound for 2
+Bone Hound falls!
+VICTORY!
+[NEWBIE] carves: Lys: BLOOD 6 -> BLOOD 7
+Carved: Lys: BLOOD 6 -> BLOOD 7
+[NEWBIE] moves 4 -> tile 36 (elite). Options: ["elite", "rest"]
+== Elite fight ==
+Grave Pup hits Ash Cultist for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 18/28hp [shield 4] chg 0/4, Lys 12/18hp [fire 3] chg 0/5, Aldric 11/22hp [heal 4] chg 0/6 | enemies: Grave Knight 26/26hp (Shield 6), Ash Cultist 9/12hp (Attack 3 -> Lys) | fate 5
+[NEWBIE] ends turn with: Varek shield 4, Lys fire 3, Aldric heal 4
+Varek raises a shield (4)
+Lys hits Grave Knight for 3
+Grave Knight is burning (2)
+Aldric heals Aldric for 4
+Grave Knight burns for 2
+Grave Knight shields itself (6)
+Ash Cultist hits Lys the Hollow for 3
+--- Round 2 ---
+>> STATE R2  heroes: Varek 18/28hp [attack 3] chg 1/4, Lys 9/18hp [fire 3] chg 1/5, Aldric 15/22hp [heal 3] chg 1/6 | enemies: Grave Knight 21/26hp (Attack 9 -> Varek), Ash Cultist 9/12hp (Attack 5 -> Varek) | fate 5
+[NEWBIE] ends turn with: Varek attack 3, Lys fire 3, Aldric heal 3
+Varek hits Grave Knight for 0 (3 blocked)
+Lys hits Grave Knight for 0 (3 blocked)
+Grave Knight is burning (3)
+Aldric heals Lys for 3
+Grave Knight burns for 3
+Grave Knight hits Varek the Oathbroken for 9
+Ash Cultist hits Varek the Oathbroken for 5
+--- Round 3 ---
+>> STATE R3  heroes: Varek 4/28hp [shield 4] chg 2/4, Lys 12/18hp [blank 0] chg 2/5, Aldric 15/22hp [blank 0] chg 2/6 | enemies: Grave Knight 18/26hp (Attack 9 -> Lys), Ash Cultist 9/12hp (Attack 5 -> Varek) | fate 5
+[NEWBIE] ends turn with: Varek shield 4, Lys blank 0, Aldric guard 1
+Varek raises a shield (4)
+Lys rolls nothing... Fate overflows: +1 free reroll next round
+Aldric guards the party (+1 shield all)
+Grave Pup hits Grave Knight for 2
+Grave Knight burns for 2
+Grave Knight hits Lys the Hollow for 8 (1 blocked)
+Ash Cultist hits Varek the Oathbroken for 0 (5 blocked)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 4/28hp [attack 3] chg 3/4, Lys 4/18hp [fire 3] chg 3/5, Aldric 15/22hp [guard 1] chg 3/6 | enemies: Grave Knight 14/26hp (Attack 6 -> Aldric), Ash Cultist 9/12hp (Attack 5 -> Lys) | fate 5
+[NEWBIE] ends turn with: Varek attack 3, Lys fire 3, Aldric guard 1
+Varek hits Grave Knight for 3
+Lys hits Grave Knight for 3
+Grave Knight is burning (3)
+Aldric guards the party (+1 shield all)
+Grave Pup hits Grave Knight for 3
+Grave Knight burns for 3
+Grave Knight hits Brother Aldric for 5 (1 blocked)
+Ash Cultist hits Lys the Hollow for 4 (1 blocked)
+Lys the Hollow falls!
+--- Round 5 ---
+>> STATE R5  heroes: Varek 4/28hp [attack 3] chg 4/4, Lys DEAD, Aldric 10/22hp [attack 2] chg 4/6 | enemies: Grave Knight 2/26hp (Attack 6 -> Aldric), Ash Cultist 9/12hp (Attack 4 -> Varek) | fate 5
+[NEWBIE] uses broken_oath (incoming 10, party missing 36 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[NEWBIE] ends turn with: Varek attack 3, Aldric attack 2
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek hits Grave Knight for 4
+Grave Knight falls!
+Aldric hits Ash Cultist for 3
+Grave Pup hits Ash Cultist for 3
+Ash Cultist hits Varek the Oathbroken for 0 (4 blocked)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 2/28hp [attack 3] chg 2/4, Lys DEAD, Aldric 10/22hp [heal 3] chg 6/6 | enemies: Ash Cultist 3/12hp (Heal 3) | fate 5
+[NEWBIE] uses last_rite (incoming 0, party missing 38 HP)
+* Aldric uses Last Rite!
+Lys the Hollow rises from death!
+All allies heal 3
+Aldric's faith is paid in blood (-3 HP)
+[NEWBIE] ends turn with: Varek attack 3, Lys attack 5, Aldric heal 3
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek hits Ash Cultist for 4
+Ash Cultist falls!
+VICTORY!
+[NEWBIE] equips Tower Shield of Dunmere on Varek (gain 1.0)
+Varek takes up Tower Shield of Dunmere.
+[NEWBIE] carves: Aldric: HEAL 4 -> HEAL 5
+Carved: Aldric: HEAL 4 -> HEAL 5
+[NEWBIE] moves 4 -> tile 40 (rest). Options: ["rest", "elite"]
+[NEWBIE] rests: heal (party HP 51%)
+The party rests by the fire.
+[NEWBIE] moves 5 -> tile 41 (rest). Options: ["rest", "rest"]
+[NEWBIE] rests: heal (party HP 79%)
+The party rests by the fire.
+[NEWBIE] moves 6 -> tile 42 (boss). Options: ["boss", "boss"]
+== BOSS ==
+Grave Pup hits The Rotting Bishop for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 28/28hp [attack 3] chg 0/4, Lys 18/18hp [blood 7] chg 0/5, Aldric 22/22hp [heal 3] chg 0/6 | enemies: The Rotting Bishop 60/63hp (Attack 7 -> Aldric) | fate 5
+[NEWBIE] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits The Rotting Bishop for 3
+Lys (blood magic) hits The Rotting Bishop for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 2
+Aldric's prayer wards Lys (+1 shield)
+Grave Pup hits The Rotting Bishop for 2
+The Rotting Bishop hits Brother Aldric for 7
+--- Round 2 ---
+>> STATE R2  heroes: Varek 28/28hp [attack 3] chg 1/4, Lys 18/18hp [fire 3] chg 1/5, Aldric 15/22hp [heal 5] chg 1/6 | enemies: The Rotting Bishop 48/63hp (Attack 7 -> Varek) | fate 5
+[NEWBIE] ends turn with: Varek attack 3, Lys fire 3, Aldric heal 5
+Varek hits The Rotting Bishop for 3
+Lys hits The Rotting Bishop for 3
+The Rotting Bishop is burning (2)
+Aldric heals Aldric for 5
+The Rotting Bishop burns for 2
+The Rotting Bishop hits Varek the Oathbroken for 7
+--- Round 3 ---
+>> STATE R3  heroes: Varek 21/28hp [shield 4] chg 2/4, Lys 18/18hp [blood 7] chg 2/5, Aldric 20/22hp [attack 2] chg 2/6 | enemies: The Rotting Bishop 40/63hp (Attack 7 -> Lys) | fate 5
+[NEWBIE] ends turn with: Varek shield 4, Lys blood 7, Aldric attack 2
+Varek raises a shield (4)
+Lys (blood magic) hits The Rotting Bishop for 7
+Lys pays 2 HP in blood
+Aldric hits The Rotting Bishop for 2
+!! The Rotting Bishop tears off his vestments. Something underneath was never human.
+Grave Pup hits The Rotting Bishop for 2
+The Rotting Bishop burns for 1
+The Rotting Bishop hits Lys the Hollow for 7
+--- Round 4 ---
+>> STATE R4  heroes: Varek 21/28hp [shield 3] chg 3/4, Lys 9/18hp [attack 5] chg 3/5, Aldric 20/22hp [blank 0] chg 3/6 | enemies: The Rotting Bishop 28/63hp (Attack 8 -> Lys) | fate 5
+[NEWBIE] ends turn with: Varek shield 3, Lys attack 5, Aldric heal 5
+Varek raises a shield (3)
+Lys hits The Rotting Bishop for 5
+Aldric heals Lys for 5
+Grave Pup hits The Rotting Bishop for 2
+The Rotting Bishop hits Lys the Hollow for 8
+--- Round 5 ---
+>> STATE R5  heroes: Varek 21/28hp [shield 4] chg 4/4, Lys 6/18hp [blood 7] chg 4/5, Aldric 20/22hp [attack 2] chg 4/6 | enemies: The Rotting Bishop 21/63hp (Attack 11 -> Lys) | fate 5
+[NEWBIE] uses broken_oath (incoming 11, party missing 21 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[NEWBIE] ends turn with: Varek shield 4, Lys blood 7, Aldric attack 2
+Varek raises a shield (4)
+Lys (blood magic) hits The Rotting Bishop for 7
+Lys pays 2 HP in blood
+Aldric hits The Rotting Bishop for 2
+Grave Pup hits The Rotting Bishop for 2
+The Rotting Bishop hits Varek the Oathbroken for 2 (9 blocked)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 17/28hp [shield 4] chg 1/4, Lys 4/18hp [fire 3] chg 5/5, Aldric 20/22hp [heal 3] chg 5/6 | enemies: The Rotting Bishop 10/63hp (Attack 9 -> Varek) | fate 5
+[NEWBIE] uses hollow_flame (incoming 9, party missing 27 HP)
+* Lys uses Hollow Flame!
+Lys hits The Rotting Bishop for 4
+The flame feeds on Lys (-3 HP)
+[NEWBIE] ends turn with: Varek shield 4, Lys fire 3, Aldric heal 3
+Varek raises a shield (4)
+Lys hits The Rotting Bishop for 3
+The Rotting Bishop is burning (3)
+Aldric heals Lys for 3
+Grave Pup hits The Rotting Bishop for 2
+The Rotting Bishop burns for 3
+The Rotting Bishop is reduced to ash!
+!! The Bishop collapses into rot and candle wax. Somewhere, a bell stops ringing.
+VICTORY!
+
+RESULT: VICTORY at tile 42/42

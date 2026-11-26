@@ -1,0 +1,62 @@
+{
+	"buildings": [
+		{
+			"id": "chapel",
+			"name": "Ruined Chapel",
+			"desc": "+2 max HP for every hero per level.",
+			"costs": [
+				90,
+				180
+			]
+		},
+		{
+			"id": "fortune",
+			"name": "Fortune Teller's Tent",
+			"desc": "Start every fight with +1 Fate.",
+			"costs": [
+				120
+			]
+		},
+		{
+			"id": "carver",
+			"name": "Bone Carver's Hut",
+			"desc": "Lv1: carvings offer 4 choices. Lv2: start each run with one free carving.",
+			"costs": [
+				90,
+				180
+			]
+		},
+		{
+			"id": "smithy",
+			"name": "Gravesmith",
+			"desc": "Lv1: start each run with a random common weapon. Lv2: choose from 2 weapons instead.",
+			"costs": [
+				100,
+				200
+			]
+		},
+		{
+			"id": "kennel",
+			"name": "Kennel of Strays",
+			"desc": "Choose your pet from 3 instead of 2.",
+			"costs": [
+				70
+			]
+		},
+		{
+			"id": "market",
+			"name": "Night Market",
+			"desc": "Shop prices -15% per level.",
+			"costs": [
+				60,
+				120
+			]
+		}
+	],
+	"embers": {
+		"per_tile": 0.4,
+		"per_fight": 1,
+		"per_elite": 4,
+		"victory": 20
+	}
+}

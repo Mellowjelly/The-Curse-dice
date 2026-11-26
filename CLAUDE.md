@@ -48,7 +48,7 @@ Balance targets: newbie bot 65-75% wins, tactician ~90%, gap >= 15 points, sessi
 
 ### Commands
 - Run tests (must pass before calling any change done):
-  `godot --headless --path . -s tests/run_tests.gd`
+  `tools/run_tests.sh` (wraps `godot --headless --path . -s tests/run_tests.gd` and also fails on SCRIPT ERROR)
   It also prints a naive-play balance line; mention it to the owner when balance changes.
 - If `godot` is not on PATH, use the full path to the Godot executable.
 - Exporting: make sure the export preset includes `data/*.json` (Export → Resources → "Filters to export non-resource files": `data/*.json`).

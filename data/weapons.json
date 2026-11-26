@@ -17,10 +17,10 @@
 		"faces": [{ "type": "attack", "value": 8 }, { "type": "blank", "value": 0 }] },
 	{ "id": "grave_scythe", "name": "Grave Scythe", "rarity": "rare", "desc": "Reaps the living and the dead.",
 		"faces": [{ "type": "cleave", "value": 3 }, { "type": "fire", "value": 3 }] },
-	{ "id": "thirsting_sword", "name": "The Thirsting Sword", "rarity": "cursed", "desc": "CURSED: -4 max HP. It drinks.",
-		"max_hp": -4, "faces": [{ "type": "blood", "value": 8 }, { "type": "blood", "value": 7 }] },
-	{ "id": "widows_lantern", "name": "Widow's Lantern", "rarity": "cursed", "desc": "CURSED: -4 max HP. Its flame never dies.",
-		"max_hp": -4, "faces": [{ "type": "fire", "value": 5 }, { "type": "cleave", "value": 4 }] },
-	{ "id": "oathkeeper", "name": "Oathkeeper", "rarity": "cursed", "desc": "CURSED: -5 max HP. It remembers every broken vow.",
-		"max_hp": -5, "faces": [{ "type": "guard", "value": 5 }, { "type": "attack", "value": 6 }] }
+	{ "id": "thirsting_sword", "name": "The Thirsting Sword", "rarity": "cursed", "desc": "CURSED: -3 max HP. It drinks.",
+		"max_hp": -3, "faces": [{ "type": "blood", "value": 8 }, { "type": "blood", "value": 7 }] },
+	{ "id": "widows_lantern", "name": "Widow's Lantern", "rarity": "cursed", "desc": "CURSED: -3 max HP. Its flame never dies.",
+		"max_hp": -3, "faces": [{ "type": "fire", "value": 5 }, { "type": "cleave", "value": 4 }] },
+	{ "id": "oathkeeper", "name": "Oathkeeper", "rarity": "cursed", "desc": "CURSED: -4 max HP. It remembers every broken vow.",
+		"max_hp": -4, "faces": [{ "type": "guard", "value": 5 }, { "type": "attack", "value": 6 }] }
 ]

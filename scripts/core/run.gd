@@ -42,7 +42,7 @@ var carve_offers: Array = []  # [{ "hero": int, "face": int, "new": Dictionary, 
 var shop_bought: Array = []
 var combat_kind := ""         # "fight" | "elite" | "boss"
 var last_reward_text := ""
-var stats := {"fights": 0, "elites": 0, "events": 0, "carves": 0, "gold_earned": 0, "tiles": {}}
+var stats := {"fights": 0, "elites": 0, "events": 0, "carves": 0, "gold_earned": 0, "tiles": {}, "kills": {}}
 var _return_phase := "map"    # where to go after a carving reward
 var weapons_db: Array = []
 var pets_db: Array = []
@@ -50,9 +50,12 @@ var pet_offers: Array = []
 var weapon_offers: Array = []
 var _loot_then := "map"       # "carve" | "map" | "shop"
 var _seen_events: Array = []
+var upgrades := {}            # town building levels (see data/town.json)
+var _start_queue: Array = []  # steps after choosing a pet: "loot", "carve"
 
 
-func _init(seed_value: int = -1) -> void:
+func _init(seed_value: int = -1, town_levels: Dictionary = {}) -> void:
+	upgrades = town_levels
 	if seed_value >= 0:
 		rng.seed = seed_value
 	else:
@@ -64,6 +67,9 @@ func _init(seed_value: int = -1) -> void:
 		var u := Combat.make_unit(def)
 		u["carve_pool"] = def.get("carve_pool", [])
 		u["weapon"] = {}
+		var bonus_hp := 2 * int(upgrades.get("chapel", 0))
+		u["max_hp"] += bonus_hp
+		u["hp"] += bonus_hp
 		heroes.append(u)
 	weapons_db = GameData.load_weapons()
 	pets_db = GameData.load_pets()
@@ -71,12 +77,17 @@ func _init(seed_value: int = -1) -> void:
 	combat = Combat.new(rng.randi())
 	combat.battle_ended.connect(_on_battle_ended)
 	combat.log_added.connect(func(t): log_added.emit(t))
+	combat.bonus_fate_start = int(upgrades.get("fortune", 0))
 	_generate_board()
 	# A stray follows you onto the road: pick 1 of 2 companions.
 	var pool := pets_db.duplicate()
 	_shuffle(pool)
-	pet_offers = pool.slice(0, 2)
+	pet_offers = pool.slice(0, 3 if int(upgrades.get("kennel", 0)) > 0 else 2)
 	phase = "pet"
+	if int(upgrades.get("smithy", 0)) > 0:
+		_start_queue.append("loot")
+	if int(upgrades.get("carver", 0)) >= 2:
+		_start_queue.append("carve")
 
 
 # ---------------------------------------------------------------- board
@@ -90,7 +101,7 @@ func _generate_board() -> void:
 	for k in region.get("fixed_tiles", {}):
 		var idx := int(k)
 		if idx > 0 and idx < length - 1:
-			board[idx] = {"type": region["fixed_tiles"][k], "visited": false}
+			board[idx] = {"type": region["fixed_tiles"][k], "visited": false, "gate": idx in region.get("gate_tiles", [])}
 	# Fixed landmarks: a gate campfire right before the boss (movement always stops there).
 	board[length - 1] = {"type": "rest", "visited": false, "gate": true}
 	board.append({"type": "boss", "visited": false, "gate": true})
@@ -236,6 +247,9 @@ func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 
 
 func _on_battle_ended(victory: bool) -> void:
+	for m in combat.monsters:
+		if not Combat.is_alive(m):
+			stats["kills"][m["id"]] = stats["kills"].get(m["id"], 0) + 1
 	if not victory:
 		phase = "defeat"
 		changed.emit()
@@ -252,8 +266,16 @@ func _on_battle_ended(victory: bool) -> void:
 			h["hp"] = max(1, h["max_hp"] * pct / 100)
 	var g := _gold_roll("elite" if combat_kind == "elite" else "fight")
 	last_reward_text = "Victory! +%d gold." % g
+	if combat.pet.get("passive", "") == "mend":
+		for h in heroes:
+			if Combat.is_alive(h):
+				h["hp"] = min(h["max_hp"], h["hp"] + Combat.PET_MEND)
+		last_reward_text += " The Candle Moth mends your wounds (+%d HP)." % Combat.PET_MEND
 	if combat_kind == "elite":
-		last_reward_text += " The elite drops its arms."
+		var heal_pct := int(region.get("elite_heal_percent", 0))
+		for h in heroes:
+			h["hp"] = min(h["max_hp"], h["hp"] + h["max_hp"] * heal_pct / 100)
+		last_reward_text += " The party catches its breath (+%d%% HP). The elite drops its arms." % heal_pct
 		_offer_loot(2, "carve")
 	else:
 		_offer_carving("map")
@@ -279,7 +301,8 @@ func _offer_carving(return_to: String) -> void:
 	carve_offers = []
 	var hero_order := range(heroes.size())
 	_shuffle(hero_order)
-	for k in CARVE_OFFERS:
+	var count := CARVE_OFFERS + (1 if int(upgrades.get("carver", 0)) >= 1 else 0)
+	for k in count:
 		var hi: int = hero_order[k % hero_order.size()]
 		carve_offers.append(_make_offer(hi))
 	phase = "reward"
@@ -292,6 +315,8 @@ func _make_offer(hi: int) -> Dictionary:
 	var blanks: Array = []
 	var others: Array = []
 	for i in faces.size():
+		if i in WEAPON_SLOTS:
+			continue  # weapon faces belong to the weapon; carving shapes the hero's own faces 1-4
 		(blanks if faces[i]["type"] == "blank" else others).append(i)
 	var fi: int
 	var new_face: Dictionary
@@ -330,6 +355,9 @@ func skip_carving() -> void:
 	if phase != "reward":
 		return
 	carve_offers = []
+	if _return_phase == "start":
+		_next_start_step()
+		return
 	phase = _return_phase
 	changed.emit()
 
@@ -439,6 +467,11 @@ func shop_items() -> Array:
 	return region["shop"]
 
 
+func price(item: Dictionary) -> int:
+	var discount := 0.15 * int(upgrades.get("market", 0))
+	return int(round(int(item["cost"]) * (1.0 - discount)))
+
+
 func can_buy(item_id: String) -> bool:
 	if phase != "shop" or item_id in shop_bought:
 		return false
@@ -446,7 +479,7 @@ func can_buy(item_id: String) -> bool:
 		if it["id"] == item_id:
 			if item_id == "resurrect" and heroes.all(func(h): return Combat.is_alive(h)):
 				return false
-			return gold >= int(it["cost"])
+			return gold >= price(it)
 	return false
 
 
@@ -454,7 +487,7 @@ func buy(item_id: String) -> void:
 	if not can_buy(item_id):
 		return
 	var item: Dictionary = region["shop"].filter(func(it): return it["id"] == item_id)[0]
-	gold -= int(item["cost"])
+	gold -= price(item)
 	shop_bought.append(item_id)
 	_log("Bought " + item["name"])
 	match item_id:
@@ -493,17 +526,32 @@ func choose_pet(index: int) -> void:
 	combat.pet = p
 	_log("%s follows you." % p["name"])
 	pet_offers = []
-	phase = "map"
-	changed.emit()
+	_next_start_step()
 
 
-func _offer_loot(count: int, then: String) -> void:
+## Town upgrades that happen at the start of a run (Gravesmith weapon, Bone Carver carving).
+func _next_start_step() -> void:
+	if _start_queue.is_empty():
+		phase = "map"
+		changed.emit()
+		return
+	var step: String = _start_queue.pop_front()
+	last_reward_text = "A gift from the town."
+	if step == "loot":
+		_offer_loot(int(upgrades.get("smithy", 0)), "start", "common")
+	else:
+		_offer_carving("start")
+
+
+func _offer_loot(count: int, then: String, only_rarity: String = "") -> void:
 	_loot_then = then
 	weapon_offers = []
 	var guard := 0
-	while weapon_offers.size() < count and guard < 50:
+	while weapon_offers.size() < count and guard < 80:
 		guard += 1
 		var w := _weighted_weapon()
+		if only_rarity != "" and w["rarity"] != only_rarity:
+			continue
 		if not weapon_offers.any(func(x): return x["id"] == w["id"]):
 			weapon_offers.append(w)
 	phase = "loot"
@@ -554,6 +602,8 @@ func skip_loot() -> void:
 		"shop":
 			phase = "shop"
 			changed.emit()
+		"start":
+			_next_start_step()
 		_:
 			phase = "map"
 			changed.emit()
@@ -598,3 +648,36 @@ func _shuffle(arr: Array) -> void:
 
 func _log(text: String) -> void:
 	log_added.emit(text)
+
+
+# ---------------------------------------------------------------- save / load (only on the map)
+
+func to_dict() -> Dictionary:
+	return {
+		"version": 1, "rng_seed": rng.seed, "rng_state": rng.state, "combat_rng_state": combat.rng.state,
+		"board": board, "pos": pos, "gold": gold, "heroes": heroes, "fate": combat.fate, "pet": combat.pet,
+		"twists": combat.twists, "stats": stats, "seen_events": _seen_events, "upgrades": upgrades,
+		"move_options": move_options,
+	}
+
+
+static func from_dict(d: Dictionary) -> RefCounted:
+	var script: GDScript = load("res://scripts/core/run.gd")
+	var r = script.new(0, d.get("upgrades", {}))
+	r.rng.seed = d["rng_seed"]
+	r.rng.state = d["rng_state"]
+	r.combat.rng.state = d["combat_rng_state"]
+	r.board = d["board"]
+	r.pos = d["pos"]
+	r.gold = d["gold"]
+	r.heroes = d["heroes"]
+	r.combat.fate = d["fate"]
+	r.combat.pet = d["pet"]
+	r.combat.twists = d.get("twists", 0)
+	r.stats = d["stats"]
+	r._seen_events = d["seen_events"]
+	r.move_options = d.get("move_options", [])
+	r._start_queue = []
+	r.pet_offers = []
+	r.phase = "map"
+	return r

@@ -6,9 +6,9 @@
 		"desc": "d4 bites. Bites a random enemy for 3 when a fight starts.",
 		"faces": [{ "type": "attack", "value": 2 }, { "type": "attack", "value": 3 }, { "type": "attack", "value": 2 }, { "type": "blank", "value": 0 }] },
 	{ "id": "candle_moth", "name": "Candle Moth", "passive": "mend",
-		"desc": "d4 of soft light. Heals the weakest hero 1 at the end of every round.",
-		"faces": [{ "type": "heal", "value": 2 }, { "type": "shield", "value": 1 }, { "type": "fire", "value": 1 }, { "type": "blank", "value": 0 }] },
+		"desc": "d4 of soft light. After every won fight, all heroes heal 1.",
+		"faces": [{ "type": "heal", "value": 1 }, { "type": "shield", "value": 1 }, { "type": "fire", "value": 1 }, { "type": "blank", "value": 0 }] },
 	{ "id": "black_cat", "name": "Black Cat", "passive": "lucky",
 		"desc": "d4 of mischief. +1 reroll every round.",
-		"faces": [{ "type": "attack", "value": 1 }, { "type": "shield", "value": 2 }, { "type": "blank", "value": 0 }, { "type": "blank", "value": 0 }] }
+		"faces": [{ "type": "attack", "value": 2 }, { "type": "shield", "value": 2 }, { "type": "attack", "value": 1 }, { "type": "blank", "value": 0 }] }
 ]

@@ -7,6 +7,10 @@ const Run = preload("res://scripts/core/run.gd")
 const Combat = preload("res://scripts/core/combat.gd")
 const CombatView = preload("res://scripts/ui/combat_view.gd")
 const UI = preload("res://scripts/ui/ui_kit.gd")
+const Profile = preload("res://scripts/core/profile.gd")
+const TownScreen = preload("res://scripts/ui/town_screen.gd")
+
+const TOWN_SCENE := "res://scenes/town.tscn"
 
 const TITLE_SCENE := "res://scenes/title.tscn"
 const COLS := 10
@@ -15,6 +19,8 @@ const TILE_GAP := Vector2(14, 18)
 const BOARD_ORIGIN := Vector2(40, 96)
 
 var run: Run
+var profile: Profile
+var _recorded := false
 var _combat_view: CombatView
 var _in_combat := false
 
@@ -35,11 +41,23 @@ func _ready() -> void:
 	add_child(UI.full_rect(_combat_view))
 	_combat_view.hide()
 	_combat_view.finished.connect(_on_combat_finished)
-	new_run()
+	profile = Profile.new()
+	profile.load_profile()
+	var saved := Profile.load_run_data()
+	if not saved.is_empty():
+		_attach(Run.from_dict(saved))
+	else:
+		new_run()
 
 
 func new_run() -> void:
-	run = Run.new()
+	Profile.delete_saved_run()
+	_attach(Run.new(-1, profile.levels))
+
+
+func _attach(r: Run) -> void:
+	run = r
+	_recorded = false
 	run.changed.connect(_on_run_changed)
 	_in_combat = false
 	_draw_board()
@@ -61,7 +79,7 @@ func _build_map() -> void:
 	_stats = UI.label("", 20, UI.GOLD)
 	_stats.position = Vector2(640, 28)
 	_map_root.add_child(_stats)
-	var menu := UI.button("Menu", func(): get_tree().change_scene_to_file(TITLE_SCENE))
+	var menu := UI.button("Town", func(): get_tree().change_scene_to_file(TOWN_SCENE))
 	menu.position = Vector2(1170, 22)
 	menu.custom_minimum_size = Vector2(80, 36)
 	_map_root.add_child(menu)
@@ -168,6 +186,12 @@ func _on_run_changed() -> void:
 		return  # stay on the combat screen until the player presses Continue
 	_map_root.show()
 	_combat_view.hide()
+	if run.phase == "map":
+		Profile.save_run_data(run.to_dict())  # auto-save at every map step
+	elif run.is_over() and not _recorded:
+		_recorded = true
+		Profile.delete_saved_run()
+		TownScreen.last_result = profile.record_run(run)
 	_header.text = "%s  -  tile %d / %d" % [run.region["name"], run.pos, run.board.size() - 1]
 	_stats.text = "Gold %d    Fate %d/%d" % [run.gold, run.combat.fate, Combat.MAX_FATE]
 	if not run.combat.pet.is_empty():
@@ -316,7 +340,7 @@ func _refresh_modal() -> void:
 			for it in run.shop_items():
 				var id: String = it["id"]
 				var bought: bool = id in run.shop_bought
-				var text := "%s  (%d gold)\n%s" % [it["name"], int(it["cost"]), "Sold" if bought else it["desc"]]
+				var text := "%s  (%d gold)\n%s" % [it["name"], run.price(it), "Sold" if bought else it["desc"]]
 				_modal_box.add_child(UI.choice_button(text, func(): run.buy(id), UI.GOLD, run.can_buy(id)))
 			_modal_box.add_child(UI.button("Leave", func(): run.leave_shop()))
 		"rest":
@@ -344,8 +368,13 @@ func _refresh_modal() -> void:
 
 
 func _end_buttons() -> void:
-	_modal_box.add_child(UI.choice_button("New Run", new_run, UI.GOLD))
-	_modal_box.add_child(UI.button("Main Menu", func(): get_tree().change_scene_to_file(TITLE_SCENE)))
+	var res: Dictionary = TownScreen.last_result
+	if not res.is_empty():
+		var t := "+%d Soul Embers" % int(res["embers"])
+		for q in res["quests"]:
+			t += "\nQuest complete: %s" % q["name"]
+		_modal_text(t, Color("#e08a3c"))
+	_modal_box.add_child(UI.choice_button("Return to Ashfall", func(): get_tree().change_scene_to_file(TOWN_SCENE), UI.GOLD))
 
 
 func _run_summary() -> String:

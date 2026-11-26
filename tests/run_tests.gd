@@ -6,6 +6,7 @@ extends SceneTree
 const Combat = preload("res://scripts/core/combat.gd")
 const GameData = preload("res://scripts/core/game_data.gd")
 const Run = preload("res://scripts/core/run.gd")
+const Profile = preload("res://scripts/core/profile.gd")
 
 var _failures := 0
 var _checks := 0
@@ -32,6 +33,9 @@ func _init() -> void:
 	test_weapons()
 	test_fate_twist()
 	test_pets()
+	test_profile_and_quests()
+	test_run_save_load()
+	test_town_upgrades_apply()
 	print("\n%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -292,7 +296,7 @@ func test_weapons() -> void:
 	var plain: Dictionary = run.weapons_db.filter(func(w): return w["id"] == "rusted_blade")[0]
 	Run.equip_weapon(h, cursed)
 	check(h["faces"][4]["type"] == "blood" and h["faces"][5]["type"] == "blood", "weapon replaces faces 5 and 6")
-	check(h["max_hp"] == max_before - 4, "cursed weapon lowers max HP")
+	check(h["max_hp"] == max_before - 3, "cursed weapon lowers max HP")
 	Run.equip_weapon(h, plain)
 	check(h["max_hp"] == max_before, "swapping away a cursed weapon restores max HP")
 	check(h["faces"][4]["type"] == "attack", "new weapon faces are applied")
@@ -323,3 +327,53 @@ func test_pets() -> void:
 	check(run.phase == "pet" and run.pet_offers.size() == 2, "a run starts by choosing 1 of 2 pets")
 	run.choose_pet(0)
 	check(run.phase == "map" and not run.combat.pet.is_empty(), "choosing a pet starts the road")
+
+
+func test_profile_and_quests() -> void:
+	var path := "user://test_profile.save"
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	var p := Profile.new(path)
+	var run := Run.new(20)
+	run.pos = 20
+	run.phase = "defeat"
+	run.stats["fights"] = 3
+	run.stats["kills"] = {"ghoul": 30}
+	var res := p.record_run(run)
+	check(res["embers"] == 8 + 3 + 15 + 20, "embers = tiles*0.4 + fights + quests (got %d)" % res["embers"])
+	check("first_steps" in p.quests_done and "ghoul_hunter" in p.quests_done, "quests complete from run stats")
+	var again := Profile.new(path)
+	again.load_profile()
+	check(again.embers == p.embers and again.stat("kills_ghoul") == 30, "profile survives save/load")
+	again.embers = 1000
+	check(again.upgrade("chapel") and again.level("chapel") == 1, "buildings can be upgraded")
+	check(again.next_cost("kennel") == 70 and again.upgrade("kennel") and again.next_cost("kennel") == -1, "max level reports -1")
+
+
+func test_run_save_load() -> void:
+	var run := Run.new(21)
+	run.choose_pet(0)
+	run.gold = 42
+	run.pos = 7
+	run.heroes[0]["faces"][5] = {"type": "attack", "value": 9}
+	var copy: Run = Run.from_dict(run.to_dict())
+	check(copy.gold == 42 and copy.pos == 7 and copy.phase == "map", "run state restored")
+	check(copy.heroes[0]["faces"][5]["value"] == 9, "carved faces restored")
+	check(copy.combat.pet["id"] == run.combat.pet["id"], "pet restored")
+	run.roll_move()
+	copy.roll_move()
+	check(run.move_options == copy.move_options, "random numbers continue identically after loading")
+
+
+func test_town_upgrades_apply() -> void:
+	var run := Run.new(22, {"chapel": 2, "kennel": 1, "smithy": 1, "carver": 2, "market": 1, "fortune": 1})
+	check(run.heroes[0]["max_hp"] == 28 + 4, "Chapel adds max HP")
+	check(run.pet_offers.size() == 3, "Kennel offers 3 pets")
+	run.choose_pet(0)
+	check(run.phase == "loot" and run.weapon_offers.size() == 1 and run.weapon_offers[0]["rarity"] == "common", "Gravesmith offers a common weapon")
+	run.equip(0, 0)
+	check(run.phase == "reward" and run.carve_offers.size() == 4, "Bone Carver gives a free 4-choice carving")
+	run.skip_carving()
+	check(run.phase == "map", "then the road begins")
+	check(run.price({"cost": 20}) == 17, "Night Market discounts prices")
+	check(run.combat.bonus_fate_start == 1, "Fortune Teller adds starting Fate")

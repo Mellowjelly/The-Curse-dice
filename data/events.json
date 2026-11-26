@@ -58,7 +58,7 @@
 		"title": "Crow Feast",
 		"text": "Crows tear at a fallen soldier. Something bigger moves behind them.",
 		"options": [
-			{ "label": "Chase them off (fight).", "effects": [{ "op": "fight", "pool": "early", "text": "Something bigger was waiting." }] },
+			{ "label": "Chase them off (fight).", "effects": [{ "op": "fight", "pool": "mid", "text": "Something bigger was waiting." }] },
 			{ "label": "Search the body quickly (+12 gold, a hero loses 3 HP).", "effects": [{ "op": "gold", "value": 12 }, { "op": "hp", "who": "random", "value": -3 }] }
 		]
 	},

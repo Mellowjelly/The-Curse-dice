@@ -47,10 +47,12 @@ var target_index := 0
 var round_number := 0
 var finished := false
 var pet: Dictionary = {}  # optional companion: { id, name, faces (d4), face, passive }
+var bonus_fate_start := 0  # from the town's Fortune Teller
+var twists := 0            # Fate Twists used (for quests)
 
 # Pet passive numbers.
 const PET_FIRST_STRIKE := 3
-const PET_MEND := 1
+const PET_MEND := 1  # Candle Moth: heal all heroes after a won fight (applied by run.gd)
 
 
 func _init(seed_value: int = -1) -> void:
@@ -113,6 +115,8 @@ func start_battle(hero_units: Array, monster_defs: Array) -> void:
 	finished = false
 	round_number = 0
 	target_index = 0
+	if bonus_fate_start > 0:
+		fate = min(MAX_FATE, fate + bonus_fate_start)
 	_apply_pet_battle_start()
 	_start_round()
 
@@ -157,6 +161,7 @@ func fate_twist(hero_index: int, face_index: int) -> bool:
 	if not is_alive(h) or face_index < 0 or face_index >= h["faces"].size():
 		return false
 	fate -= FATE_TWIST_COST
+	twists += 1
 	h["face"] = face_index
 	h["locked"] = true
 	_log("* Fate twists %s's die to %s %d (-%d Fate)" % [short_name(h), String(h["faces"][face_index]["type"]).to_upper(),
@@ -276,9 +281,8 @@ func end_turn() -> void:
 		elif combos[t] >= 2:
 			_log("Combo: pair of %s - +1 each" % t.to_upper())
 			fate_gain += FATE_PER_PAIR
-	if fate_gain > 0 and fate < MAX_FATE:
-		fate = min(MAX_FATE, fate + fate_gain)
-		_log("The combo feeds your Fate (+%d)" % fate_gain)
+	if fate_gain > 0:
+		gain_fate(fate_gain, "The combo feeds your Fate")
 
 	for h in heroes:
 		if not is_alive(h):
@@ -297,13 +301,6 @@ func end_turn() -> void:
 
 	_monster_phase()
 	if not finished:
-		if not pet.is_empty() and pet["passive"] == "mend":
-			var ally := _lowest_hp_ratio(heroes)
-			if not ally.is_empty():
-				var healed: int = min(PET_MEND, ally["max_hp"] - ally["hp"])
-				if healed > 0:
-					ally["hp"] += healed
-					_log("%s mends %s (+%d)" % [pet["name"], short_name(ally), healed])
 		_start_round()
 
 
@@ -330,7 +327,8 @@ func intent_text(monster: Dictionary) -> String:
 
 func _start_round() -> void:
 	round_number += 1
-	rerolls_left = REROLLS_PER_TURN
+	rerolls_left = REROLLS_PER_TURN + _overflow_rerolls
+	_overflow_rerolls = 0
 	if not pet.is_empty():
 		pet["face"] = rng.randi_range(0, pet["faces"].size() - 1)
 		if pet["passive"] == "lucky":
@@ -405,11 +403,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 				ally["shield"] += extra
 				_log("%s's prayer wards %s (+%d shield)" % [who, short_name(ally), extra])
 		"blank":
-			if fate < MAX_FATE:
-				fate += 1
-				_log("%s rolls nothing... +1 Fate" % who)
-			else:
-				_log("%s rolls nothing" % who)
+			gain_fate(1, "%s rolls nothing..." % who)
 
 
 func _apply_pet_battle_start() -> void:
@@ -446,6 +440,21 @@ func _apply_pet_face() -> void:
 			if not ally.is_empty():
 				ally["shield"] += v
 				_log("%s shields %s (%d)" % [pet["name"], short_name(ally), v])
+
+
+## Adds Fate. Fate beyond the cap is not wasted: it becomes a free reroll next round.
+var _overflow_rerolls := 0
+
+func gain_fate(amount: int, reason: String) -> void:
+	var room := MAX_FATE - fate
+	var added: int = min(amount, room)
+	fate += added
+	var over := amount - added
+	if added > 0:
+		_log("%s +%d Fate" % [reason, added])
+	if over > 0:
+		_overflow_rerolls += over
+		_log("%s Fate overflows: +%d free reroll next round" % [reason, over])
 
 
 func _monster_phase() -> void:

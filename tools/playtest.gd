@@ -9,6 +9,16 @@ extends SceneTree
 const Combat = preload("res://scripts/core/combat.gd")
 const Run = preload("res://scripts/core/run.gd")
 const PlayerBot = preload("res://tools/bots/player_bot.gd")
+const Profile = preload("res://scripts/core/profile.gd")
+
+const CAMPAIGNS := 20
+const CAMPAIGN_RUNS := 20
+# The order each bot style buys town upgrades in.
+const BUY_ORDER := {
+	"newbie": ["chapel", "chapel", "chapel", "market", "fortune", "kennel", "smithy", "carver", "fortune", "market", "smithy", "carver"],
+	"tactician": ["carver", "fortune", "smithy", "chapel", "kennel", "carver", "fortune", "chapel", "smithy", "market", "chapel", "market"],
+	"berserker": ["smithy", "smithy", "fortune", "carver", "fortune", "chapel", "kennel", "carver", "chapel", "market", "chapel", "market"],
+}
 
 const STYLES := ["newbie", "tactician", "berserker"]
 const RUNS := 300
@@ -29,6 +39,7 @@ func _init() -> void:
 		"%d full runs per bot style (start of the road -> boss)." % runs, ""]
 	for style in STYLES:
 		report.append_array(_measure(style, runs))
+		report.append_array(_campaign(style))
 		_write(out_dir + "/transcript_%s.txt" % style, "\n".join(_transcript(style, 7)))
 	_write(out_dir + "/report.md", "\n".join(report))
 	print("\n".join(report))
@@ -41,8 +52,8 @@ func _write(path: String, text: String) -> void:
 
 
 ## Plays one full run. If `log` is given, everything is recorded there.
-func play_run(style: String, seed_value: int, log: Array[String] = []) -> Dictionary:
-	var run := Run.new(seed_value)
+func play_run(style: String, seed_value: int, log: Array[String] = [], levels: Dictionary = {}) -> Dictionary:
+	var run := Run.new(seed_value, levels)
 	var bot := PlayerBot.new(style, seed_value)
 	bot.notes = log
 	run.log_added.connect(func(t): log.append(t))
@@ -185,3 +196,47 @@ func _transcript(style: String, seed_value: int) -> Array[String]:
 	log.append("")
 	log.append("RESULT: %s at tile %d/%d" % ["VICTORY" if r["won"] else "DEFEAT", r["run"].pos, r["run"].board.size() - 1])
 	return log
+
+
+## Meta-progression: the bot plays CAMPAIGN_RUNS runs in a row from a fresh profile,
+## buying town upgrades between runs. Shows how fast the town makes the game easier.
+func _campaign(style: String) -> Array[String]:
+	var wins_at := []
+	wins_at.resize(CAMPAIGN_RUNS)
+	wins_at.fill(0)
+	var first_win_total := 0.0
+	var first_win_n := 0
+	var embers_total := 0.0
+	var levels_total := 0.0
+	for cmp in CAMPAIGNS:
+		var path := "user://bot_campaign.save"
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+		var prof := Profile.new(path)
+		var first := -1
+		for i in CAMPAIGN_RUNS:
+			var r := play_run(style, 90000 + cmp * 100 + i, [], prof.levels.duplicate())
+			var res := prof.record_run(r["run"])
+			embers_total += res["embers"]
+			if r["won"]:
+				wins_at[i] += 1
+				if first < 0:
+					first = i + 1
+			# Spend embers in this style's order.
+			for id in BUY_ORDER[style]:
+				if prof.can_upgrade(id):
+					prof.upgrade(id)
+				elif prof.next_cost(id) >= 0:
+					break  # saving up for this one
+		if first > 0:
+			first_win_total += first
+			first_win_n += 1
+		for k in prof.levels:
+			levels_total += prof.levels[k]
+	var curve: Array[String] = []
+	for i in CAMPAIGN_RUNS:
+		curve.append("%d%%" % int(100.0 * wins_at[i] / CAMPAIGNS))
+	return ["- **Campaign (%d profiles x %d runs, buying town upgrades):** win rate by run #: %s" % [CAMPAIGNS, CAMPAIGN_RUNS, " ".join(curve)],
+		"- Campaign: first win on run #%.1f on average (%d/%d profiles ever won); %.0f embers per run; %.1f building levels after %d runs" % [
+			_avg(first_win_total, first_win_n), first_win_n, CAMPAIGNS, embers_total / (CAMPAIGNS * CAMPAIGN_RUNS), levels_total / CAMPAIGNS, CAMPAIGN_RUNS],
+		""]

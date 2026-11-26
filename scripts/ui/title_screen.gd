@@ -1,7 +1,7 @@
 extends Control
 ## Title screen: New Game, How to Play, Quit. Built in code (no art yet).
 
-const GAME_SCENE := "res://scenes/game.tscn"
+const GAME_SCENE := "res://scenes/town.tscn"
 
 const COL_BG := Color("#0e0b12")
 const COL_TEXT := Color("#d8cfc4")
@@ -83,12 +83,12 @@ func _build() -> void:
 	spacer.custom_minimum_size = Vector2(0, 40)
 	box.add_child(spacer)
 
-	box.add_child(_menu_button("New Game", _on_new_game))
+	box.add_child(_menu_button("Play", _on_new_game))
 	box.add_child(_menu_button("How to Play", func(): _help.show()))
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
 
-	var version := _label("Prototype 0.4", 14, COL_DIM)
+	var version := _label("Prototype 0.5", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
 
