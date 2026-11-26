@@ -642,9 +642,11 @@ func buy(item_id: String) -> void:
 				if not Combat.is_alive(h):
 					h["hp"] = h["max_hp"] / 2
 		"carving":
+			last_reward_text = "The Bone Carver sets to work on your dice."
 			_offer_carving("shop")
 			return
 		"weapon":
+			last_reward_text = "The merchant lays two weapons on the cloth."
 			_offer_loot(2, "shop")
 			return
 	changed.emit()
@@ -766,6 +768,7 @@ func rest_heal() -> void:
 
 func rest_carve() -> void:
 	if phase == "rest":
+		last_reward_text = "By the fire, you whittle at your dice."
 		_offer_carving("map")
 
 

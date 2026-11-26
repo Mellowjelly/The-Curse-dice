@@ -132,6 +132,9 @@ func toggle_lock(hero_index: int) -> void:
 	var h: Dictionary = heroes[hero_index]
 	if not is_alive(h):
 		return
+	if h.get("twisted", false):
+		_log("%s's die was twisted by Fate and stays put this round." % short_name(h))
+		return
 	h["locked"] = not h["locked"]
 	state_changed.emit()
 
@@ -141,7 +144,10 @@ func reroll() -> bool:
 		return false
 	for h in heroes:
 		if is_alive(h) and not h["locked"]:
-			h["face"] = rng.randi_range(0, h["faces"].size() - 1)
+			# A reroll always lands on a different face (rerolling into the same face felt like a wasted reroll).
+			var old: int = h["face"]
+			var n: int = h["faces"].size()
+			h["face"] = (old + 1 + rng.randi_range(0, n - 2)) % n
 	rerolls_left -= 1
 	state_changed.emit()
 	return true
@@ -169,6 +175,7 @@ func fate_twist(hero_index: int, face_index: int) -> bool:
 	twists += 1
 	h["face"] = face_index
 	h["locked"] = true
+	h["twisted"] = true  # a twisted die cannot be unlocked by accident
 	_log("* Fate twists %s's die to %s %d (-%d Fate)" % [short_name(h), String(h["faces"][face_index]["type"]).to_upper(),
 		int(h["faces"][face_index]["value"]), FATE_TWIST_COST])
 	state_changed.emit()
@@ -361,6 +368,7 @@ func _start_round() -> void:
 	for h in heroes:
 		h["shield"] = 0
 		h["locked"] = false
+		h["twisted"] = false
 		if is_alive(h):
 			h["face"] = rng.randi_range(0, h["faces"].size() - 1)
 			if round_number == 1 and int(h.get("armor_shield", 0)) > 0:
@@ -422,6 +430,8 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 				_log("%s is burning (%d)" % [t["name"], t["burn"]])
 		"blood":
 			var t := _get_target()
+			if t.is_empty():
+				return
 			_damage(t, value, who + " (blood magic)", false, h)
 			# Dark price: blood magic hurts the caster, but never kills them.
 			var cost: int = min(BLOOD_SELF_DAMAGE, h["hp"] - 1)
@@ -594,7 +604,9 @@ func _damage(unit: Dictionary, amount: int, source: String, pierce := false, att
 	var mult := element_multiplier(attacker.get("element", ""), unit.get("element", ""))
 	unit["last_eff"] = mult
 	if mult != 1.0:
-		amount = max(1, int(round(amount * mult)))
+		# +-20%, but always at least 1 point so "super effective" is never invisible.
+		var delta: int = max(1, int(round(amount * abs(mult - 1.0))))
+		amount = amount + delta if mult > 1.0 else max(1, amount - delta)
 	var absorbed: int = 0 if pierce else min(unit["shield"], amount)
 	unit["shield"] -= absorbed
 	var dealt := amount - absorbed

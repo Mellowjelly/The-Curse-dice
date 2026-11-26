@@ -146,7 +146,12 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 				say("  %s [%s %s] mats %s + %d embers %s" % [r["id"], r["grade"], r["slot"], str(r["materials"]), int(r["embers"]), "(CAN CRAFT)" if profile.can_craft(r["id"]) else ""])
 		"craft":
 			var uid := profile.craft(p[1] if p.size() > 1 else "")
-			say("Crafted item #%d." % uid if uid >= 0 else "Missing materials or embers.")
+			if uid >= 0:
+				var r := profile.recipe(p[1])
+				var eff: String = ("faces " + str(r["faces"].map(func(f): return "%s%d" % [f["type"], f["value"]])) + " (replaces die faces 5-6)") if r["slot"] == "weapon" else "+%d max HP, +%d shield each fight" % [int(r["hp"]), int(r["shield"])]
+				say("Crafted item #%d: [%s] %s - %s. Equip with: equip <hero> %s %d" % [uid, r["grade"], r["name"], eff, r["slot"], uid])
+			else:
+				say("Missing materials or embers.")
 		"equip":
 			if p.size() > 3:
 				profile.equip_gear(p[1], p[2], int(p[3]))
@@ -155,7 +160,12 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 			if p.size() > 2:
 				var w := World.new()
 				var ok := profile.trade_material(p[1], int(p[2]), "embers" if c == "sell" else "dust", w.material_value(p[1]))
-				say("Done." if ok else "Cannot.")
+				if ok:
+					say("Done. Embers %d, Star Dust %d." % [profile.embers, profile.star_dust])
+				elif int(profile.materials.get(p[1], 0)) < int(p[2]):
+					say("You only have %d %s." % [int(profile.materials.get(p[1], 0)), p[1]])
+				else:
+					say("Too little to grind: %d x value %d gives less than 1 Star Dust (needs total value 10)." % [int(p[2]), w.material_value(p[1])])
 		"road":
 			runs_started += 1
 			run = Run.new(1000 + runs_started, profile.run_options(), profile.party)
@@ -222,7 +232,11 @@ func _road_cmd(c: String, p: PackedStringArray) -> void:
 		"equip_loot":
 			run.equip(n, int(p[2]) if p.size() > 2 else 0)
 		"buy":
-			run.buy(p[1] if p.size() > 1 else "")
+			var item := p[1] if p.size() > 1 else ""
+			if not run.can_buy(item):
+				say("Cannot buy %s: %s" % [item, "already bought here" if item in run.shop_bought else "not enough gold or not useful now"])
+			else:
+				run.buy(item)
 		"leave":
 			run.leave_shop()
 		"rest":
@@ -313,7 +327,9 @@ func _combat_cmd(cb: Combat, c: String, p: PackedStringArray) -> void:
 		if mode == "road":
 			_after_road()
 		else:
-			var r := world.finish_fight(wenemy, cb.monsters.all(func(m): return not Combat.is_alive(m)), rng_world)
+			var won: bool = cb.monsters.all(func(m): return not Combat.is_alive(m))
+			var r := world.finish_fight(wenemy, won, rng_world)
+			profile.record_world_fight(wenemy["group"], won, cb.twists)
 			profile.embers += int(r["embers"])
 			profile.star_dust += int(r["dust"])
 			say("FIGHT OVER: %s. +%d embers, +%d dust, drops %s%s" % ["VICTORY" if r["victory"] else "DEFEAT", r["embers"], r["dust"], str(r.get("drops", {})),
@@ -401,6 +417,10 @@ func _walk_to(target: Vector2i) -> void:
 			world.regenerate(1)
 		for e in world.enemies:
 			if world.enemy_active(e) and Vector2(e["cell"]).distance_to(Vector2(world.player_cell)) <= 1.0:
+				if e.get("boss", false):
+					say("Walked %d steps. BOSS %s guards its lair here (tier %d) - use 'fight' to challenge it, or walk away." % [
+						steps, world.monster_defs[e["group"][0]]["name"], int(world.countries[e["country"]]["tier"])])
+					return
 				say("Walked %d steps. A monster blocks the way!" % steps)
 				_start_world_fight(e)
 				return

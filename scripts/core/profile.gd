@@ -294,6 +294,15 @@ func summon_roll(rng: RandomNumberGenerator, banner: String = "heroes") -> Dicti
 	return result
 
 
+## Open-world fights count for lifetime stats and villagers' requests too.
+func record_world_fight(group: Array, victory: bool, twists: int) -> void:
+	if victory:
+		for id in group:
+			_add("kills_" + id, 1)
+	_add("fate_twists", twists)
+	save()
+
+
 # ---------------------------------------------------------------- villagers and their requests
 
 func npc(id: String) -> Dictionary:
@@ -349,7 +358,7 @@ func accept_request(id: String) -> bool:
 
 ## Hands over the reward. Returns a result like summon_roll's, or {} if not finished.
 func claim_request(id: String) -> Dictionary:
-	if not is_request_done(id):
+	if not is_request_done(id) or not npc_is_out(id):
 		return {}
 	var req := npc_request(id)
 	npc_active.erase(id)

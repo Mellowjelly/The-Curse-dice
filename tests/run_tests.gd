@@ -45,6 +45,7 @@ func _init() -> void:
 	test_stars()
 	test_world()
 	test_elements()
+	test_v22_player_bugs()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -559,6 +560,9 @@ func test_villager_requests() -> void:
 	run.stats["carves"] = 5
 	p.record_run(run)
 	check(p.is_request_done("pip"), "5 carvings in one journey completes it")
+	p.time_of_day = 3  # night: Pip is asleep
+	check(p.claim_request("pip").is_empty(), "you cannot claim from a villager who is away")
+	p.time_of_day = 1
 	r = p.claim_request("pip")
 	check(r["kind"] == "pet" and "ember_salamander" in p.owned_pets and r["grade"] == "SSR", "Pip gives an SSR pet")
 	# Owned rewards become Star Dust.
@@ -709,3 +713,37 @@ func test_elements() -> void:
 	var hp: int = varek["hp"]
 	c._damage(varek, 10, "test", true, wolf)
 	check(varek["hp"] == hp - 12, "wind wolves hit earth Varek +20%")
+
+
+## Bugs found by the AI player in v2.2.
+func test_v22_player_bugs() -> void:
+	var c := Combat.new(120)
+	c.start_battle(_heroes(), [_monster("ghoul")])
+	c.fate = 4
+	c.fate_twist(0, 2)
+	c.toggle_lock(0)
+	check(c.heroes[0]["locked"], "a twisted die cannot be unlocked by accident")
+	c.rerolls_left = 1
+	c.reroll()
+	check(c.heroes[0]["face"] == 2, "rerolling keeps the twisted face")
+	var before: int = c.heroes[1]["face"]
+	c.rerolls_left = 1
+	c.reroll()
+	check(c.heroes[1]["face"] != before, "a reroll always shows a different face")
+	var hp: int = c.monsters[0]["hp"]
+	c._damage(c.monsters[0], 2, "test", true, {"element": "light"})
+	check(c.monsters[0]["hp"] == hp - 3, "super effective adds at least 1 (2 -> 3)")
+	var p := _fresh_profile("test_bugs")
+	p.npc_step["hesk"] = 0
+	p.time_of_day = 3
+	p.accept_request("hesk")
+	p.record_world_fight(["ghoul", "ghoul"], true, 2)
+	check(p.request_progress("hesk") == 2, "ghouls killed on the Cursed Isle count for Captain Hesk")
+	check(p.stat("fate_twists") == 2, "twists on the Isle count too")
+	var run := Run.new(121)
+	run.choose_pet(0)
+	run.phase = "shop"
+	run.gold = 100
+	run.last_reward_text = "Victory! +9 gold."
+	run.buy("carving")
+	check(not run.last_reward_text.begins_with("Victory"), "shop carving does not show an old victory message")

@@ -45,6 +45,8 @@ var _regen := 0.0
 var _save_timer := 0.0
 var _in_combat := false
 var _fight_enemy: Dictionary = {}
+var _challenge_boss := ""      # bosses only fight when you tap them on purpose
+var _boss_warned := ""
 
 # HUD
 var _hud: CanvasLayer
@@ -379,6 +381,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var p := get_global_mouse_position()
 		_pending_node = ""
+		_challenge_boss = ""
+		# Tapped a boss? Walk up and challenge it.
+		for e in world.enemies:
+			if e.get("boss", false) and world.enemy_active(e) and _enemy_nodes[e["id"]].position.distance_to(p + Vector2(0, 20)) < 30:
+				_challenge_boss = e["id"]
+				p = _enemy_nodes[e["id"]].position
+				break
 		# Tapped a vein? Walk there and gather.
 		for n in world.nodes:
 			var spr: Sprite2D = _node_sprites[n["id"]]
@@ -448,7 +457,17 @@ func _process(delta: float) -> void:
 		if not world.enemy_active(e):
 			continue
 		var node: Node2D = _enemy_nodes[e["id"]]
-		if node.position.distance_to(_player.position) < 14.0:
+		var d := node.position.distance_to(_player.position)
+		if e.get("boss", false):
+			if d < 60.0 and _boss_warned != e["id"]:
+				_boss_warned = e["id"]
+				_show_toast("%s guards this lair. Tap it to challenge (Tier %d)." % [w_name(e["group"][0]), int(world.countries[e["country"]]["tier"])], Color("#f2c443"))
+			if d < 16.0 and _challenge_boss == e["id"]:
+				_challenge_boss = ""
+				_start_fight(e)
+				break
+			continue
+		if d < 14.0:
 			_start_fight(e)
 			break
 
@@ -470,6 +489,7 @@ func _on_combat_finished(victory: bool) -> void:
 	_combat_view.hide()
 	_in_combat = false
 	var r := world.finish_fight(_fight_enemy, victory, rng)
+	profile.record_world_fight(_fight_enemy["group"], victory, _combat_view.combat.twists)
 	if victory:
 		profile.embers += int(r["embers"])
 		profile.star_dust += int(r["dust"])
