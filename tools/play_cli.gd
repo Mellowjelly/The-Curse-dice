@@ -212,10 +212,12 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 			world = World.new()
 			if not profile.world_state.is_empty():
 				world.load_dict(profile.world_state)
-			world.setup_party(profile.party, profile.stars, profile.owned_pets[0] if not profile.owned_pets.is_empty() else "", profile.gear_bonuses(), profile.level("chapel"))
+			var resumed: bool = world.begin_trip(profile.party, profile.stars, profile.owned_pets[0] if not profile.owned_pets.is_empty() else "", profile.gear_bonuses(), profile.level("chapel"))
 			world.time_of_day = profile.time_name()
 			mode = "world"
-			say("You walk out of the gate onto the Cursed Isle.")
+			say("You pick up the trail where you left it." if resumed else "You walk out of the gate onto the Cursed Isle.")
+			if not world.sharpen_offers.is_empty():
+				say(_sharpen_text())
 			say(_world_look())
 		_:
 			say("Unknown town command. Type help.")
@@ -461,8 +463,7 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 		"home":
 			var moved := profile.bank(world)
 			profile.advance_time()
-			world.rest_in_town()
-			world.player_cell = Vector2i(int(world.countries[0]["center"][0]), int(world.countries[0]["center"][1]))
+			world.end_trip()
 			profile.world_state = world.to_dict()
 			profile.save()
 			mode = "town"

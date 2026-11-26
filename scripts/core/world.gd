@@ -26,6 +26,7 @@ var trip_carvings := 0            # Isle wins sharpen the party's dice until the
 const MAX_TRIP_CARVINGS := 3
 const SHARPEN_OFFERS := 3         # 3.4: after an Isle win the player picks 1 of 3 sharpenings
 var sharpen_offers: Array = []    # [{ "hero": int, "face": int, "new": Dictionary, "text": String }]
+var on_trip := false              # 3.5: true from setting out until the party is home (a closed app resumes the trip)
 
 
 func _init(world_seed: int = -1) -> void:
@@ -165,6 +166,30 @@ func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dicti
 			Run.apply_pet_stars(pet, int(stars.get("pet:" + pet_id, 1)))
 			Run.apply_pet_treat(pet, gear.get("pet:" + pet_id, {}).get("treat", {}))
 			pet["face"] = 0
+
+
+## 3.5: sets out from town. If the last trip never reached home (the app was closed on the Isle) and the
+## same heroes and pet are chosen, the trip resumes: HP, sharpened faces and pending sharpen offers are kept.
+## Otherwise a fresh party is built. Returns true when an old trip was resumed.
+func begin_trip(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dictionary = {}, bonus_hp: int = 0) -> bool:
+	var same := on_trip and party.size() == hero_ids.size() and String(pet.get("id", "")) == pet_id
+	if same:
+		for i in hero_ids.size():
+			if String(party[i].get("id", "")) != String(hero_ids[i]):
+				same = false
+	if not same:
+		setup_party(hero_ids, stars, pet_id, gear, bonus_hp)
+	on_trip = true
+	return same
+
+
+## 3.5: the party is home: heal, clear the trip's sharpening and stand at the gate.
+func end_trip() -> void:
+	rest_in_town()
+	on_trip = false
+	sharpen_offers = []
+	trip_carvings = 0
+	player_cell = Vector2i(int(countries[0]["center"][0]), int(countries[0]["center"][1]))
 
 
 func party_alive() -> bool:
@@ -351,9 +376,17 @@ func _make_sharpen_offers(rng: RandomNumberGenerator) -> Array:
 		var f: Dictionary = h["faces"][c[1]]
 		var nf: Dictionary = f.duplicate()
 		nf["value"] = int(f["value"]) + 1
-		offers.append({"hero": c[0], "face": c[1], "new": nf,
-			"text": "%s: %s %d -> %d" % [Combat.short_name(h), tr(String(f["type"]).to_upper()), int(f["value"]), int(nf["value"])]})
+		var o := {"hero": c[0], "face": c[1], "new": nf}
+		o["text"] = sharpen_text(o)
+		offers.append(o)
 	return offers
+
+
+## "Varek: ATTACK 3 -> 4" for one offer (rebuilt after loading, so the language is current).
+func sharpen_text(o: Dictionary) -> String:
+	var h: Dictionary = party[int(o["hero"])]
+	var nf: Dictionary = o["new"]
+	return "%s: %s %d -> %d" % [Combat.short_name(h), tr(String(nf["type"]).to_upper()), int(nf["value"]) - 1, int(nf["value"])]
 
 
 ## Applies the chosen sharpening. Returns the message to show ("" if the choice is not valid).
@@ -362,8 +395,8 @@ func choose_sharpening(index: int) -> String:
 		return ""
 	var o: Dictionary = sharpen_offers[index]
 	sharpen_offers = []
-	var h: Dictionary = party[o["hero"]]
-	h["faces"][o["face"]] = o["new"]
+	var h: Dictionary = party[int(o["hero"])]
+	h["faces"][int(o["face"])] = o["new"]
 	trip_carvings += 1
 	return tr("%s's %s face sharpens to %d (until you go home)") % [Combat.short_name(h), tr(String(o["new"]["type"]).to_upper()), int(o["new"]["value"])]
 
@@ -377,7 +410,9 @@ func skip_sharpening() -> void:
 func to_dict() -> Dictionary:
 	return {"party": party, "pet": pet, "bag": bag, "player_cell": [player_cell.x, player_cell.y], "clock": clock,
 		"nodes": nodes.map(func(n): return n["depleted_until"]),
-		"enemies": enemies.map(func(e): return e["defeated_until"])}
+		"enemies": enemies.map(func(e): return e["defeated_until"]),
+		"trip_carvings": trip_carvings, "on_trip": on_trip,
+		"sharpen_offers": sharpen_offers.map(func(o): return {"hero": o["hero"], "face": o["face"], "new": o["new"]})}
 
 
 func load_dict(d: Dictionary) -> void:
@@ -393,3 +428,15 @@ func load_dict(d: Dictionary) -> void:
 	var ed: Array = d.get("enemies", [])
 	for i in min(ed.size(), enemies.size()):
 		enemies[i]["defeated_until"] = float(ed[i])
+	# 3.5: the trip state (old saves have none: no trip in progress).
+	trip_carvings = int(d.get("trip_carvings", 0))
+	on_trip = bool(d.get("on_trip", false))
+	sharpen_offers = []
+	for o in d.get("sharpen_offers", []):
+		var hi := int(o.get("hero", -1))
+		var fi := int(o.get("face", -1))
+		if hi < 0 or hi >= party.size() or fi < 0 or fi >= party[hi]["faces"].size():
+			continue
+		var off := {"hero": hi, "face": fi, "new": Dictionary(o["new"]).duplicate()}
+		off["text"] = sharpen_text(off)
+		sharpen_offers.append(off)

@@ -75,7 +75,8 @@ func _ready() -> void:
 		world.load_dict(profile.world_state)
 	# The party always sets out with its current gear and stars from town.
 	var pet_id: String = profile.owned_pets[0] if not profile.owned_pets.is_empty() else ""
-	world.setup_party(profile.party, profile.stars, pet_id, profile.gear_bonuses(), profile.level("chapel"))
+	# 3.5: an Isle trip interrupted by closing the app resumes (HP, sharpened faces, a pending sharpening).
+	var resumed := world.begin_trip(profile.party, profile.stars, pet_id, profile.gear_bonuses(), profile.level("chapel"))
 	world.time_of_day = profile.time_name()
 	_build_world()
 	_build_hud()
@@ -84,6 +85,10 @@ func _ready() -> void:
 	_camera.position = _player.position
 	_camera.reset_smoothing()
 	_refresh_hud()
+	if resumed:
+		_show_toast(tr("You pick up the trail where you left it."), Color("#b07cf0"))
+	if not world.sharpen_offers.is_empty():
+		_show_sharpen()
 
 
 # ---------------------------------------------------------------- building the world
@@ -562,8 +567,7 @@ func _save() -> void:
 func _return_to_town() -> void:
 	var moved := profile.bank(world)
 	profile.advance_time()  # a trip to the Isle takes time
-	world.rest_in_town()
-	world.player_cell = Vector2i(int(world.countries[0]["center"][0]), int(world.countries[0]["center"][1]))
+	world.end_trip()
 	_save()
 	if not moved.is_empty() or not profile.last_bank_quests.is_empty():
 		var TownScreen = load("res://scripts/ui/town_screen.gd")

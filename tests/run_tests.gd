@@ -55,6 +55,7 @@ func _init() -> void:
 	test_v34_road()
 	test_v34_isle_sharpening()
 	test_v34_new_heroes()
+	test_v35_trip_save()
 	test_v35_thai_layout()
 	test_crafting_and_hunting()
 	test_new_pets()
@@ -1190,6 +1191,56 @@ func test_v35_thai_layout() -> void:
 		check(th.has(h["role"]), "hero role '%s' has Thai" % h["role"])
 	var UI = load("res://scripts/ui/ui_kit.gd")
 	check(UI.wrapped_height("one\ntwo\nthree", 12, 200) > UI.wrapped_height("one", 12, 200) * 2.5, "wrapped text height counts lines")
+
+
+## 3.5: an Isle trip survives a save/load (closing the app): sharpenings used, pending offers, HP.
+func test_v35_trip_save() -> void:
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	check(not w.begin_trip(["varek", "lys", "aldric"], {}, "ash_crow"), "the first trip starts fresh")
+	check(w.on_trip, "setting out starts a trip")
+	var e: Dictionary = w.enemies.filter(func(x): return not x["boss"] and x["country"] == 0)[0]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 35
+	w.finish_fight(e, true, rng)
+	var picked: Dictionary = w.sharpen_offers[0]
+	w.choose_sharpening(0)
+	w.finish_fight(e, true, rng)
+	w.party[1]["hp"] = 7
+	var pending: Array = w.sharpen_offers.duplicate(true)
+	check(w.trip_carvings == 1 and pending.size() == World.SHARPEN_OFFERS, "one sharpening used, three more offered")
+	# Saved like the profile does (store_var keeps types) and through JSON (ints become floats).
+	for d in [w.to_dict(), JSON.parse_string(JSON.stringify(w.to_dict()))]:
+		var copy = World.new()
+		copy.load_dict(d)
+		check(copy.trip_carvings == 1 and copy.on_trip, "the trip's sharpening count is saved")
+		check(copy.sharpen_offers.size() == pending.size(), "pending sharpen offers are saved")
+		check(copy.sharpen_offers[0]["text"] == pending[0]["text"], "a loaded offer reads the same: %s" % copy.sharpen_offers[0]["text"])
+		check(copy.begin_trip(["varek", "lys", "aldric"], {}, "ash_crow"), "setting out again resumes the trip")
+		check(int(copy.party[1]["hp"]) == 7, "a resumed trip keeps HP")
+		check(int(copy.party[picked["hero"]]["faces"][picked["face"]]["value"]) == int(picked["new"]["value"]), "a resumed trip keeps sharpened faces")
+		var o: Dictionary = copy.sharpen_offers[2]
+		check(copy.choose_sharpening(2) != "" and copy.trip_carvings == 2, "a loaded offer can be picked")
+		check(int(copy.party[int(o["hero"])]["faces"][int(o["face"])]["value"]) == int(o["new"]["value"]), "the loaded pick is applied")
+	# A different party after closing the app: a fresh trip.
+	var other = World.new()
+	other.load_dict(w.to_dict())
+	check(not other.begin_trip(["varek", "lys", "mordecai"], {}, "ash_crow"), "a changed party starts a fresh trip")
+	check(other.trip_carvings == 0 and other.sharpen_offers.is_empty(), "a fresh trip has no sharpening")
+	# Going home ends the trip; the next one is fresh.
+	w.end_trip()
+	check(not w.on_trip and w.trip_carvings == 0 and w.sharpen_offers.is_empty(), "home ends the trip")
+	var home = World.new()
+	home.load_dict(w.to_dict())
+	check(not home.begin_trip(["varek", "lys", "aldric"], {}, "ash_crow"), "after going home the next trip is fresh")
+	check(home.party[1]["hp"] == home.party[1]["max_hp"], "a fresh trip starts healed")
+	# Old saves (3.4 and before) have no trip state.
+	var old: Dictionary = w.to_dict()
+	for k in ["trip_carvings", "on_trip", "sharpen_offers"]:
+		old.erase(k)
+	var legacy = World.new()
+	legacy.load_dict(old)
+	check(legacy.trip_carvings == 0 and not legacy.on_trip and legacy.sharpen_offers.is_empty(), "an old world save loads")
 
 
 ## 3.4: Wren the Bell-Ringer (Death Knell) and Osric the Ash-Eater (Ash Feast).
