@@ -827,5 +827,8 @@
 	"The ashes burn %s inside": "เถ้าถ่านแผดเผา %s จากข้างใน",
 	"executioner": "เพชฌฆาต",
 	"devourer": "ผู้กลืนกิน",
-	"You pick up the trail where you left it.": "คุณออกเดินต่อจากจุดที่ทิ้งไว้"
+	"You pick up the trail where you left it.": "คุณออกเดินต่อจากจุดที่ทิ้งไว้",
+	"The road remembers today's first fallen boss: +%d Soul Embers, +%d Grave Die (included above).": "ถนนจดจำบอสตัวแรกที่ล้มในวันนี้: เถ้าวิญญาณ +%d, เต๋าหลุมศพ +%d (รวมอยู่ในยอดด้านบนแล้ว)",
+	"Today's first road boss pays +%d Soul Embers, +%d Grave Die.": "บอสถนนตัวแรกของวันนี้ให้เถ้าวิญญาณ +%d และเต๋าหลุมศพ +%d",
+	"Today's road-boss bonus is taken. It returns at Dawn.": "รับโบนัสบอสถนนของวันนี้ไปแล้ว จะกลับมาอีกตอนรุ่งเช้า"
 }

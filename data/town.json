@@ -59,5 +59,9 @@
 		"per_fight": 3,
 		"per_elite": 12,
 		"victory": 70
+	},
+	"road_boss_daily": {
+		"embers": 40,
+		"dice": 1
 	}
 }

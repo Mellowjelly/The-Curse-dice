@@ -300,6 +300,8 @@ func _after_road() -> void:
 		var res := profile.record_run(run)
 		say("JOURNEY OVER: %s at tile %d. +%d Soul Embers, +%d Grave Dice%s" % [run.phase.to_upper(), run.pos, int(res["embers"]), int(res.get("dice", 0)),
 			("; quests: " + ", ".join(res["quests"].map(func(q): return q["name"]))) if not res["quests"].is_empty() else ""])
+		if not res.get("boss_bonus", {}).is_empty():
+			say("  (includes today's first road-boss bonus: +%d embers, +%d Grave Die)" % [res["boss_bonus"]["embers"], res["boss_bonus"]["dice"]])
 		mode = "town"
 		run = null
 		return

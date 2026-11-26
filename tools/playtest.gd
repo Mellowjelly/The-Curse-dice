@@ -217,6 +217,10 @@ func _campaign(style: String) -> Array[String]:
 	var embers_total := 0.0
 	var levels_total := 0.0
 	var curse_total := 0.0
+	var road_only := 0.0      # embers from the road itself (no first-time quest rewards), runs 6-20
+	var road_only_n := 0
+	var dice_total := 0.0
+	var bonus_n := 0
 	for cmp in CAMPAIGNS:
 		var path := "user://bot_campaign.save"
 		GameData.safe_delete(path)
@@ -226,6 +230,15 @@ func _campaign(style: String) -> Array[String]:
 			var r := play_run(style, 90000 + cmp * 100 + i, [], prof.run_options())
 			var res := prof.record_run(r["run"])
 			embers_total += res["embers"]
+			dice_total += res["dice"]
+			if not res.get("boss_bonus", {}).is_empty():
+				bonus_n += 1
+			if i >= 5:
+				var q_embers := 0
+				for q in res["quests"]:
+					q_embers += int(q["reward"])
+				road_only += res["embers"] - q_embers
+				road_only_n += 1
 			if r["won"]:
 				wins_at[i] += 1
 				if first < 0:
@@ -250,4 +263,6 @@ func _campaign(style: String) -> Array[String]:
 	return ["- **Campaign (%d profiles x %d runs, buying town upgrades):** win rate by run #: %s" % [CAMPAIGNS, CAMPAIGN_RUNS, " ".join(curve)],
 		"- Campaign: first win on run #%.1f on average (%d/%d profiles ever won); %.0f embers per run; %.1f building levels and Curse %.1f after %d runs" % [
 			_avg(first_win_total, first_win_n), first_win_n, CAMPAIGNS, embers_total / (CAMPAIGNS * CAMPAIGN_RUNS), levels_total / CAMPAIGNS, curse_total / CAMPAIGNS, CAMPAIGN_RUNS],
+		"- Campaign economy: %.0f embers per road run from run 6 on (without first-time quest rewards); %.1f Grave Dice per run; first-boss-kill-of-the-day bonus paid on %.0f%% of runs" % [
+			_avg(road_only, road_only_n), dice_total / (CAMPAIGNS * CAMPAIGN_RUNS), 100.0 * bonus_n / (CAMPAIGNS * CAMPAIGN_RUNS)],
 		""]

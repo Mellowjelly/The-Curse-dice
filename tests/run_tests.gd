@@ -57,6 +57,7 @@ func _init() -> void:
 	test_v34_new_heroes()
 	test_v35_trip_save()
 	test_v35_thai_layout()
+	test_v35_road_bonus()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1177,6 +1178,39 @@ func test_v34_isle_sharpening() -> void:
 	check(faces.size() == w.sharpen_offers.size() and w.sharpen_offers.size() >= 2, "offers never repeat a face (%d offers)" % w.sharpen_offers.size())
 	w.finish_fight(e, false, rng)
 	check(w.sharpen_offers.is_empty(), "a lost fight leaves no sharpening")
+
+
+## 3.5: the first road-boss kill of each day pays +40 Soul Embers and +1 Grave Die.
+func test_v35_road_bonus() -> void:
+	var p := _fresh_profile("test_road_bonus")
+	var daily: Dictionary = p.town["road_boss_daily"]
+	check(int(daily["embers"]) == 40 and int(daily["dice"]) == 1, "daily road-boss bonus is +40 embers, +1 Grave Die")
+	p.time_of_day = 0  # Dawn of day 0
+	var won := Run.new(350)
+	won.pos = 42
+	won.phase = "victory"
+	var lost := Run.new(351)
+	lost.pos = 30
+	lost.phase = "defeat"
+	check(p.road_bonus_ready(), "a new profile can earn the bonus")
+	var r1 := p.record_run(lost)
+	check(r1["boss_bonus"].is_empty() and p.road_bonus_ready(), "a lost journey does not use the bonus")
+	var d0 := p.grave_dice
+	var r2 := p.record_run(won)
+	check(not r2["boss_bonus"].is_empty() and p.grave_dice - d0 == r2["dice"], "the first win of the day pays the bonus")
+	check(not p.road_bonus_ready(), "the bonus is paid once a day")
+	var r3 := p.record_run(won)
+	check(r3["boss_bonus"].is_empty(), "a second win the same day has no bonus")
+	check(r2["embers"] - r3["embers"] >= 40 - 5 and r2["dice"] - r3["dice"] >= 1, "the bonus adds embers and a die (%d vs %d)" % [r2["embers"], r3["embers"]])
+	check(p.time_of_day == 3 and p.day == 0, "three journeys from Dawn end at Night")
+	p.advance_time()
+	check(p.time_of_day == 0 and p.day == 1 and p.road_bonus_ready(), "Dawn starts a new day and the bonus returns")
+	var again := Profile.new(p.path)
+	again.load_profile()
+	check(again.day == 1 and again.road_bonus_day == 0, "day and bonus day are saved")
+	var old := Profile.new("user://test_road_bonus_old.save")
+	old.load_profile()
+	check(old.day == 0 and old.road_bonus_ready(), "old saves start on day 0 with the bonus ready")
 
 
 ## 3.5: screenshot fixes - Thai word-break hints (Godot 4.3 Label wrap bug) and hero roles in Thai.

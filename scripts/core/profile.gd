@@ -20,6 +20,8 @@ var summons_since_hero := 0      # (old single-banner pity, kept for old saves)
 var summon_pity := {}             # banner -> rolls since its last new item
 var owned_pets: Array = []        # pet ids; starter pets are always owned
 var time_of_day := 1              # index into TIMES (starts at Day)
+var day := 0                      # 3.5: days passed (+1 each time the clock goes from Night to Dawn)
+var road_bonus_day := -1          # 3.5: the day the "first road-boss kill of the day" bonus was last paid
 var star_dust := 0                # upgrade material
 var stars := {}                   # "hero:varek" / "pet:ash_crow" / "relic:plague_lance" -> 1..5
 var last_bank_quests: Array = []  # quests completed by the last bank() (not saved)
@@ -136,6 +138,8 @@ func load_profile() -> void:
 		if not id in owned_pets:
 			owned_pets.append(id)
 	time_of_day = d.get("time_of_day", 1)
+	day = int(d.get("day", 0))
+	road_bonus_day = int(d.get("road_bonus_day", -1))
 	star_dust = d.get("star_dust", 0)
 	stars = d.get("stars", {})
 	npc_done = d.get("npc_done", {})
@@ -155,7 +159,7 @@ func save() -> void:
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
 		"star_dust": star_dust, "stars": stars, "npc_done": npc_done, "npc_active": npc_active,
 		"materials": materials, "world_state": world_state, "gear": gear, "equipped": equipped, "next_uid": next_uid,
-		"bestiary_claimed": bestiary_claimed})
+		"bestiary_claimed": bestiary_claimed, "day": day, "road_bonus_day": road_bonus_day})
 
 
 # ---------------------------------------------------------------- town
@@ -242,14 +246,34 @@ func record_run(run) -> Dictionary:
 	var completed := _complete_quests(run_stats)
 	for q in completed:
 		earned += int(q["reward"])
-	embers += earned
 	var dice: int = int(summon["dice_per_run"]) + s["elites"] * int(summon["dice_per_elite"])
 	dice += (int(summon["dice_per_victory"]) if won else 0) + completed.size() * int(summon["dice_per_quest"])
 	dice += 1 if night else 0
+	# 3.5: the road remembers the first boss you put down each day (a day = Dawn to Night).
+	var bonus := {}
+	if won and road_bonus_ready():
+		var b: Dictionary = town.get("road_boss_daily", {})
+		bonus = {"embers": int(b.get("embers", 0)), "dice": int(b.get("dice", 0))}
+		earned += bonus["embers"]
+		dice += bonus["dice"]
+		road_bonus_day = day
+	embers += earned
 	grave_dice += dice
-	time_of_day = (time_of_day + 1) % TIMES.size()  # you return to town a little later
+	_pass_time()  # you return to town a little later
 	save()
-	return {"embers": earned, "quests": completed, "dice": dice}
+	return {"embers": earned, "quests": completed, "dice": dice, "boss_bonus": bonus}
+
+
+## 3.5: true while today's first road-boss kill has not been paid yet.
+func road_bonus_ready() -> bool:
+	return road_bonus_day != day and not town.get("road_boss_daily", {}).is_empty()
+
+
+## Moves the clock one step; Night -> Dawn starts a new day.
+func _pass_time() -> void:
+	time_of_day = (time_of_day + 1) % TIMES.size()
+	if time_of_day == 0:
+		day += 1
 
 
 ## What a run should be started with: town levels plus unlocked relic weapons.
@@ -788,7 +812,7 @@ func road_boss() -> Dictionary:
 
 
 func advance_time() -> void:
-	time_of_day = (time_of_day + 1) % TIMES.size()
+	_pass_time()
 	save()
 
 

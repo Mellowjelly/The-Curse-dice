@@ -381,6 +381,10 @@ func _refresh() -> void:
 		for q in last_result["quests"]:
 			t += tr("   Quest complete: %s (+%d)") % [tr(q["name"]), int(q["reward"])]
 		_result_box.add_child(UI.wrap_label(t, 14, UI.GOLD, 560))
+		var bonus: Dictionary = last_result.get("boss_bonus", {})
+		if not bonus.is_empty():
+			_result_box.add_child(UI.wrap_label(tr("The road remembers today's first fallen boss: +%d Soul Embers, +%d Grave Die (included above).") % [
+				int(bonus["embers"]), int(bonus["dice"])], 13, Color("#d08a6a"), 560))
 	if profile.max_curse() > 0 and profile.curse == 0:
 		_result_box.add_child(UI.wrap_label(tr("The Bishop has fallen. The road can be walked under a Curse now: harder, but +25% Soul Embers per level (Party tab)."), 13, UI.BLOOD, 560))
 	var saved := Profile.has_saved_run()
@@ -409,6 +413,11 @@ func _refresh_time_box() -> void:
 	var omen := String(profile.road_boss().get("omen", ""))
 	if omen != "":
 		info.add_child(UI.wrap_label(tr(omen), 12, Color("#d08a6a"), 380))  # 3.4: which boss waits on the road now
+	if profile.stat("wins") > 0:
+		var daily: Dictionary = profile.town.get("road_boss_daily", {})
+		var ready := profile.road_bonus_ready()
+		info.add_child(UI.wrap_label((tr("Today's first road boss pays +%d Soul Embers, +%d Grave Die.") % [int(daily.get("embers", 0)), int(daily.get("dice", 0))])
+			if ready else tr("Today's road-boss bonus is taken. It returns at Dawn."), 12, Color("#d08a6a") if ready else UI.DIM, 380))
 	_time_box.add_child(info)
 	var next: String = Profile.TIMES[(Profile.TIMES.find(t) + 1) % Profile.TIMES.size()]
 	var wait := UI.button(tr("Wait until %s") % tr(Profile.TIME_NAMES[next]), func(): profile.advance_time(); Sfx.play(self, "fate"); _refresh(), 14)
