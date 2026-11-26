@@ -70,6 +70,13 @@ Adding a face type = update `GameData.FACE_TYPES`, `combat.gd`, the UI colour/na
 | `writer` | lore, names, dialogue, item descriptions |
 | `art-director` | pixel art specs and prompts for AI art tools, palette, music & SFX briefs |
 | `qa-tester` | running tests, writing tests, hunting bugs, balance reports |
+| `playtester` | panel of 4 personas critiquing bot playtest reports |
+| `game-player` | an AI player that really plays through `tools/play_cli.gd` and keeps a diary |
+| `game-critic` | professional critique of a player's diary -> ranked improvements |
+| `game-developer` | senior dev: analyses the whole game, adds missing pieces, writes `docs/ROADMAP.md` |
+
+Text interface for playing the whole game (used by `game-player`): `godot --headless --path . -s tools/play_cli.gd -- session.txt [tail]`
+(one command per line; the session is replayed each run because the game is deterministic; `help` lists commands).
 
 For a new feature the usual order is: game-designer → programmer → qa-tester.
 
