@@ -56,7 +56,7 @@ Balance targets: newbie bot 65-75% wins, tactician ~90%, gap >= 15 points, sessi
 ## Face types (current)
 `attack` damage target · `fire` damage + 2 burn · `blood` big damage, costs caster 2 HP (never kills) ·
 `shield` self shield · `guard` shield whole party · `heal` heal lowest-HP ally · `sweep` (monsters) hit all heroes · `blank` nothing, +1 Fate.
-Combos: 2 of a type = +1 each, 3 = double. Fate (max 5): 3 Fate buys an extra reroll.
+Combos: 2 of a type = +1 each, 3 = double. Fate (max 5, from blanks, combos and wins): 2 Fate = extra reroll, 4 Fate = Twist a die to any face; overflow = free reroll.
 Skills: heroes gain +1 charge per round (+1 more if their face is in a combo); a skill is used during planning when charge = cost.
 Skill effects are matched by `skill.id` in `combat.gd` (`use_skill`); numbers are constants at the top of that file.
 Every skill has a dark price. Adding a skill = data entry in heroes.json + a `match` branch + a test.
