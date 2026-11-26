@@ -318,7 +318,7 @@ func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> D
 					nf["value"] = int(nf["value"]) + 1
 					h["faces"][fi] = nf
 					trip_carvings += 1
-					carved = "%s's %s face sharpens to %d (until you go home)" % [Combat.short_name(h), String(nf["type"]).to_upper(), nf["value"]]
+					carved = tr("%s's %s face sharpens to %d (until you go home)") % [Combat.short_name(h), tr(String(nf["type"]).to_upper()), nf["value"]]
 		return {"victory": true, "embers": embers, "dust": dust, "lost_bag": false, "drops": drops, "boss": is_boss, "carved": carved}
 	var lost := is_dangerous(countries[e["country"]]) and not bag.is_empty()
 	if lost:

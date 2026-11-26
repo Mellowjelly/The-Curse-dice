@@ -453,7 +453,7 @@ func _refresh_party() -> void:
 	var Run = load("res://scripts/core/run.gd")
 	for i in Run.CURSE_RULES.size():
 		var active: bool = i < profile.curse
-		_party_box.add_child(UI.wrap_label((tr("[active] ") if active else "") + Run.CURSE_RULES[i], 13, UI.BLOOD if active else UI.DIM, 540))
+		_party_box.add_child(UI.wrap_label((tr("[active] ") if active else "") + tr(Run.CURSE_RULES[i]), 13, UI.BLOOD if active else UI.DIM, 540))
 
 
 func _toggle_party(id: String) -> void:
