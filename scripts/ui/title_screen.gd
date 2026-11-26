@@ -24,7 +24,11 @@ SHIELD block for self   GUARD block for the whole party   HEAL heal the weakest 
 
 [b]Combos[/b]   2 of the same face = +1 each.   3 of the same face = DOUBLE.
 
-[b]Fate[/b]   Spend 3 Fate for an extra reroll. Bad luck becomes power.
+[b]Fate[/b]   Blank faces, combos and victories give Fate (max 5). Bad luck becomes power.
+Spend 2 Fate for an extra reroll, or 4 Fate to TWIST a die to any face you want.
+
+[b]The road[/b]   Roll two dice, move with one. Carve your dice after every win; elites drop weapons
+(a weapon replaces die faces 5 and 6). Your pet rolls a small d4 every round.
 
 [b]Skills[/b]   Heroes charge every round (faster with combos).
 When charged, press the skill button. Every power has a price."""
@@ -84,7 +88,7 @@ func _build() -> void:
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
 
-	var version := _label("Prototype 0.3", 14, COL_DIM)
+	var version := _label("Prototype 0.4", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
 

@@ -26,6 +26,7 @@ var _overlay: Control
 var _overlay_text: Label
 var _overlay_btn: Button
 var _banner: Label
+var _pet_label: Label
 var _victory := false
 
 # Animation state
@@ -103,7 +104,13 @@ func _build_ui() -> void:
 	_combo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	field.add_child(_combo)
 
-	field.add_child(UI.label("YOUR PARTY  (click a die to lock / unlock it)", 13, UI.DIM))
+	var party_head := HBoxContainer.new()
+	field.add_child(party_head)
+	var party_lbl := UI.label("YOUR PARTY  (click a die to lock / unlock it)", 13, UI.DIM)
+	party_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	party_head.add_child(party_lbl)
+	_pet_label = UI.label("", 15, Color("#b39ddb"))
+	party_head.add_child(_pet_label)
 	_hero_row = HBoxContainer.new()
 	_hero_row.add_theme_constant_override("separation", 12)
 	_hero_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -281,6 +288,11 @@ func _refresh() -> void:
 	_fate_btn.text = "FATE REROLL (-%d Fate)" % Combat.FATE_REROLL_COST
 	_fate_btn.disabled = combat.finished or combat.fate < Combat.FATE_REROLL_COST
 	_end_btn.disabled = combat.finished
+	if combat.pet.is_empty():
+		_pet_label.text = ""
+	else:
+		var pf: Dictionary = combat.pet["faces"][combat.pet["face"]]
+		_pet_label.text = "Pet %s rolled: %s" % [combat.pet["name"], UI.face_short(pf)]
 
 	var combos := combat.compute_combos()
 	var parts: Array[String] = []
@@ -379,8 +391,21 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	die.pressed.connect(func(): combat.toggle_lock(index))
 	_die_buttons[index] = die
 	box.add_child(die)
-	var faces := UI.wrap_label("Faces: " + " | ".join(h["faces"].map(UI.face_short)), 12, UI.DIM, 120)
-	box.add_child(faces)
+	if combat.fate >= Combat.FATE_TWIST_COST and not combat.finished:
+		# Fate Twist: click any face to set the die to it.
+		box.add_child(UI.label("Fate Twist (-%d): pick a face" % Combat.FATE_TWIST_COST, 12, UI.GOLD))
+		var grid := GridContainer.new()
+		grid.columns = 3
+		for fi in h["faces"].size():
+			var f: Dictionary = h["faces"][fi]
+			var fb := UI.button(UI.face_short(f), func(): combat.fate_twist(index, fi), 11)
+			fb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			fb.add_theme_stylebox_override("normal", UI.box(UI.FACE_COLORS[f["type"]].darkened(0.2), UI.GOLD, 1, 3, 2))
+			grid.add_child(fb)
+		box.add_child(grid)
+	else:
+		var faces := UI.wrap_label("Faces: " + " | ".join(h["faces"].map(UI.face_short)), 12, UI.DIM, 120)
+		box.add_child(faces)
 	if not h["skill"].is_empty():
 		box.add_child(_skill_button(h, index))
 	return panel

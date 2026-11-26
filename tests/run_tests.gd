@@ -29,6 +29,9 @@ func _init() -> void:
 	test_carving_changes_die()
 	test_shop_and_rest()
 	test_event_gold_requirement()
+	test_weapons()
+	test_fate_twist()
+	test_pets()
 	print("\n%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -177,8 +180,8 @@ func test_hollow_flame_hits_all_and_costs_hp() -> void:
 	lys["charge"] = Combat.skill_cost(lys)
 	var lys_hp: int = lys["hp"]
 	c.use_skill(1)
-	check(c.monsters[0]["hp"] == 12 - Combat.HOLLOW_FLAME_DAMAGE, "Hollow Flame hits monster 1")
-	check(c.monsters[1]["hp"] == 10 - Combat.HOLLOW_FLAME_DAMAGE, "Hollow Flame hits monster 2")
+	check(c.monsters[0]["hp"] == c.monsters[0]["max_hp"] - Combat.HOLLOW_FLAME_DAMAGE, "Hollow Flame hits monster 1")
+	check(c.monsters[1]["hp"] == c.monsters[1]["max_hp"] - Combat.HOLLOW_FLAME_DAMAGE, "Hollow Flame hits monster 2")
 	check(c.monsters[1]["burn"] == Combat.HOLLOW_FLAME_BURN, "Hollow Flame adds burn")
 	check(lys["hp"] == lys_hp - Combat.HOLLOW_FLAME_HP_COST, "Hollow Flame costs Lys HP")
 	lys["hp"] = 1
@@ -279,3 +282,44 @@ func test_event_gold_requirement() -> void:
 	run.gold = 5
 	check(not run.can_choose_event_option(0), "option needing 20 gold is locked with 5 gold")
 	check(run.can_choose_event_option(1), "free option is always available")
+
+
+func test_weapons() -> void:
+	var run := Run.new(11)
+	var h: Dictionary = run.heroes[0]
+	var max_before: int = h["max_hp"]
+	var cursed: Dictionary = run.weapons_db.filter(func(w): return w["id"] == "thirsting_sword")[0]
+	var plain: Dictionary = run.weapons_db.filter(func(w): return w["id"] == "rusted_blade")[0]
+	Run.equip_weapon(h, cursed)
+	check(h["faces"][4]["type"] == "blood" and h["faces"][5]["type"] == "blood", "weapon replaces faces 5 and 6")
+	check(h["max_hp"] == max_before - 4, "cursed weapon lowers max HP")
+	Run.equip_weapon(h, plain)
+	check(h["max_hp"] == max_before, "swapping away a cursed weapon restores max HP")
+	check(h["faces"][4]["type"] == "attack", "new weapon faces are applied")
+
+
+func test_fate_twist() -> void:
+	var c := Combat.new(12)
+	c.start_battle(_heroes(), [_monster("ghoul")])
+	c.fate = Combat.FATE_TWIST_COST - 1
+	check(not c.fate_twist(0, 2), "twist needs enough Fate")
+	c.fate = Combat.FATE_TWIST_COST
+	check(c.fate_twist(0, 2), "twist works with enough Fate")
+	check(c.heroes[0]["face"] == 2 and c.heroes[0]["locked"], "twisted die shows the chosen face and is locked")
+	check(c.fate == 0, "twist costs Fate")
+
+
+func test_pets() -> void:
+	var c := Combat.new(13)
+	c.pet = {"id": "grave_pup", "name": "Grave Pup", "passive": "first_strike", "face": 0,
+		"faces": [{"type": "attack", "value": 2}]}
+	c.start_battle(_heroes(), [_monster("rotting_bishop")])
+	var boss: Dictionary = c.monsters[0]
+	check(boss["hp"] == boss["max_hp"] - Combat.PET_FIRST_STRIKE, "Grave Pup bites at the start of the fight")
+	c.pet["passive"] = "lucky"
+	c._start_round()
+	check(c.rerolls_left == Combat.REROLLS_PER_TURN + 1, "Black Cat gives an extra reroll")
+	var run := Run.new(14)
+	check(run.phase == "pet" and run.pet_offers.size() == 2, "a run starts by choosing 1 of 2 pets")
+	run.choose_pet(0)
+	check(run.phase == "map" and not run.combat.pet.is_empty(), "choosing a pet starts the road")

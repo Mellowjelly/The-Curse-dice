@@ -59,7 +59,7 @@ func _build_map() -> void:
 	_header.position = Vector2(40, 22)
 	_map_root.add_child(_header)
 	_stats = UI.label("", 20, UI.GOLD)
-	_stats.position = Vector2(820, 28)
+	_stats.position = Vector2(640, 28)
 	_map_root.add_child(_stats)
 	var menu := UI.button("Menu", func(): get_tree().change_scene_to_file(TITLE_SCENE))
 	menu.position = Vector2(1170, 22)
@@ -170,6 +170,8 @@ func _on_run_changed() -> void:
 	_combat_view.hide()
 	_header.text = "%s  -  tile %d / %d" % [run.region["name"], run.pos, run.board.size() - 1]
 	_stats.text = "Gold %d    Fate %d/%d" % [run.gold, run.combat.fate, Combat.MAX_FATE]
+	if not run.combat.pet.is_empty():
+		_stats.text += "    Pet: " + run.combat.pet["name"]
 	_style_tiles()
 	_move_token()
 	_refresh_party()
@@ -203,6 +205,9 @@ func _refresh_party() -> void:
 		card.add_child(UI.hp_bar(h["hp"], h["max_hp"], 18))
 		card.add_child(UI.wrap_label(" ".join(h["faces"].map(UI.face_short)), 13, UI.DIM, 150))
 		card.add_child(UI.label("Skill: " + h["skill"].get("name", "-"), 12, UI.DIM))
+		var w: Dictionary = h.get("weapon", {})
+		card.add_child(UI.label("Weapon: " + (w["name"] if not w.is_empty() else "bare hands"), 12,
+			UI.BLOOD if w.get("rarity", "") == "cursed" else UI.DIM))
 		_party_box.add_child(card)
 
 
@@ -258,6 +263,33 @@ func _modal_text(text: String, color: Color = UI.TEXT) -> void:
 func _refresh_modal() -> void:
 	_clear_modal()
 	match run.phase:
+		"pet":
+			_modal_title("A stray follows you", Color("#b39ddb"))
+			_modal_text("Something small and loyal watches you from the ditch. Its die is a d4: it rolls every round and acts after your heroes.")
+			for i in run.pet_offers.size():
+				var p: Dictionary = run.pet_offers[i]
+				var text := "%s  [%s]\n%s" % [p["name"], " ".join(p["faces"].map(UI.face_short)), p["desc"]]
+				_modal_box.add_child(UI.choice_button(text, func(): run.choose_pet(i), UI.GOLD))
+		"loot":
+			_modal_title("Weapons")
+			if run.last_reward_text != "":
+				_modal_text(run.last_reward_text, UI.GOLD)
+			_modal_text("A weapon replaces die faces 5 and 6 of the hero who carries it. The old weapon is left behind.", UI.DIM)
+			for wi in run.weapon_offers.size():
+				var w: Dictionary = run.weapon_offers[wi]
+				var color := UI.BLOOD if w["rarity"] == "cursed" else (UI.GOLD if w["rarity"] == "rare" else UI.TEXT)
+				_modal_box.add_child(UI.label("%s  (%s)   faces: %s" % [w["name"], w["rarity"], "  ".join(w["faces"].map(UI.face_short))], 18, color))
+				_modal_box.add_child(UI.wrap_label(w["desc"], 14, UI.DIM, 680))
+				var row := HBoxContainer.new()
+				row.add_theme_constant_override("separation", 8)
+				for hi in run.heroes.size():
+					var h: Dictionary = run.heroes[hi]
+					var cur := "%s %s" % [UI.face_short(h["faces"][4]), UI.face_short(h["faces"][5])]
+					var b := UI.choice_button("Give to %s\n(replaces %s)" % [Combat.short_name(h), cur], func(): run.equip(wi, hi), color)
+					b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+					row.add_child(b)
+				_modal_box.add_child(row)
+			_modal_box.add_child(UI.button("Leave them", func(): run.skip_loot()))
 		"reward":
 			_modal_title("Carve your dice")
 			if run.last_reward_text != "":

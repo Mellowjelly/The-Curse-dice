@@ -8,7 +8,7 @@ const REGION_PATH := "res://data/region1.json"
 const EVENTS_PATH := "res://data/events.json"
 
 ## Every face type the combat code knows how to resolve.
-const FACE_TYPES := ["attack", "fire", "blood", "shield", "guard", "heal", "sweep", "blank"]
+const FACE_TYPES := ["attack", "fire", "blood", "cleave", "shield", "guard", "heal", "sweep", "blank"]
 
 
 static func load_json(path: String) -> Variant:
@@ -32,6 +32,14 @@ static func load_monsters() -> Dictionary:
 	for def in load_json(MONSTERS_PATH):
 		by_id[def["id"]] = def
 	return by_id
+
+
+static func load_weapons() -> Array:
+	return load_json("res://data/weapons.json")
+
+
+static func load_pets() -> Array:
+	return load_json("res://data/pets.json")
 
 
 static func load_region() -> Dictionary:

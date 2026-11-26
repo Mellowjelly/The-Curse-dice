@@ -9,6 +9,8 @@ extends RefCounted
 ##   "event"   - read `event`, pick an option
 ##   "shop"    - buy items, then leave
 ##   "rest"    - heal OR carve
+##   "pet"     - choose a companion at the start of the run
+##   "loot"    - choose a weapon and which hero equips it (or skip)
 ##   "victory" / "defeat" - the run is over
 
 signal changed
@@ -19,6 +21,9 @@ const GameData = preload("res://scripts/core/game_data.gd")
 
 const CARVE_OFFERS := 3
 const BLANK_CARVE_CHANCE := 0.45  # chance an offer targets a blank face (if the hero has one)
+const WEAPON_SLOTS := [4, 5]       # die faces 5 and 6 belong to the equipped weapon
+const CHEST_WEAPON_CHANCE := 0.4
+const RARITY_WEIGHTS := {"common": 6, "rare": 3, "cursed": 2}
 
 var rng := RandomNumberGenerator.new()
 var region: Dictionary
@@ -39,6 +44,12 @@ var combat_kind := ""         # "fight" | "elite" | "boss"
 var last_reward_text := ""
 var stats := {"fights": 0, "elites": 0, "events": 0, "carves": 0, "gold_earned": 0, "tiles": {}}
 var _return_phase := "map"    # where to go after a carving reward
+var weapons_db: Array = []
+var pets_db: Array = []
+var pet_offers: Array = []
+var weapon_offers: Array = []
+var _loot_then := "map"       # "carve" | "map" | "shop"
+var _seen_events: Array = []
 
 
 func _init(seed_value: int = -1) -> void:
@@ -52,12 +63,20 @@ func _init(seed_value: int = -1) -> void:
 	for def in GameData.load_heroes():
 		var u := Combat.make_unit(def)
 		u["carve_pool"] = def.get("carve_pool", [])
+		u["weapon"] = {}
 		heroes.append(u)
+	weapons_db = GameData.load_weapons()
+	pets_db = GameData.load_pets()
 	# The combat object lives for the whole run, so Fate carries between fights.
 	combat = Combat.new(rng.randi())
 	combat.battle_ended.connect(_on_battle_ended)
 	combat.log_added.connect(func(t): log_added.emit(t))
 	_generate_board()
+	# A stray follows you onto the road: pick 1 of 2 companions.
+	var pool := pets_db.duplicate()
+	_shuffle(pool)
+	pet_offers = pool.slice(0, 2)
+	phase = "pet"
 
 
 # ---------------------------------------------------------------- board
@@ -68,6 +87,10 @@ func _generate_board() -> void:
 	for i in range(1, length):
 		var tier := "early" if i < length / 3 else ("mid" if i < 2 * length / 3 else "late")
 		board.append({"type": _weighted_pick(region["tile_weights"][tier]), "visited": false})
+	for k in region.get("fixed_tiles", {}):
+		var idx := int(k)
+		if idx > 0 and idx < length - 1:
+			board[idx] = {"type": region["fixed_tiles"][k], "visited": false}
 	# Fixed landmarks: a gate campfire right before the boss (movement always stops there).
 	board[length - 1] = {"type": "rest", "visited": false, "gate": true}
 	board.append({"type": "boss", "visited": false, "gate": true})
@@ -105,8 +128,20 @@ func destination(steps: int) -> int:
 func roll_move() -> void:
 	if phase != "map" or not move_options.is_empty():
 		return
-	move_options = [rng.randi_range(1, 6), rng.randi_range(1, 6)]
+	move_options = _roll_distinct_moves()
 	changed.emit()
+
+
+## Two movement dice that lead to different kinds of tiles whenever possible
+## (v0.3 critique: half of all choices were fake, e.g. Fight vs Fight).
+func _roll_distinct_moves() -> Array:
+	var a := rng.randi_range(1, 6)
+	var b := rng.randi_range(1, 6)
+	for attempt in 6:
+		if board[destination(a)]["type"] != board[destination(b)]["type"]:
+			break
+		b = rng.randi_range(1, 6)
+	return [a, b]
 
 
 const MOVE_REROLL_FATE := 1
@@ -116,7 +151,7 @@ func reroll_move() -> bool:
 	if phase != "map" or move_options.is_empty() or combat.fate < MOVE_REROLL_FATE:
 		return false
 	combat.fate -= MOVE_REROLL_FATE
-	move_options = [rng.randi_range(1, 6), rng.randi_range(1, 6)]
+	move_options = _roll_distinct_moves()
 	_log("Fate bends the road (-%d Fate)" % MOVE_REROLL_FATE)
 	changed.emit()
 	return true
@@ -141,14 +176,21 @@ func _enter_tile(tile: Dictionary) -> void:
 			var g := _gold_roll("chest")
 			last_reward_text = "You pry open a rotten chest: +%d gold." % g
 			_log(last_reward_text)
-			if rng.randf() < 0.35:
+			if rng.randf() < CHEST_WEAPON_CHANCE:
+				last_reward_text += " A weapon lies among the bones."
+				_offer_loot(1, "map")
+			elif rng.randf() < 0.35:
 				last_reward_text += " Inside, a bone chisel."
 				_offer_carving("map")
 			else:
 				phase = "map"
 				changed.emit()
 		"event":
-			event = events[rng.randi_range(0, events.size() - 1)]
+			var fresh := events.filter(func(e): return not (e["id"] in _seen_events))
+			if fresh.is_empty():
+				fresh = events
+			event = fresh[rng.randi_range(0, fresh.size() - 1)]
+			_seen_events.append(event["id"])
 			event_result = ""
 			stats["events"] += 1
 			phase = "event"
@@ -174,8 +216,23 @@ func _start_fight(kind: String, tier: String) -> void:
 	var ids: Array = pool[rng.randi_range(0, pool.size() - 1)]
 	phase = "combat"
 	_log("== %s ==" % ("BOSS" if kind == "boss" else ("Elite fight" if kind == "elite" else "Fight")))
-	combat.start_battle(heroes, ids.map(func(id): return monster_defs[id]))
+	combat.start_battle(heroes, ids.map(func(id): return scaled_monster(monster_defs[id], kind, tier)))
 	changed.emit()
+
+
+## Enemies get tougher further down the road (region1.json "scaling").
+func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
+	var sc: Dictionary = region.get("scaling", {}).get(kind if kind in ["elite", "boss"] else tier, {})
+	if sc.is_empty():
+		return def
+	var d := def.duplicate(true)
+	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0))))
+	var bonus := int(sc.get("damage", 0))
+	for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:
+		for f in faces:
+			if f["type"] in ["attack", "sweep"]:
+				f["value"] = int(f["value"]) + bonus
+	return d
 
 
 func _on_battle_ended(victory: bool) -> void:
@@ -195,7 +252,11 @@ func _on_battle_ended(victory: bool) -> void:
 			h["hp"] = max(1, h["max_hp"] * pct / 100)
 	var g := _gold_roll("elite" if combat_kind == "elite" else "fight")
 	last_reward_text = "Victory! +%d gold." % g
-	_offer_carving("map")
+	if combat_kind == "elite":
+		last_reward_text += " The elite drops its arms."
+		_offer_loot(2, "carve")
+	else:
+		_offer_carving("map")
 
 
 func _gold_roll(kind: String) -> int:
@@ -256,7 +317,10 @@ func choose_carving(index: int) -> void:
 	if phase != "reward" or index < 0 or index >= carve_offers.size():
 		return
 	var o: Dictionary = carve_offers[index]
-	heroes[o["hero"]]["faces"][o["face"]] = o["new"]
+	var hero: Dictionary = heroes[o["hero"]]
+	hero["faces"][o["face"]] = o["new"]
+	if o["face"] in WEAPON_SLOTS and not hero["weapon"].is_empty():
+		hero["weapon"]["faces"][WEAPON_SLOTS.find(o["face"])] = o["new"]
 	stats["carves"] += 1
 	_log("Carved: " + o["text"])
 	skip_carving()
@@ -407,6 +471,9 @@ func buy(item_id: String) -> void:
 		"carving":
 			_offer_carving("shop")
 			return
+		"weapon":
+			_offer_loot(2, "shop")
+			return
 	changed.emit()
 
 
@@ -414,6 +481,82 @@ func leave_shop() -> void:
 	if phase == "shop":
 		phase = "map"
 		changed.emit()
+
+
+# ---------------------------------------------------------------- pets & weapons
+
+func choose_pet(index: int) -> void:
+	if phase != "pet" or index < 0 or index >= pet_offers.size():
+		return
+	var p: Dictionary = pet_offers[index].duplicate(true)
+	p["face"] = 0
+	combat.pet = p
+	_log("%s follows you." % p["name"])
+	pet_offers = []
+	phase = "map"
+	changed.emit()
+
+
+func _offer_loot(count: int, then: String) -> void:
+	_loot_then = then
+	weapon_offers = []
+	var guard := 0
+	while weapon_offers.size() < count and guard < 50:
+		guard += 1
+		var w := _weighted_weapon()
+		if not weapon_offers.any(func(x): return x["id"] == w["id"]):
+			weapon_offers.append(w)
+	phase = "loot"
+	changed.emit()
+
+
+func _weighted_weapon() -> Dictionary:
+	var total := 0
+	for w in weapons_db:
+		total += RARITY_WEIGHTS.get(w["rarity"], 1)
+	var roll := rng.randi_range(1, total)
+	for w in weapons_db:
+		roll -= RARITY_WEIGHTS.get(w["rarity"], 1)
+		if roll <= 0:
+			return w
+	return weapons_db[0]
+
+
+## Equip weapon_offers[weapon_index] on heroes[hero_index]. The old weapon is lost.
+func equip(weapon_index: int, hero_index: int) -> void:
+	if phase != "loot" or weapon_index < 0 or weapon_index >= weapon_offers.size():
+		return
+	if hero_index < 0 or hero_index >= heroes.size():
+		return
+	equip_weapon(heroes[hero_index], weapon_offers[weapon_index])
+	_log("%s takes up %s." % [Combat.short_name(heroes[hero_index]), weapon_offers[weapon_index]["name"]])
+	skip_loot()
+
+
+static func equip_weapon(h: Dictionary, weapon: Dictionary) -> void:
+	var old: Dictionary = h["weapon"]
+	h["max_hp"] -= int(old.get("max_hp", 0))
+	var w := weapon.duplicate(true)
+	h["weapon"] = w
+	h["max_hp"] = max(5, h["max_hp"] + int(w.get("max_hp", 0)))
+	h["hp"] = min(h["hp"], h["max_hp"])
+	for k in WEAPON_SLOTS.size():
+		h["faces"][WEAPON_SLOTS[k]] = w["faces"][k]
+
+
+func skip_loot() -> void:
+	if phase != "loot":
+		return
+	weapon_offers = []
+	match _loot_then:
+		"carve":
+			_offer_carving("map")
+		"shop":
+			phase = "shop"
+			changed.emit()
+		_:
+			phase = "map"
+			changed.emit()
 
 
 # ---------------------------------------------------------------- rest

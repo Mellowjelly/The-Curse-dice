@@ -112,6 +112,8 @@ func _measure(style: String, runs: int) -> Array[String]:
 	var skills := {}
 	var tiles := {}
 	var boss_rounds := 0.0
+	var by_pet := {}     # pet -> [wins, runs]
+	var by_weapon := {}  # weapon -> [wins, runs]
 	for s in runs:
 		var r := play_run(style, 5000 + s)
 		var run: Run = r["run"]
@@ -136,6 +138,12 @@ func _measure(style: String, runs: int) -> Array[String]:
 			boss_n += 1
 			if r["won"]:
 				boss_rounds += run.combat.round_number
+		var pet_name: String = run.combat.pet.get("name", "none")
+		by_pet[pet_name] = [by_pet.get(pet_name, [0, 0])[0] + int(r["won"]), by_pet.get(pet_name, [0, 0])[1] + 1]
+		for h in run.heroes:
+			var wn: String = h["weapon"].get("name", "")
+			if wn != "":
+				by_weapon[wn] = [by_weapon.get(wn, [0, 0])[0] + int(r["won"]), by_weapon.get(wn, [0, 0])[1] + 1]
 		for k in r["bot"].stats["skills"]:
 			skills[k] = skills.get(k, 0) + r["bot"].stats["skills"][k]
 	var lines: Array[String] = ["## Bot: %s" % style, ""]
@@ -158,6 +166,14 @@ func _measure(style: String, runs: int) -> Array[String]:
 	for k in tiles:
 		tl.append("%s %.1f" % [k, float(tiles[k]) / runs])
 	lines.append("- Tiles landed on per run: " + ", ".join(tl))
+	var pets: Array[String] = []
+	for k in by_pet:
+		pets.append("%s %.0f%% (%d runs)" % [k, 100.0 * by_pet[k][0] / by_pet[k][1], by_pet[k][1]])
+	lines.append("- Win rate by pet: " + ", ".join(pets))
+	var ws: Array[String] = []
+	for k in by_weapon:
+		ws.append("%s %.0f%% (%d)" % [k, 100.0 * by_weapon[k][0] / by_weapon[k][1], by_weapon[k][1]])
+	lines.append("- Win rate by weapon held at the end: " + ", ".join(ws))
 	lines.append("")
 	return lines
 

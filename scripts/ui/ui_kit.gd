@@ -13,13 +13,13 @@ const GOLD := Color("#c9a227")
 const GREEN := Color("#5f9e58")
 
 const FACE_COLORS := {
-	"attack": Color("#9b2c2c"), "fire": Color("#c2571a"), "blood": Color("#5e0b1a"),
+	"attack": Color("#9b2c2c"), "fire": Color("#c2571a"), "blood": Color("#5e0b1a"), "cleave": Color("#8a3b2a"),
 	"shield": Color("#3b5876"), "guard": Color("#2f6b6b"), "heal": Color("#3f6e3a"),
 	"sweep": Color("#6b2d6b"), "blank": Color("#2a2530"),
 }
 const FACE_NAMES := {
-	"attack": "ATK", "fire": "FIRE", "blood": "BLOOD", "shield": "SHIELD",
-	"guard": "GUARD", "heal": "HEAL", "sweep": "SWEEP", "blank": "-",
+	"attack": "ATK", "fire": "FIRE", "blood": "BLOOD", "cleave": "CLEAVE", "shield": "SHIELD",
+	"guard": "GUARD", "heal": "HEAL", "sweep": "SWEEP", "blank": "BLANK",
 }
 const TILE_COLORS := {
 	"start": Color("#2a2530"), "fight": Color("#6e2424"), "elite": Color("#8a1f4a"),

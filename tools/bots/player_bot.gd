@@ -174,12 +174,14 @@ func face_score(c: Combat, hero_index: int, face: Dictionary) -> float:
 		"berserker":
 			match face["type"]:
 				"attack", "fire": return v * 1.5
+				"cleave": return v * 1.5 * _alive_count(c.monsters)
 				"blood": return v * 1.6
 				"blank": return 0.0
 				_: return v * 0.4
 		_:
 			match face["type"]:
 				"attack": return v
+				"cleave": return v * _alive_count(c.monsters)
 				"fire": return v + 1.5
 				"blood": return v - (3.0 if h["hp"] <= 6 else 1.0)
 				"shield": return min(v, my_incoming) * 1.1
@@ -228,6 +230,18 @@ func _smart_reroll_loop(c: Combat) -> void:
 				to_reroll.append(i)
 		if to_reroll.is_empty():
 			return
+		if c.rerolls_left <= 0 and c.fate >= Combat.FATE_TWIST_COST:
+			# Twist the worst die to its best face.
+			var hi: int = to_reroll[0]
+			var h: Dictionary = c.heroes[hi]
+			var best := 0
+			for fi in h["faces"].size():
+				if face_score(c, hi, h["faces"][fi]) > face_score(c, hi, h["faces"][best]):
+					best = fi
+			if c.fate_twist(hi, best):
+				stats["fate_rerolls"] += 1
+				note("spends Fate to twist %s's die to %s" % [Combat.short_name(h), UI_face(h["faces"][best])])
+				continue
 		if c.rerolls_left <= 0:
 			var wants_fate := style == "berserker" or c.heroes.any(
 				func(h): return Combat.is_alive(h) and Combat.current_face(h)["type"] == "blank")
@@ -323,18 +337,29 @@ func play_run_step(run: Run) -> void:
 				pick = 1 - pick
 			note("event '%s': picks \"%s\"" % [run.event["title"], opts[pick]["label"]])
 			run.choose_event_option(pick)
+		"pet":
+			var prefs := {"newbie": ["grave_pup"], "tactician": ["candle_moth", "black_cat"], "berserker": ["black_cat", "grave_pup"]}
+			var pick := 0
+			for i in run.pet_offers.size():
+				if run.pet_offers[i]["id"] in prefs[style]:
+					pick = i
+					break
+			note("adopts pet %s" % run.pet_offers[pick]["name"])
+			run.choose_pet(pick)
+		"loot":
+			_choose_loot(run)
 		"shop":
 			var wants: Array = []
 			match style:
 				"newbie":
 					wants = ["tonic"]
 				"berserker":
-					wants = ["carving", "fate_shard"]
+					wants = ["weapon", "carving", "fate_shard"]
 				"tactician":
 					wants = ["resurrect"]
 					if _party_hp_ratio(run) < 0.6:
 						wants.append("tonic")
-					wants.append_array(["carving", "fate_shard"])
+					wants.append_array(["carving", "weapon", "fate_shard"])
 			for id in wants:
 				if run.can_buy(id):
 					note("buys %s (gold %d)" % [id, run.gold])
@@ -359,3 +384,49 @@ var _rng := RandomNumberGenerator.new()
 
 func rng_pick(n: int) -> int:
 	return _rng.randi_range(0, n - 1)
+
+
+## Rough value of a face outside combat (used to compare weapons).
+func _static_face_value(f: Dictionary) -> float:
+	var v := float(f["value"])
+	match f["type"]:
+		"cleave": return v * 2.2
+		"fire": return v + 1.5
+		"guard": return v * 2.0
+		"blood": return v - 1.0
+		"blank": return 0.0
+	return v
+
+
+func _choose_loot(run: Run) -> void:
+	var best_gain := 0.0
+	var best := [-1, -1]
+	for wi in run.weapon_offers.size():
+		var w: Dictionary = run.weapon_offers[wi]
+		var cursed: bool = w["rarity"] == "cursed"
+		for hi in run.heroes.size():
+			var h: Dictionary = run.heroes[hi]
+			var old := 0.0
+			for slot in Run.WEAPON_SLOTS:
+				old += _static_face_value(h["faces"][slot])
+			var new := 0.0
+			for f in w["faces"]:
+				new += _static_face_value(f)
+			var gain := new - old
+			if cursed:
+				gain -= 1.0 if style == "berserker" else 4.0
+			if style == "newbie":
+				gain = 1.0 if hi == 0 and wi == 0 else 0.0  # equips the first weapon on the first hero
+			if gain > best_gain:
+				best_gain = gain
+				best = [wi, hi]
+	if best[0] >= 0:
+		note("equips %s on %s (gain %.1f)" % [run.weapon_offers[best[0]]["name"], Combat.short_name(run.heroes[best[1]]), best_gain])
+		run.equip(best[0], best[1])
+	else:
+		note("skips the weapons")
+		run.skip_loot()
+
+
+static func UI_face(f: Dictionary) -> String:
+	return "%s %d" % [f["type"], int(f["value"])]
