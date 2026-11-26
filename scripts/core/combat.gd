@@ -53,6 +53,7 @@ var twists := 0            # Fate Twists used (for quests)
 
 # Pet passive numbers.
 const PET_FIRST_STRIKE := 3
+const PET_WARD := 3
 const PET_MEND := 1  # Candle Moth: heal all heroes after a won fight (applied by run.gd)
 
 
@@ -359,6 +360,11 @@ func _start_round() -> void:
 		h["locked"] = false
 		if is_alive(h):
 			h["face"] = rng.randi_range(0, h["faces"].size() - 1)
+	if not pet.is_empty() and pet["passive"] == "ward" and round_number == 1:
+		for h in heroes:
+			if is_alive(h):
+				h["shield"] += PET_WARD
+		_log("%s wards the party (+%d shield)" % [pet["name"], PET_WARD])
 	for m in monsters:
 		m.erase("held_face")
 		if is_alive(m):
@@ -455,6 +461,10 @@ func _apply_pet_battle_start() -> void:
 			var i := _random_alive_index(monsters)
 			if i >= 0:
 				_damage(monsters[i], PET_FIRST_STRIKE, pet["name"])
+		"burn_aura":
+			for m in monsters:
+				m["burn"] = min(MAX_BURN, m["burn"] + 1)
+			_log("%s sets every enemy alight" % pet["name"])
 
 
 func _apply_pet_face() -> void:

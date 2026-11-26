@@ -16,7 +16,10 @@ var grave_dice := 0
 var owned_heroes: Array = []      # hero ids; starters are always owned
 var unlocked_weapons: Array = []  # relic weapon ids unlocked by summoning
 var party: Array = []             # last chosen party (3 hero ids)
-var summons_since_hero := 0
+var summons_since_hero := 0      # (old single-banner pity, kept for old saves)
+var summon_pity := {}             # banner -> rolls since its last new item
+var owned_pets: Array = []        # pet ids; starter pets are always owned
+var time_of_day := 1              # index into TIMES (starts at Day)
 var curse := 0                    # chosen Curse level (opt-in difficulty, unlocked by wins)
 const MAX_CURSE := 4
 const CURSE_EMBER_BONUS := 0.25
@@ -34,6 +37,9 @@ func _init(save_path: String = DEFAULT_PATH) -> void:
 		if h.get("starter", false):
 			owned_heroes.append(h["id"])
 	party = owned_heroes.slice(0, 3)
+	for p in GameData.load_pets():
+		if p.get("starter", false):
+			owned_pets.append(p["id"])
 
 
 # ---------------------------------------------------------------- save / load
@@ -57,13 +63,19 @@ func load_profile() -> void:
 	party = d.get("party", party)
 	summons_since_hero = d.get("summons_since_hero", 0)
 	curse = d.get("curse", 0)
+	summon_pity = d.get("summon_pity", {})
+	for id in d.get("owned_pets", []):
+		if not id in owned_pets:
+			owned_pets.append(id)
+	time_of_day = d.get("time_of_day", 1)
 
 
 func save() -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_var({"version": 2, "embers": embers, "levels": levels, "stats": stats, "quests_done": quests_done,
 		"grave_dice": grave_dice, "owned_heroes": owned_heroes, "unlocked_weapons": unlocked_weapons,
-		"party": party, "summons_since_hero": summons_since_hero, "curse": curse})
+		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
+		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day})
 
 
 # ---------------------------------------------------------------- town
@@ -120,7 +132,8 @@ func record_run(run) -> Dictionary:
 	if won:
 		earned += int(e["victory"])
 	var run_curse := int(run.upgrades.get("curse", 0))
-	earned = int(earned * (1.0 + CURSE_EMBER_BONUS * run_curse))
+	var night: bool = run.upgrades.get("time", "") == "night"
+	earned = int(earned * (1.0 + CURSE_EMBER_BONUS * run_curse + (0.4 if night else 0.0)))
 	if won:
 		stats["best_curse_won"] = max(stat("best_curse_won"), run_curse + 1) if stats.has("best_curse_won") else run_curse + 1
 	_add("runs", 1)
@@ -145,7 +158,9 @@ func record_run(run) -> Dictionary:
 	embers += earned
 	var dice: int = int(summon["dice_per_run"]) + s["elites"] * int(summon["dice_per_elite"])
 	dice += (int(summon["dice_per_victory"]) if won else 0) + completed.size() * int(summon["dice_per_quest"])
+	dice += 1 if night else 0
 	grave_dice += dice
+	time_of_day = (time_of_day + 1) % TIMES.size()  # you return to town a little later
 	save()
 	return {"embers": earned, "quests": completed, "dice": dice}
 
@@ -164,16 +179,22 @@ func set_curse(level: int) -> void:
 func run_options() -> Dictionary:
 	var o := levels.duplicate()
 	o["curse"] = curse
+	o["owned_pets"] = owned_pets.duplicate()
+	o["time"] = time_name()
 	o["unlocked_weapons"] = unlocked_weapons.duplicate()
 	return o
 
 
-# ---------------------------------------------------------------- summon roll (fair gacha)
-# Paid only with Grave Dice earned by playing. Rates are shown in the town.
-# Pity: a new hero is guaranteed on the `pity`-th summon without one.
+# ---------------------------------------------------------------- summon roll (fair gacha, 3 banners)
+# Paid only with Grave Dice earned by playing. Each banner shows its odds and its own pity counter:
+# a roll gives something NEW from that banner with new_chance %, and is guaranteed every `pity` rolls.
+# Otherwise (or when a banner is complete) the roll gives Soul Embers. Nothing is ever a duplicate stat boost.
 
-func can_summon() -> bool:
-	return grave_dice >= int(summon["cost"])
+const BANNERS := ["heroes", "relics", "pets"]
+
+
+func can_summon(banner: String = "heroes") -> bool:
+	return grave_dice >= int(summon["cost"]) and not locked_in(banner).is_empty()
 
 
 func locked_heroes() -> Array:
@@ -184,55 +205,76 @@ func locked_relics() -> Array:
 	return GameData.load_weapons().filter(func(w): return w.get("locked", false) and not w["id"] in unlocked_weapons)
 
 
-## Returns { "kind": "hero"|"relic"|"embers", "name": String, "text": String, "new": bool }.
-func summon_roll(rng: RandomNumberGenerator) -> Dictionary:
-	if not can_summon():
+func locked_pets() -> Array:
+	return GameData.load_pets().filter(func(p): return not p["id"] in owned_pets)
+
+
+func locked_in(banner: String) -> Array:
+	match banner:
+		"heroes": return locked_heroes()
+		"relics": return locked_relics()
+		"pets": return locked_pets()
+	return []
+
+
+func pity_count(banner: String) -> int:
+	return int(summon_pity.get(banner, 0))
+
+
+## Returns { "kind": "hero"|"relic"|"pet"|"embers", "id": String, "name": String, "text": String, "new": bool }.
+func summon_roll(rng: RandomNumberGenerator, banner: String = "heroes") -> Dictionary:
+	if not can_summon(banner):
 		return {}
 	grave_dice -= int(summon["cost"])
-	summons_since_hero += 1
-	var kind := ""
-	if summons_since_hero >= int(summon["pity"]) and not locked_heroes().is_empty():
-		kind = "hero"
-	else:
-		var total := 0
-		for r in summon["rates"]:
-			total += int(r["weight"])
-		var roll := rng.randi_range(1, total)
-		for r in summon["rates"]:
-			roll -= int(r["weight"])
-			if roll <= 0:
-				kind = r["kind"]
-				break
+	summon_pity[banner] = pity_count(banner) + 1
+	var pool := locked_in(banner)
+	var hit: bool = pity_count(banner) >= int(summon["pity"]) or rng.randi_range(1, 100) <= int(summon["new_chance"])
 	var result := {}
-	match kind:
-		"hero":
-			summons_since_hero = 0
-			var pool := locked_heroes()
-			if pool.is_empty():
-				embers += int(summon["duplicate_embers"]["hero"])
-				result = {"kind": "embers", "name": "Echo of a hero", "text": "A familiar soul answers. +%d Soul Embers." % int(summon["duplicate_embers"]["hero"]), "new": false}
-			else:
-				var h: Dictionary = pool[rng.randi_range(0, pool.size() - 1)]
-				owned_heroes.append(h["id"])
-				result = {"kind": "hero", "name": h["name"], "text": "A new hero joins you: %s! %s" % [h["name"], h.get("lore", "")], "new": true}
-		"relic":
-			var pool := locked_relics()
-			if pool.is_empty():
-				embers += int(summon["duplicate_embers"]["relic"])
-				result = {"kind": "embers", "name": "Dust of relics", "text": "Only dust. +%d Soul Embers." % int(summon["duplicate_embers"]["relic"]), "new": false}
-			else:
-				var w: Dictionary = pool[rng.randi_range(0, pool.size() - 1)]
-				unlocked_weapons.append(w["id"])
-				result = {"kind": "relic", "name": w["name"], "text": "Relic unlocked: %s. It can now appear on the road." % w["name"], "new": true}
-		_:
-			var amount := 0
-			for r in summon["rates"]:
-				if r["kind"] == "embers":
-					amount = int(r["amount"])
-			embers += amount
-			result = {"kind": "embers", "name": "Soul Embers", "text": "Embers swirl from the dice: +%d Soul Embers." % amount, "new": false}
+	if hit and not pool.is_empty():
+		summon_pity[banner] = 0
+		var item: Dictionary = pool[rng.randi_range(0, pool.size() - 1)]
+		match banner:
+			"heroes":
+				owned_heroes.append(item["id"])
+				result = {"kind": "hero", "id": item["id"], "name": item["name"], "new": true,
+					"text": "A new hero joins you: %s! %s" % [item["name"], item.get("lore", "")]}
+			"relics":
+				unlocked_weapons.append(item["id"])
+				result = {"kind": "relic", "id": item["id"], "name": item["name"], "new": true,
+					"text": "Relic unlocked: %s. It can now appear on the road." % item["name"]}
+			"pets":
+				owned_pets.append(item["id"])
+				result = {"kind": "pet", "id": item["id"], "name": item["name"], "new": true,
+					"text": "A new companion follows you: %s. %s" % [item["name"], item.get("desc", "")]}
+	else:
+		var amount := int(summon["embers_amount"])
+		embers += amount
+		result = {"kind": "embers", "id": "", "name": "Soul Embers", "new": false,
+			"text": "Embers swirl from the dice: +%d Soul Embers. (%d/%d toward a guaranteed find)" % [amount, pity_count(banner), int(summon["pity"])]}
 	save()
 	return result
+
+
+# ---------------------------------------------------------------- time of day
+# Each journey back to town moves time forward; the player may also wait in town.
+
+const TIMES := ["dawn", "day", "dusk", "night"]
+const TIME_NAMES := {"dawn": "Dawn", "day": "Day", "dusk": "Dusk", "night": "Night"}
+const TIME_EFFECTS := {
+	"dawn": "First light: camps heal +10% more.",
+	"day": "Open roads: shop prices -15%.",
+	"dusk": "Long shadows: +1 Fate at the start of every fight.",
+	"night": "The dead walk: enemies +20% HP, but +40% Soul Embers and +1 Grave Die.",
+}
+
+
+func time_name() -> String:
+	return TIMES[time_of_day % TIMES.size()]
+
+
+func advance_time() -> void:
+	time_of_day = (time_of_day + 1) % TIMES.size()
+	save()
 
 
 func quest_progress(q: Dictionary) -> int:

@@ -88,6 +88,12 @@ func set_texture_id(id: String, size_px: int = -1) -> void:
 	_sprite.frame = randi() % 2
 
 
+## Turn to face left (-1) or right (1), e.g. for villagers walking back and forth.
+func set_facing(dir: int) -> void:
+	facing = dir
+	_sprite.scale.x = abs(_sprite.scale.x) * dir
+
+
 func _kill_fx() -> void:
 	if _fx != null and _fx.is_valid():
 		_fx.kill()

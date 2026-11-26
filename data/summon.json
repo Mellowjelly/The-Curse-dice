@@ -1,21 +1,22 @@
 {
 	"cost": 3,
-	"pity": 6,
-	"rates": [
-		{
-			"kind": "hero",
-			"weight": 20
+	"pity": 4,
+	"new_chance": 40,
+	"embers_amount": 35,
+	"banners": {
+		"heroes": {
+			"name": "Souls of the Crossroads",
+			"desc": "New heroes."
 		},
-		{
-			"kind": "relic",
-			"weight": 30
+		"relics": {
+			"name": "The Reliquary",
+			"desc": "Relic weapons that can drop on the road."
 		},
-		{
-			"kind": "embers",
-			"weight": 50,
-			"amount": 35
+		"pets": {
+			"name": "Strays of the Night",
+			"desc": "New companions for your journeys."
 		}
-	],
+	},
 	"duplicate_embers": {
 		"hero": 40,
 		"relic": 25

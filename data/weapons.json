@@ -28,5 +28,9 @@
 	{ "id": "gamblers_bones", "name": "Gambler's Bones", "rarity": "rare", "locked": true, "desc": "RELIC. Two knucklebones that never land the same way twice.",
 		"faces": [{ "type": "attack", "value": 7 }, { "type": "attack", "value": 1 }] },
 	{ "id": "plague_lance", "name": "Plague Lance", "rarity": "rare", "locked": true, "desc": "RELIC. The tip is always warm.",
-		"faces": [{ "type": "fire", "value": 4 }, { "type": "cleave", "value": 3 }] }
+		"faces": [{ "type": "fire", "value": 4 }, { "type": "cleave", "value": 3 }] },
+	{ "id": "moonlit_sickle", "name": "Moonlit Sickle", "rarity": "rare", "locked": true, "desc": "RELIC. Sharpest under a full moon.",
+		"faces": [{ "type": "cleave", "value": 3 }, { "type": "attack", "value": 5 }] },
+	{ "id": "sunsteel_brand", "name": "Sunsteel Brand", "rarity": "rare", "locked": true, "desc": "RELIC. Forged at dawn, it never cools.",
+		"faces": [{ "type": "fire", "value": 3 }, { "type": "guard", "value": 3 }] }
 ]

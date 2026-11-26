@@ -24,7 +24,6 @@ var _summon_box: VBoxContainer
 var _quests: VBoxContainer
 var _result_box: VBoxContainer
 var _go: Button
-var _summon_text := ""
 var _fire_line: Label
 
 
@@ -49,6 +48,25 @@ const PARTY_SPOTS := [Vector2(104, 470), Vector2(318, 448), Vector2(336, 560)]
 const IDLE_SPOTS := [Vector2(444, 584), Vector2(544, 584), Vector2(10, 590)]
 
 var _scene_layer: Control
+var _art: TextureRect
+var _time_box: HBoxContainer
+var _banner := "heroes"
+var _reveal: Dictionary = {}
+
+# Day/night look of the town: which art to use and how to tint it.
+const TIME_LOOK := {
+	"dawn": ["town_day", Color(1.0, 0.82, 0.78)],
+	"day": ["town_day", Color(1, 1, 1)],
+	"dusk": ["town_day", Color(0.85, 0.6, 0.6)],
+	"night": ["town", Color(1, 1, 1)],
+}
+# Who walks the square at each time of day: [sprite, from x, to x, y]
+const WALKERS := {
+	"dawn": [["villager_farmer", 380, 600, 430], ["villager_woman", 120, 360, 410]],
+	"day": [["villager_farmer", 380, 600, 430], ["villager_woman", 120, 360, 410]],
+	"dusk": [["villager_woman", 140, 380, 410], ["villager_guard", 400, 600, 430]],
+	"night": [["villager_guard", 380, 620, 430]],
+}
 var _building_marks := {}
 
 
@@ -57,6 +75,7 @@ func _build() -> void:
 	bg.color = UI.BG
 	add_child(UI.full_rect(bg))
 	var art := TextureRect.new()
+	_art = art
 	art.texture = load("res://assets/backgrounds/town.png")
 	art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	art.stretch_mode = TextureRect.STRETCH_SCALE
@@ -93,6 +112,9 @@ func _build() -> void:
 	var root := VBoxContainer.new()
 	root.add_theme_constant_override("separation", 6)
 	side.add_child(root)
+	_time_box = HBoxContainer.new()
+	_time_box.add_theme_constant_override("separation", 8)
+	root.add_child(_time_box)
 	_result_box = VBoxContainer.new()
 	root.add_child(_result_box)
 	_tabs = TabContainer.new()
@@ -216,8 +238,34 @@ func _refresh_scene() -> void:
 		sign.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_shadow(sign)
 		_scene_layer.add_child(sign)
-	# Heroes: the chosen party warms itself at the fire; the rest wander the square.
 	var US = load("res://scripts/ui/unit_sprite.gd")
+	# Villagers going about their day (only the watch is out at night).
+	for w in WALKERS[profile.time_name()]:
+		var v: Control = US.create(w[0], 96, false)
+		v.set_meta("dynamic", true)
+		v.position = Vector2(w[1], w[3])
+		_scene_layer.add_child(v)
+		var speed := 38.0
+		var dur: float = abs(float(w[2]) - float(w[1])) / speed
+		var tw := v.create_tween().set_loops()
+		tw.tween_callback(func(): v.set_facing(1))
+		tw.tween_property(v, "position:x", float(w[2]), dur)
+		tw.tween_interval(randf_range(0.5, 2.0))
+		tw.tween_callback(func(): v.set_facing(-1))
+		tw.tween_property(v, "position:x", float(w[1]), dur)
+		tw.tween_interval(randf_range(0.5, 2.0))
+	# Companions rest near the fire.
+	var pet_spots := [Vector2(24, 646), Vector2(170, 652), Vector2(520, 404)]
+	var shown := 0
+	for pid in profile.owned_pets:
+		if shown >= pet_spots.size():
+			break
+		var pet: Control = US.create(pid, 64, shown % 2 == 1)
+		pet.set_meta("dynamic", true)
+		pet.position = pet_spots[shown]
+		_scene_layer.add_child(pet)
+		shown += 1
+	# Heroes: the chosen party warms itself at the fire; the rest wander the square.
 	var idle_i := 0
 	for id in profile.owned_heroes:
 		var spot_pos: Vector2
@@ -278,6 +326,10 @@ func _hero_def(id: String) -> Dictionary:
 
 func _refresh() -> void:
 	_embers.text = "Soul Embers %d    Grave Dice %d" % [profile.embers, profile.grave_dice]
+	var tod := profile.time_name()
+	_art.texture = load("res://assets/backgrounds/%s.png" % TIME_LOOK[tod][0])
+	_art.modulate = TIME_LOOK[tod][1]
+	_refresh_time_box()
 	_refresh_scene()
 	var speaker := _hero_def(profile.party[0] if not profile.party.is_empty() else "varek")
 	_fire_line.text = "At the fire, %s stares into the embers: \"%s\"" % [speaker.get("name", "?"), speaker.get("lore", "")]
@@ -294,6 +346,23 @@ func _refresh() -> void:
 	_refresh_buildings()
 	_refresh_summon()
 	_refresh_quests()
+
+
+func _refresh_time_box() -> void:
+	_clear(_time_box)
+	var t := profile.time_name()
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var colors := {"dawn": Color("#f0a890"), "day": Color("#f4e08a"), "dusk": Color("#d08aa0"), "night": Color("#9fb4ff")}
+	info.add_child(UI.label("Time: %s" % Profile.TIME_NAMES[t], 17, colors[t]))
+	info.add_child(UI.wrap_label(Profile.TIME_EFFECTS[t], 12, UI.DIM, 380))
+	_time_box.add_child(info)
+	var next: String = Profile.TIMES[(Profile.TIMES.find(t) + 1) % Profile.TIMES.size()]
+	var wait := UI.button("Wait until %s" % Profile.TIME_NAMES[next], func(): profile.advance_time(); Sfx.play(self, "fate"); _refresh(), 14)
+	wait.custom_minimum_size = Vector2(170, 40)
+	wait.disabled = Profile.has_saved_run()
+	wait.tooltip_text = "Time passes for free. Your journey begins at this time of day."
+	_time_box.add_child(wait)
 
 
 func _refresh_party() -> void:
@@ -370,26 +439,81 @@ func _refresh_buildings() -> void:
 func _refresh_summon() -> void:
 	_clear(_summon_box)
 	var s: Dictionary = profile.summon
-	_summon_box.add_child(UI.wrap_label("Roll the Bone Dice of the Crossroads. Paid only with Grave Dice, earned on the road: 1 per journey, +1 per elite, +2 per victory, +1 per quest. No other currency, ever.", 14, UI.TEXT, 540))
-	var rates: Array[String] = []
-	for r in s["rates"]:
-		rates.append("%s %d%%" % [r["kind"].capitalize(), int(r["weight"])])
-	_summon_box.add_child(UI.wrap_label("Rates: %s.   Pity: a new hero is guaranteed within %d rolls (now %d/%d)." % [
-		", ".join(rates), int(s["pity"]), profile.summons_since_hero, int(s["pity"])], 14, UI.GOLD, 540))
-	_summon_box.add_child(UI.wrap_label("Duplicates turn into Soul Embers. Summoned heroes are sidegrades: the starting three can win the game.", 13, UI.DIM, 540))
-	_summon_box.add_child(UI.label("Still sealed: %d heroes, %d relic weapons." % [profile.locked_heroes().size(), profile.locked_relics().size()], 14, UI.DIM))
-	var b := UI.choice_button("Summon Roll  (%d Grave Dice)" % int(s["cost"]), _do_summon, UI.GOLD, profile.can_summon())
-	b.custom_minimum_size = Vector2(0, 56)
+	_summon_box.add_child(UI.wrap_label("Roll the Bone Dice of the Crossroads. Paid only with Grave Dice earned on the road (1 per journey, +1 per elite, +2 per victory, +1 per quest, +1 at night). No other currency, ever.", 13, UI.TEXT, 540))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	_summon_box.add_child(row)
+	var labels := {"heroes": "Heroes", "relics": "Relics", "pets": "Companions"}
+	for banner in Profile.BANNERS:
+		var left := profile.locked_in(banner).size()
+		var bb := UI.choice_button("%s\n%s" % [labels[banner], ("%d sealed" % left) if left > 0 else "complete"],
+			func(): _banner = banner; _reveal = {}; _refresh_summon(), UI.GOLD if banner == _banner else UI.BORDER)
+		bb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bb.custom_minimum_size = Vector2(0, 56)
+		row.add_child(bb)
+	var info: Dictionary = s["banners"][_banner]
+	_summon_box.add_child(UI.label(info["name"], 18, UI.GOLD))
+	_summon_box.add_child(UI.wrap_label("%s  Each roll: %d%% something new, otherwise %d Soul Embers. Guaranteed new within %d rolls (now %d/%d)." % [
+		info["desc"], int(s["new_chance"]), int(s["embers_amount"]), int(s["pity"]), profile.pity_count(_banner), int(s["pity"])], 13, UI.DIM, 540))
+	var sealed := profile.locked_in(_banner)
+	if sealed.is_empty():
+		_summon_box.add_child(UI.label("Everything in this banner is yours.", 14, UI.GREEN))
+	else:
+		_summon_box.add_child(UI.wrap_label("Still sealed: " + ", ".join(sealed.map(func(x): return "???")), 13, UI.DIM, 540))
+	var b := UI.choice_button("Roll  (%d Grave Dice)" % int(s["cost"]), _do_summon, UI.GOLD, profile.can_summon(_banner))
+	b.custom_minimum_size = Vector2(0, 52)
 	_summon_box.add_child(b)
-	if _summon_text != "":
-		_summon_box.add_child(UI.wrap_label(_summon_text, 16, Color("#b39ddb"), 540))
+	if not _reveal.is_empty():
+		_summon_box.add_child(_reveal_card(_reveal))
+
+
+## The prize, shown with its picture.
+func _reveal_card(r: Dictionary) -> Control:
+	var panel := UI.panel(UI.GOLD if r["new"] else UI.BORDER, 2)
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	panel.add_child(hb)
+	var pic: Control
+	var US = load("res://scripts/ui/unit_sprite.gd")
+	match r["kind"]:
+		"hero", "pet":
+			pic = US.create(r["id"], 96, false)
+		"relic":
+			var tr := TextureRect.new()
+			var w: Array = GameData.load_weapons().filter(func(x): return x["id"] == r["id"])
+			tr.texture = UI.face_icon(w[0]["faces"][0]["type"]) if not w.is_empty() else null
+			tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			tr.stretch_mode = TextureRect.STRETCH_SCALE
+			tr.custom_minimum_size = Vector2(96, 96)
+			pic = tr
+		_:
+			var l := UI.label("+%d" % int(profile.summon["embers_amount"]), 30, Color("#e08a3c"))
+			l.custom_minimum_size = Vector2(96, 96)
+			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			pic = l
+	hb.add_child(pic)
+	var txt := VBoxContainer.new()
+	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	txt.add_child(UI.label(("NEW!  " if r["new"] else "") + r["name"], 20, UI.GOLD if r["new"] else UI.TEXT))
+	txt.add_child(UI.wrap_label(r["text"], 13, Color("#d8c8f0"), 400))
+	hb.add_child(txt)
+	# Pop-in reveal.
+	panel.pivot_offset = Vector2(280, 60)
+	panel.scale = Vector2(0.6, 0.6)
+	panel.modulate = Color(3, 3, 3, 0)
+	var tw := panel.create_tween()
+	tw.tween_property(panel, "scale", Vector2(1.05, 1.05), 0.18).set_trans(Tween.TRANS_BACK)
+	tw.parallel().tween_property(panel, "modulate", Color(1, 1, 1, 1), 0.3)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.1)
+	return panel
 
 
 func _do_summon() -> void:
-	var r := profile.summon_roll(_rng)
+	var r := profile.summon_roll(_rng, _banner)
 	if r.is_empty():
 		return
-	_summon_text = r["text"]
+	_reveal = r
 	Sfx.play(self, "triple" if r.get("new", false) else "dice")
 	_refresh()
 

@@ -87,10 +87,11 @@ func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []
 	combat = Combat.new(rng.randi())
 	combat.battle_ended.connect(_on_battle_ended)
 	combat.log_added.connect(func(t): log_added.emit(t))
-	combat.bonus_fate_start = int(upgrades.get("fortune", 0))
+	combat.bonus_fate_start = int(upgrades.get("fortune", 0)) + (1 if time_of_day() == "dusk" else 0)
 	_generate_board()
 	# A stray follows you onto the road: pick 1 of 2 companions.
-	var pool := pets_db.duplicate()
+	var owned: Array = upgrades.get("owned_pets", [])
+	var pool := pets_db.filter(func(p): return p.get("starter", false) or p["id"] in owned)
 	_shuffle(pool)
 	pet_offers = pool.slice(0, 3 if int(upgrades.get("kennel", 0)) > 0 else 2)
 	phase = "pet"
@@ -255,12 +256,13 @@ func _start_fight(kind: String, tier: String) -> void:
 func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 	var sc: Dictionary = region.get("scaling", {}).get(kind if kind in ["elite", "boss"] else tier, {})
 	var curse := curse_level()
-	if sc.is_empty() and curse == 0:
+	var night := time_of_day() == "night"
+	if sc.is_empty() and curse == 0 and not night:
 		return def
 	var d := def.duplicate(true)
 	# Curse rules (see CURSE_RULES): I hungry dead, II sharpened bones, IV the Bishop wakes early.
-	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.15 if curse >= 1 else 1.0)))
-	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 and kind == "elite" else 0)
+	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.15 if curse >= 1 else 1.0) * (1.2 if night else 1.0)))
+	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 and kind == "elite" else 0) 
 	if curse >= 4 and d.has("phase2"):
 		d["phase2"]["at"] = 0.7
 	for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:
@@ -279,12 +281,17 @@ const CURSE_RULES := [
 ]
 
 
+## Time of day the journey began ("dawn", "day", "dusk", "night" or "" when not set).
+func time_of_day() -> String:
+	return String(upgrades.get("time", ""))
+
+
 func curse_level() -> int:
 	return int(upgrades.get("curse", 0))
 
 
 func rest_percent() -> int:
-	return int(region["rest_heal_percent"]) - (10 if curse_level() >= 3 else 0)
+	return int(region["rest_heal_percent"]) - (10 if curse_level() >= 3 else 0) + (10 if time_of_day() == "dawn" else 0)
 
 
 func _on_battle_ended(victory: bool) -> void:
@@ -325,6 +332,8 @@ func _on_battle_ended(victory: bool) -> void:
 func _gold_roll(kind: String) -> int:
 	var r: Array = region["gold"][kind]
 	var g := rng.randi_range(int(r[0]), int(r[1]))
+	if combat.pet.get("passive", "") == "greedy":
+		g = int(g * 1.5)
 	add_gold(g)
 	return g
 
@@ -524,7 +533,7 @@ func shop_items() -> Array:
 
 
 func price(item: Dictionary) -> int:
-	var discount := 0.15 * int(upgrades.get("market", 0))
+	var discount := 0.15 * int(upgrades.get("market", 0)) + (0.15 if time_of_day() == "day" else 0.0)
 	return int(round(int(item["cost"]) * (1.0 - discount)))
 
 

@@ -14,6 +14,7 @@ var _checks := 0
 
 func _init() -> void:
 	test_data_is_valid()
+	test_ui_scripts_compile()
 	test_shield_absorbs_damage()
 	test_combo_values()
 	test_blank_gives_fate_capped()
@@ -39,6 +40,8 @@ func _init() -> void:
 	test_summon_roll()
 	test_party_and_new_skills()
 	test_gates_stop_movement()
+	test_time_of_day()
+	test_new_pets()
 	test_tile_snapshot_reload()
 	print("\n%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
@@ -349,6 +352,8 @@ func test_profile_and_quests() -> void:
 	var again := Profile.new(path)
 	again.load_profile()
 	check(again.embers == p.embers and again.stat("kills_ghoul") == 30, "profile survives save/load")
+	for q in again.quests:
+		check(again.quest_progress(q) >= 0, "quest progress readable: " + q["id"])
 	again.embers = 1000
 	check(again.upgrade("chapel") and again.level("chapel") == 1, "buildings can be upgraded")
 	check(again.next_cost("kennel") == 70 and again.upgrade("kennel") and again.next_cost("kennel") == -1, "max level reports -1")
@@ -388,29 +393,64 @@ func test_summon_roll() -> void:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	var p := Profile.new(path)
-	check(p.owned_heroes.size() == 3, "3 starter heroes are owned from the start")
-	check(not p.can_summon(), "summoning needs Grave Dice")
-	p.grave_dice = 100
+	check(p.owned_heroes.size() == 3 and p.owned_pets.size() == 4, "3 starter heroes and 4 starter pets are owned")
+	check(not p.can_summon("heroes"), "summoning needs Grave Dice")
+	p.grave_dice = 300
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1
-	var heroes_got := 0
-	var since := 0
-	var max_gap := 0
-	for i in 30:
-		var r := p.summon_roll(rng)
-		since += 1
-		if r["kind"] == "hero":
-			heroes_got += 1
-			max_gap = max(max_gap, since)
-			since = 0
-	check(p.owned_heroes.size() == 6, "30 summons unlock all 3 new heroes (pity)")
-	check(max_gap <= int(p.summon["pity"]), "pity guarantees a hero within %d summons (gap %d)" % [p.summon["pity"], max_gap])
-	check(p.grave_dice == 10, "each summon costs 3 Grave Dice")
+	for banner in Profile.BANNERS:
+		var since := 0
+		var max_gap := 0
+		var guard := 0
+		while p.can_summon(banner) and guard < 60:
+			guard += 1
+			var r := p.summon_roll(rng, banner)
+			since += 1
+			if r["new"]:
+				max_gap = max(max_gap, since)
+				since = 0
+		check(p.locked_in(banner).is_empty(), "banner %s can be completed" % banner)
+		check(max_gap <= int(p.summon["pity"]), "pity guarantees something new in %s within %d rolls (gap %d)" % [banner, p.summon["pity"], max_gap])
+		check(not p.can_summon(banner), "a completed banner cannot be rolled")
+	check(p.owned_heroes.size() == 6, "all heroes unlocked")
+	check(p.owned_pets.size() == 7, "all pets unlocked")
 	var run := Run.new(30, p.run_options(), ["rook", "vael", "mordecai"])
 	check(run.heroes.map(func(h): return h["id"]) == ["rook", "vael", "mordecai"], "the chosen party is used")
 	var relics := run.weapons_db.filter(func(w): return w.get("locked", false))
 	check(relics.size() == p.unlocked_weapons.size(), "only unlocked relics appear on the road")
 	check(not Run.new(31).weapons_db.any(func(w): return w.get("locked", false)), "locked relics never drop without unlocking")
+	check(not Run.new(32).pet_offers.any(func(x): return not x.get("starter", false)), "locked pets are never offered")
+
+
+func test_time_of_day() -> void:
+	var day := Run.new(60, {"time": "day"})
+	var night := Run.new(60, {"time": "night"})
+	var dawn := Run.new(60, {"time": "dawn"})
+	var dusk := Run.new(60, {"time": "dusk"})
+	var plain := Run.new(60)
+	check(day.price({"cost": 20}) < plain.price({"cost": 20}), "Day: cheaper shops")
+	var g: Dictionary = plain.monster_defs["ghoul"]
+	check(night.scaled_monster(g, "fight", "early")["hp"] > plain.scaled_monster(g, "fight", "early")["hp"], "Night: tougher enemies")
+	check(dawn.rest_percent() > plain.rest_percent(), "Dawn: better camps")
+	check(dusk.combat.bonus_fate_start == plain.combat.bonus_fate_start + 1, "Dusk: +1 Fate each fight")
+	var path := "user://test_time.save"
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	var p := Profile.new(path)
+	var t := p.time_name()
+	p.advance_time()
+	check(p.time_name() != t, "waiting moves time forward")
+
+
+func test_new_pets() -> void:
+	var c := Combat.new(70)
+	c.pet = {"id": "lantern_wisp", "name": "Lantern Wisp", "passive": "ward", "face": 0, "faces": [{"type": "blank", "value": 0}]}
+	c.start_battle(_heroes(), [_monster("ghoul")])
+	check(c.heroes[0]["shield"] == Combat.PET_WARD, "Lantern Wisp shields the party in round 1")
+	var c2 := Combat.new(71)
+	c2.pet = {"id": "ember_salamander", "name": "Ember Salamander", "passive": "burn_aura", "face": 0, "faces": [{"type": "blank", "value": 0}]}
+	c2.start_battle(_heroes(), [_monster("ghoul"), _monster("cultist")])
+	check(c2.monsters.all(func(m): return m["burn"] == 1), "Ember Salamander sets every enemy burning")
 
 
 func test_party_and_new_skills() -> void:
@@ -467,3 +507,11 @@ func test_tile_snapshot_reload() -> void:
 	check(Run.from_dict(old).phase == "map", "version-1 saves still load")
 	var cursed := Run.new(51, {"curse": 3})
 	check(cursed.rest_percent() == 20, "Curse III makes camps heal less")
+
+
+## UI scripts are not exercised by the rule tests, so at least make sure they all compile.
+func test_ui_scripts_compile() -> void:
+	for f in DirAccess.get_files_at("res://scripts/ui"):
+		if f.ends_with(".gd"):
+			var scr: GDScript = load("res://scripts/ui/" + f)
+			check(scr != null and scr.can_instantiate(), "UI script compiles: " + f)

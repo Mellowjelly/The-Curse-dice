@@ -313,11 +313,141 @@ def rotting_bishop(enraged=False):
     return frames(c.img, 38)
 
 
+# ---------------------------------------------------------------- pets (small creatures, bottom of a 32x32 canvas)
+
+def ash_crow():
+    c = Canvas()
+    c.ell(10, 18, 22, 27, CLOTH); c.ell(18, 13, 25, 20, CLOTH)              # body, head
+    c.poly([(24, 16), (29, 17), (24, 18)], GOLD_D)                          # beak
+    c.px(22, 15, EMBER)                                                     # eye
+    c.poly([(10, 20), (3, 24), (11, 25)], CLOTH_L)                          # tail
+    c.poly([(12, 19), (17, 14), (19, 22)], CLOTH_L)                         # wing
+    c.rect(14, 27, 14, 30, GOLD_D); c.rect(18, 27, 18, 30, GOLD_D)          # legs
+    for x, y in ((6, 12), (9, 9), (26, 9)):
+        c.px(x, y, PALE_D)                                                  # drifting ash
+    return frames(c.img, 26)
+
+
+def grave_pup():
+    c = Canvas()
+    c.rect(9, 26, 10, 31, BONE); c.rect(19, 26, 20, 31, BONE)
+    c.ell(7, 17, 22, 28, BONE_D); c.ell(9, 19, 15, 25, BONE)                # skeletal body
+    c.line([(9, 21), (20, 21)], K)
+    c.ell(18, 12, 27, 20, BONE)                                             # skull head
+    c.px(23, 15, EMBER); c.rect(24, 18, 27, 18, K)
+    c.poly([(19, 13), (20, 8), (22, 13)], BONE_D)                           # ear
+    c.line([(7, 20), (3, 16)], BONE)                                        # wagging tail
+    return frames(c.img, 24)
+
+
+def candle_moth():
+    c = Canvas()
+    c.ell(4, 10, 15, 22, (230, 200, 140)); c.ell(17, 10, 28, 22, (230, 200, 140))   # wings
+    c.ell(6, 12, 13, 20, (250, 230, 170)); c.ell(19, 12, 26, 20, (250, 230, 170))
+    c.ell(14, 12, 18, 26, BROWN)                                            # body
+    c.rect(15, 6, 17, 11, WHITE); c.px(16, 4, FLAME); c.px(16, 5, EMBER)    # candle on its head
+    c.px(15, 13, K); c.px(17, 13, K)
+    return frames(c.img, 24)
+
+
+def black_cat():
+    c = Canvas()
+    c.line([(8, 26), (4, 18), (6, 14)], CLOTH, 2)                           # tail up
+    c.ell(7, 19, 21, 30, CLOTH)                                             # body
+    c.ell(17, 13, 26, 22, CLOTH)                                            # head
+    c.poly([(18, 14), (18, 9), (21, 13)], CLOTH); c.poly([(22, 13), (25, 9), (25, 14)], CLOTH)  # ears
+    c.px(20, 17, (230, 220, 80)); c.px(23, 17, (230, 220, 80))              # eyes
+    c.px(21, 19, PALE_D)
+    return frames(c.img, 24)
+
+
+def ember_salamander():
+    c = Canvas()
+    c.line([(4, 26), (9, 24)], EMBER, 2)                                    # tail
+    c.ell(8, 21, 22, 28, CAPE); c.ell(10, 22, 20, 26, EMBER)                # body
+    for x in (11, 15, 19):
+        c.px(x, 21, FLAME)                                                  # glowing spots
+    c.ell(19, 18, 27, 25, CAPE); c.px(24, 20, FLAME)                        # head, eye
+    c.rect(10, 28, 11, 30, CAPE_D); c.rect(18, 28, 19, 30, CAPE_D)
+    c.px(26, 16, FLAME); c.px(25, 14, EMBER)                                # little flame breath
+    return frames(c.img, 26)
+
+
+def lantern_wisp():
+    c = Canvas()
+    c.ell(9, 8, 23, 22, (120, 170, 220)); c.ell(11, 10, 21, 20, (190, 225, 245))   # glowing orb
+    c.ell(13, 12, 19, 18, WHITE)
+    c.px(14, 14, ST_D); c.px(18, 14, ST_D)                                  # little face
+    c.poly([(12, 21), (16, 30), (20, 21)], (120, 170, 220))                 # wispy tail
+    for x, y in ((6, 6), (25, 10), (8, 24), (24, 26)):
+        c.px(x, y, (190, 225, 245))
+    return frames(c.img, 24)
+
+
+def gilded_rat():
+    c = Canvas()
+    c.line([(5, 27), (2, 23), (4, 19)], GOLD_D)                             # tail
+    c.ell(6, 21, 20, 29, GOLD); c.ell(8, 23, 14, 28, GOLD_D)                # golden body
+    c.ell(16, 20, 24, 27, GOLD); c.px(20, 22, RED)
+    c.ell(16, 17, 19, 21, GOLD_D)
+    c.ell(22, 25, 27, 30, (250, 220, 90)); c.px(24, 27, GOLD_D)             # a coin
+    return frames(c.img, 27)
+
+
+# ---------------------------------------------------------------- villagers (town life)
+
+def villager_farmer():
+    c = Canvas()
+    c.rect(12, 25, 14, 31, BROWN_D); c.rect(17, 25, 19, 31, BROWN_D)
+    c.rect(11, 14, 20, 26, (110, 90, 60)); c.rect(11, 22, 20, 23, BROWN_D)
+    c.rect(13, 7, 18, 13, SKIN); c.px(14, 9, K); c.px(17, 9, K)
+    c.rect(10, 5, 21, 6, (190, 160, 90)); c.rect(12, 2, 19, 5, (190, 160, 90))   # straw hat
+    c.line([(21, 6), (23, 29)], BROWN); c.poly([(19, 6), (23, 2), (27, 6)], ST)    # pitchfork
+    return frames(c.img, 24)
+
+
+def villager_woman():
+    c = Canvas()
+    c.poly([(14, 13), (9, 31), (22, 31), (18, 13)], (120, 50, 50))           # dress
+    c.rect(11, 20, 20, 21, (200, 190, 170))                                  # apron string
+    c.rect(13, 6, 18, 12, SKIN); c.px(14, 8, K); c.px(17, 8, K)
+    c.ell(11, 3, 20, 9, (90, 60, 40))                                        # hair / headscarf
+    c.rect(19, 18, 22, 19, (120, 50, 50)); c.ell(20, 19, 27, 25, BROWN)      # basket
+    c.px(22, 20, (200, 60, 60)); c.px(24, 20, (90, 150, 70))
+    return frames(c.img, 24)
+
+
+def villager_child():
+    c = Canvas()
+    c.rect(13, 26, 14, 31, BROWN_D); c.rect(17, 26, 18, 31, BROWN_D)
+    c.rect(12, 18, 19, 26, (70, 90, 120))
+    c.rect(13, 11, 18, 17, SKIN); c.px(14, 13, K); c.px(17, 13, K); c.px(15, 15, SKIN_D)
+    c.rect(12, 9, 19, 11, (140, 90, 50))
+    c.ell(20, 20, 25, 25, (180, 60, 50))                                     # a ball
+    return frames(c.img, 26)
+
+
+def villager_guard():
+    c = Canvas()
+    c.rect(12, 25, 14, 31, ST_D); c.rect(17, 25, 19, 31, ST_D)
+    c.rect(11, 14, 20, 26, (80, 40, 40)); c.rect(12, 15, 19, 20, ST)         # tabard + mail
+    c.rect(13, 7, 18, 13, SKIN); c.px(14, 9, K); c.px(17, 9, K)
+    c.rect(12, 3, 19, 7, ST); c.rect(11, 6, 20, 7, ST_D)                     # kettle helm
+    c.line([(9, 2), (9, 30)], BROWN); c.poly([(7, 4), (9, 0), (11, 4)], ST_L)  # spear
+    c.rect(20, 17, 22, 18, (80, 40, 40)); c.rect(22, 18, 22, 19, ST_D)
+    c.rect(21, 20, 24, 24, GOLD_D); c.rect(22, 21, 23, 23, FLAME)            # lantern
+    return frames(c.img, 24)
+
+
 SPRITES = {
     "varek": varek, "lys": lys, "aldric": aldric, "rook": rook, "vael": vael, "mordecai": mordecai,
     "ghoul": ghoul, "cultist": cultist, "bone_hound": bone_hound, "plague_rat": plague_rat,
     "weeping_nun": weeping_nun, "grave_knight": grave_knight, "bone_colossus": bone_colossus,
     "rotting_bishop": rotting_bishop, "rotting_bishop_enraged": lambda: rotting_bishop(True),
+    "ash_crow": ash_crow, "grave_pup": grave_pup, "candle_moth": candle_moth, "black_cat": black_cat,
+    "ember_salamander": ember_salamander, "lantern_wisp": lantern_wisp, "gilded_rat": gilded_rat,
+    "villager_farmer": villager_farmer, "villager_woman": villager_woman, "villager_child": villager_child,
+    "villager_guard": villager_guard,
 }
 
 if __name__ == "__main__":

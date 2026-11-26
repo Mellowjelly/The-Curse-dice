@@ -110,6 +110,12 @@ static func hp_bar(hp: int, max_hp: int, height: float = 20) -> ProgressBar:
 	return bar
 
 
+## How the scenery is tinted at each time of day (values above 1 brighten).
+const TIME_TINT := {
+	"dawn": Color(1.1, 0.9, 0.85), "day": Color(1.3, 1.28, 1.2), "dusk": Color(1.05, 0.72, 0.7),
+	"night": Color(0.72, 0.78, 1.0), "": Color(1, 1, 1),
+}
+
 static var _icons := {}
 
 ## 16x16 pixel icon for a face type (assets/icons/face_<type>.png), or null.

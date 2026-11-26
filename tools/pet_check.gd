@@ -5,7 +5,7 @@ const PlayerBot = preload("res://tools/bots/player_bot.gd")
 func _init():
 	for style in ["newbie", "tactician"]:
 		var line: String = style + ": "
-		for pet_id in ["ash_crow", "grave_pup", "candle_moth", "black_cat"]:
+		for pet_id in ["ash_crow", "grave_pup", "candle_moth", "black_cat", "ember_salamander", "lantern_wisp", "gilded_rat"]:
 			var wins := 0
 			for s in 150:
 				var run := Run.new(7000 + s)

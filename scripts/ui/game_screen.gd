@@ -36,6 +36,7 @@ var _action_box: HBoxContainer
 var _modal: Control
 var _modal_box: VBoxContainer
 var _token: Control
+var _map_art: TextureRect
 
 
 func _ready() -> void:
@@ -77,6 +78,7 @@ func _build_map() -> void:
 	bg.color = UI.BG
 	_map_root.add_child(UI.full_rect(bg))
 	var map_art := TextureRect.new()
+	_map_art = map_art
 	map_art.texture = load("res://assets/backgrounds/map.png")
 	map_art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	map_art.stretch_mode = TextureRect.STRETCH_SCALE
@@ -271,6 +273,9 @@ func _on_run_changed() -> void:
 		Profile.delete_saved_run()
 		TownScreen.last_result = profile.record_run(run)
 	_header.text = "%s  -  tile %d / %d" % [run.region["name"], run.pos, run.board.size() - 1]
+	if run.time_of_day() != "":
+		_header.text += "   (%s)" % run.time_of_day().capitalize()
+	_map_art.modulate = UI.TIME_TINT.get(run.time_of_day(), Color.WHITE)
 	_stats.text = "Gold %d    Fate %d/%d" % [run.gold, run.combat.fate, Combat.MAX_FATE]
 	if not run.combat.pet.is_empty():
 		_stats.text += "    Pet: " + run.combat.pet["name"]
@@ -292,7 +297,8 @@ func _enter_combat() -> void:
 	_combat_view.show()
 	var names := {"fight": "Fight", "elite": "ELITE", "boss": "BOSS: The Chapel of Rot"}
 	var scene := "battle_boss" if run.combat_kind == "boss" else "battle_" + run.tier_at(run.pos)
-	_combat_view.bind(run.combat, names.get(run.combat_kind, "Fight"), scene)
+	var tint: Color = UI.TIME_TINT.get(run.time_of_day(), Color.WHITE)
+	_combat_view.bind(run.combat, names.get(run.combat_kind, "Fight"), scene, tint)
 
 
 func _on_combat_finished(_victory: bool) -> void:

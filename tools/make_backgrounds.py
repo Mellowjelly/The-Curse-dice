@@ -268,38 +268,49 @@ TOWN_BUILDINGS = {
 }
 
 
-def town():
+def town(day=False):
     rng = random.Random(21)
     img = Image.new("RGBA", (W, H))
-    sky(img, (10, 8, 22), (52, 34, 54), 0, 100)
-    stars(img, rng, 50, 60)
+    if day:
+        sky(img, (96, 140, 190), (196, 206, 200), 0, 100)
+    else:
+        sky(img, (10, 8, 22), (52, 34, 54), 0, 100)
+        stars(img, rng, 50, 60)
     d = ImageDraw.Draw(img)
-    d.ellipse([126, 12, 144, 30], fill=(226, 218, 196)); d.ellipse([131, 11, 147, 28], fill=(26, 20, 40))   # crescent moon
+    if day:
+        d.ellipse([128, 10, 146, 28], fill=(252, 236, 170)); d.ellipse([131, 13, 143, 25], fill=(255, 250, 220))   # sun
+        for cx, cy in ((40, 22), (90, 14), (200, 26), (270, 12)):
+            for k in range(4):
+                d.ellipse([cx + k * 7, cy - (3 if k % 2 else 0), cx + k * 7 + 14, cy + 7], fill=(236, 238, 240))  # clouds
+    else:
+        d.ellipse([126, 12, 144, 30], fill=(226, 218, 196)); d.ellipse([131, 11, 147, 28], fill=(26, 20, 40))   # crescent moon
     for i in range(9):                                                   # mountains
         x = i * 40 + rng.randint(-10, 10)
         top = 34 + rng.randint(0, 12)
-        d.polygon([(x - 30, 80), (x, top), (x + 30, 80)], fill=(34, 28, 44))
-        d.polygon([(x - 5, top + 7), (x, top), (x + 5, top + 7)], fill=(120, 112, 136))
-    ridge(d, rng, 92, 2, (26, 20, 32))
+        d.polygon([(x - 30, 80), (x, top), (x + 30, 80)], fill=(110, 120, 140) if day else (34, 28, 44))
+        d.polygon([(x - 5, top + 7), (x, top), (x + 5, top + 7)], fill=(240, 240, 248) if day else (120, 112, 136))
+    ridge(d, rng, 92, 2, (70, 96, 64) if day else (26, 20, 32))
     # far houses on the right (behind the UI panel)
     for i in range(9):
         x = 160 + i * 18 + rng.randint(-3, 3)
         h = rng.randint(14, 24)
-        d.rectangle([x, 100 - h, x + 14, 104], fill=(30, 22, 30))
-        d.polygon([(x - 2, 100 - h), (x + 7, 92 - h), (x + 16, 100 - h)], fill=(44, 26, 30))
+        d.rectangle([x, 100 - h, x + 14, 104], fill=(118, 96, 84) if day else (30, 22, 30))
+        d.polygon([(x - 2, 100 - h), (x + 7, 92 - h), (x + 16, 100 - h)], fill=(120, 58, 46) if day else (44, 26, 30))
         if rng.random() < 0.6:
-            d.rectangle([x + 5, 104 - h + 6, x + 7, 104 - h + 9], fill=(230, 170, 70))
+            d.rectangle([x + 5, 104 - h + 6, x + 7, 104 - h + 9], fill=(60, 50, 56) if day else (230, 170, 70))
     # the town wall and the gate to the Hollow Road
-    d.rectangle([160, 96, W, 106], fill=(48, 42, 50))
+    wall = (128, 120, 118) if day else (48, 42, 50)
+    d.rectangle([160, 96, W, 106], fill=wall)
     for x in range(160, W, 6):
-        d.rectangle([x, 92, x + 3, 96], fill=(48, 42, 50))
-    d.rectangle([286, 84, 310, 106], fill=(40, 34, 44)); d.rectangle([292, 92, 304, 106], fill=(12, 8, 14))
+        d.rectangle([x, 92, x + 3, 96], fill=wall)
+    d.rectangle([286, 84, 310, 106], fill=(108, 100, 100) if day else (40, 34, 44)); d.rectangle([292, 92, 304, 106], fill=(12, 8, 14))
     # cobbled square
-    d.rectangle([0, 104, W, H], fill=(40, 34, 38))
+    d.rectangle([0, 104, W, H], fill=(92, 84, 80) if day else (40, 34, 38))
     for y in range(106, H, 4):
         off = (y // 4) % 2 * 3
         for x in range(-3, W, 6):
-            d.rectangle([x + off, y, x + off + 4, y + 2], fill=rng.choice([(48, 41, 44), (44, 38, 42), (52, 45, 46)]))
+            stones = [(110, 100, 94), (102, 94, 88), (118, 108, 100)] if day else [(48, 41, 44), (44, 38, 42), (52, 45, 46)]
+            d.rectangle([x + off, y, x + off + 4, y + 2], fill=rng.choice(stones))
     # --- the six buildings ---
     x0, y0, x1, y1 = TOWN_BUILDINGS["chapel"]                            # Ruined Chapel
     d.rectangle([x0, y0 + 26, x1, y1], fill=(62, 56, 66)); d.rectangle([x0, y0 + 26, x0 + 4, y1], fill=(76, 70, 80))
@@ -348,7 +359,7 @@ def town():
     fx, fy = 64, 150
     glow = Image.new("RGBA", img.size, (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
-    for r, a in ((46, 22), (32, 30), (20, 40)):
+    for r, a in (((24, 14), (16, 18)) if day else ((46, 22), (32, 30), (20, 40))):
         gd.ellipse([fx - r, fy - r * 0.6, fx + r, fy + r * 0.6], fill=(240, 130, 40, a))
     img.alpha_composite(glow)
     d = ImageDraw.Draw(img)
@@ -361,7 +372,7 @@ def town():
     vig = Image.new("RGBA", img.size, (0, 0, 0, 0))
     vd = ImageDraw.Draw(vig)
     for i in range(10):
-        vd.rectangle([i, i, W - 1 - i, H - 1 - i], outline=(0, 0, 0, 120 - i * 11))
+        vd.rectangle([i, i, W - 1 - i, H - 1 - i], outline=(0, 0, 0, (60 if day else 120) - i * (5 if day else 11)))
     img.alpha_composite(vig)
     return img
 
@@ -414,7 +425,7 @@ if __name__ == "__main__":
     os.makedirs("assets/backgrounds", exist_ok=True)
     os.makedirs("assets/icons", exist_ok=True)
     for name, fn in {"battle_early": battle_early, "battle_mid": battle_mid, "battle_late": battle_late,
-                     "battle_boss": battle_boss, "map": world_map, "town": town}.items():
+                     "battle_boss": battle_boss, "map": world_map, "town": town, "town_day": lambda: town(True)}.items():
         fn().convert("RGB").save(f"assets/backgrounds/{name}.png")
         print("wrote", name)
     for name, fn in TILE_ICONS.items():

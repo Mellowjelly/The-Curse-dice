@@ -34,6 +34,7 @@ var _overlay_btn: Button
 var _banner: Label
 var _pet_label: Label
 var _bg_art: TextureRect
+var _pet_slot: Control
 var _particles: CPUParticles2D
 var _pulse: Tween
 var _victory := false
@@ -55,8 +56,9 @@ func _ready() -> void:
 
 
 ## Attach a combat. Call before (or right after) start_battle.
-func bind(c: Combat, fight_title: String, background: String = "battle_early") -> void:
+func bind(c: Combat, fight_title: String, background: String = "battle_early", tint: Color = Color.WHITE) -> void:
 	_set_background(background)
+	_bg_art.modulate = tint
 	if combat != null:
 		for pair in [[combat.log_added, _on_log], [combat.state_changed, _refresh],
 				[combat.battle_ended, _on_battle_ended], [combat.damaged, _on_damaged],
@@ -78,6 +80,12 @@ func bind(c: Combat, fight_title: String, background: String = "battle_early") -
 	_overlay.hide()
 	_banner.modulate.a = 0.0
 	_last_round = -1
+	for ch in _pet_slot.get_children():
+		ch.queue_free()
+	if not combat.pet.is_empty():
+		var ps := UnitSprite.create(combat.pet["id"], 40, false)
+		ps.position = Vector2(0, -8)
+		_pet_slot.add_child(ps)
 	_log.append_text("\n[color=#c9a227][b]== %s ==[/b][/color]\n" % fight_title)
 	_on_log("--- Round %d ---" % combat.round_number)
 	if not combat.pet.is_empty() and combat.pet["passive"] in ["first_strike", "fate_start"]:
@@ -142,6 +150,9 @@ func _build_ui() -> void:
 	party_head.add_child(party_lbl)
 	_pet_label = UI.label("", 15, Color("#b39ddb"))
 	party_head.add_child(_pet_label)
+	_pet_slot = Control.new()
+	_pet_slot.custom_minimum_size = Vector2(40, 32)
+	party_head.add_child(_pet_slot)
 	_hero_row = HBoxContainer.new()
 	_hero_row.add_theme_constant_override("separation", 12)
 	_hero_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
