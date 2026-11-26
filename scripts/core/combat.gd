@@ -259,6 +259,26 @@ func use_skill(hero_index: int) -> bool:
 			if rite_cost > 0:
 				h["hp"] -= rite_cost
 				_log("%s's faith is paid in blood (-%d HP)" % [who, rite_cost])
+		"backstab":
+			var t := _get_target()
+			_damage(t, BACKSTAB_DAMAGE, who, true)
+			_pay_hp(h, 2, "The grave takes its due from %s" % who)
+		"miasma":
+			for m in monsters:
+				if is_alive(m):
+					m["burn"] = min(MAX_BURN, m["burn"] + 3)
+			_log("A sickly green fog: every enemy is burning")
+			_pay_hp(h, 2, "The plague bites %s" % who)
+		"loaded_dice":
+			var best := 0
+			for fi in h["faces"].size():
+				if _face_power(h["faces"][fi]) > _face_power(h["faces"][best]):
+					best = fi
+			h["face"] = best
+			h["locked"] = true
+			fate = min(MAX_FATE, fate + 2)
+			_log("%s's die lands on %s. +2 Fate" % [who, String(h["faces"][best]["type"]).to_upper()])
+			_pay_hp(h, 3, "Luck is never free for %s" % who)
 		_:
 			push_error("Unknown skill id: %s" % h["skill"]["id"])
 	if _all_dead(monsters):
@@ -347,6 +367,21 @@ func _start_round() -> void:
 		target_index = _first_alive_index(monsters)
 	_log("--- Round %d ---" % round_number)
 	state_changed.emit()
+
+
+const BACKSTAB_DAMAGE := 9
+
+
+## Pays an HP price for a skill; never kills the hero.
+func _pay_hp(h: Dictionary, amount: int, text: String) -> void:
+	var cost: int = min(amount, h["hp"] - 1)
+	if cost > 0:
+		h["hp"] -= cost
+		_log("%s (-%d HP)" % [text, cost])
+
+
+static func _face_power(f: Dictionary) -> int:
+	return 0 if f["type"] == "blank" else int(f["value"])
 
 
 func _gain_charge(combos: Dictionary) -> void:

@@ -38,6 +38,7 @@ var _help: Control
 
 func _ready() -> void:
 	_build()
+	load("res://scripts/ui/sfx.gd").music(self)
 
 
 func _build() -> void:
@@ -88,7 +89,7 @@ func _build() -> void:
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
 
-	var version := _label("Prototype 0.5", 14, COL_DIM)
+	var version := _label("Prototype 0.6", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
 

@@ -36,6 +36,9 @@ func _init() -> void:
 	test_profile_and_quests()
 	test_run_save_load()
 	test_town_upgrades_apply()
+	test_summon_roll()
+	test_party_and_new_skills()
+	test_gates_stop_movement()
 	print("\n%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -48,7 +51,7 @@ func check(cond: bool, message: String) -> void:
 
 
 func _heroes() -> Array:
-	return GameData.load_heroes().map(func(d): return Combat.make_unit(d))
+	return GameData.load_heroes().filter(func(d): return d.get("starter", false)).map(func(d): return Combat.make_unit(d))
 
 
 func _monster(id: String) -> Dictionary:
@@ -367,7 +370,7 @@ func test_run_save_load() -> void:
 
 func test_town_upgrades_apply() -> void:
 	var run := Run.new(22, {"chapel": 2, "kennel": 1, "smithy": 1, "carver": 2, "market": 1, "fortune": 1})
-	check(run.heroes[0]["max_hp"] == 28 + 4, "Chapel adds max HP")
+	check(run.heroes[0]["max_hp"] == 28 + 2, "Chapel adds max HP")
 	check(run.pet_offers.size() == 3, "Kennel offers 3 pets")
 	run.choose_pet(0)
 	check(run.phase == "loot" and run.weapon_offers.size() == 1 and run.weapon_offers[0]["rarity"] == "common", "Gravesmith offers a common weapon")
@@ -377,3 +380,68 @@ func test_town_upgrades_apply() -> void:
 	check(run.phase == "map", "then the road begins")
 	check(run.price({"cost": 20}) == 17, "Night Market discounts prices")
 	check(run.combat.bonus_fate_start == 1, "Fortune Teller adds starting Fate")
+
+
+func test_summon_roll() -> void:
+	var path := "user://test_summon.save"
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	var p := Profile.new(path)
+	check(p.owned_heroes.size() == 3, "3 starter heroes are owned from the start")
+	check(not p.can_summon(), "summoning needs Grave Dice")
+	p.grave_dice = 100
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	var heroes_got := 0
+	var since := 0
+	var max_gap := 0
+	for i in 30:
+		var r := p.summon_roll(rng)
+		since += 1
+		if r["kind"] == "hero":
+			heroes_got += 1
+			max_gap = max(max_gap, since)
+			since = 0
+	check(p.owned_heroes.size() == 6, "30 summons unlock all 3 new heroes (pity)")
+	check(max_gap <= int(p.summon["pity"]), "pity guarantees a hero within %d summons (gap %d)" % [p.summon["pity"], max_gap])
+	check(p.grave_dice == 10, "each summon costs 3 Grave Dice")
+	var run := Run.new(30, p.run_options(), ["rook", "vael", "mordecai"])
+	check(run.heroes.map(func(h): return h["id"]) == ["rook", "vael", "mordecai"], "the chosen party is used")
+	var relics := run.weapons_db.filter(func(w): return w.get("locked", false))
+	check(relics.size() == p.unlocked_weapons.size(), "only unlocked relics appear on the road")
+	check(not Run.new(31).weapons_db.any(func(w): return w.get("locked", false)), "locked relics never drop without unlocking")
+
+
+func test_party_and_new_skills() -> void:
+	var by_id := {}
+	for d in GameData.load_heroes():
+		by_id[d["id"]] = d
+	var c := Combat.new(32)
+	var party := ["rook", "vael", "mordecai"].map(func(id): return Combat.make_unit(by_id[id]))
+	c.start_battle(party, [_monster("rotting_bishop")])
+	var boss: Dictionary = c.monsters[0]
+	boss["shield"] = 5
+	c.heroes[0]["charge"] = 4
+	c.use_skill(0)
+	check(boss["hp"] == boss["max_hp"] - Combat.BACKSTAB_DAMAGE, "Backstab ignores shields")
+	c.heroes[1]["charge"] = 4
+	c.use_skill(1)
+	check(boss["burn"] == 3, "Miasma sets enemies burning")
+	c.heroes[2]["charge"] = 3
+	c.fate = 0
+	c.use_skill(2)
+	check(Combat.current_face(c.heroes[2])["value"] == 8 and c.fate == 2, "Loaded Dice picks the best face and gives Fate")
+
+
+func test_gates_stop_movement() -> void:
+	var run := Run.new(40)
+	check(run.board[21]["type"] == "shop" and run.board[21].get("gate", false), "tile 21 is a shop gate")
+	check(run.board[30]["type"] == "rest" and run.board[30].get("gate", false), "tile 30 is a camp gate")
+	run.pos = 18
+	check(run.destination(6) == 21, "moving past the shop gate stops at the shop")
+	run.pos = 27
+	check(run.destination(5) == 30, "moving past the camp gate stops at the camp")
+	var cursed := Run.new(41, {"curse": 2})
+	var plain := Run.new(41)
+	var g: Dictionary = plain.monster_defs["ghoul"]
+	check(cursed.scaled_monster(g, "fight", "early")["hp"] > plain.scaled_monster(g, "fight", "early")["hp"], "Curse makes enemies tougher")

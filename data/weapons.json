@@ -22,5 +22,11 @@
 	{ "id": "widows_lantern", "name": "Widow's Lantern", "rarity": "cursed", "desc": "CURSED: -3 max HP. Its flame never dies.",
 		"max_hp": -3, "faces": [{ "type": "fire", "value": 5 }, { "type": "cleave", "value": 4 }] },
 	{ "id": "oathkeeper", "name": "Oathkeeper", "rarity": "cursed", "desc": "CURSED: -4 max HP. It remembers every broken vow.",
-		"max_hp": -4, "faces": [{ "type": "guard", "value": 5 }, { "type": "attack", "value": 6 }] }
+		"max_hp": -4, "faces": [{ "type": "guard", "value": 5 }, { "type": "attack", "value": 6 }] },
+	{ "id": "bishops_crozier", "name": "Bishop's Crozier", "rarity": "rare", "locked": true, "desc": "RELIC. Taken from the Chapel. It still hums hymns.",
+		"faces": [{ "type": "guard", "value": 4 }, { "type": "fire", "value": 4 }] },
+	{ "id": "gamblers_bones", "name": "Gambler's Bones", "rarity": "rare", "locked": true, "desc": "RELIC. Two knucklebones that never land the same way twice.",
+		"faces": [{ "type": "attack", "value": 7 }, { "type": "attack", "value": 1 }] },
+	{ "id": "plague_lance", "name": "Plague Lance", "rarity": "rare", "locked": true, "desc": "RELIC. The tip is always warm.",
+		"faces": [{ "type": "fire", "value": 4 }, { "type": "cleave", "value": 3 }] }
 ]

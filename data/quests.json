@@ -5,7 +5,7 @@
 	{ "id": "rat_catcher", "name": "Rat Catcher", "desc": "Destroy 40 Plague Rats (all runs).", "stat": "kills_plague_rat", "goal": 40, "reward": 20 },
 	{ "id": "elite_slayer", "name": "Elite Slayer", "desc": "Win 3 elite fights in a single run.", "stat": "run_elites", "goal": 3, "reward": 30 },
 	{ "id": "dice_sculptor", "name": "Dice Sculptor", "desc": "Carve 8 dice in a single run.", "stat": "run_carves", "goal": 8, "reward": 30 },
-	{ "id": "twist_of_fate", "name": "Twist of Fate", "desc": "Use Fate Twist 10 times (all runs).", "stat": "fate_twists", "goal": 10, "reward": 25 },
+	{ "id": "twist_of_fate", "name": "Twist of Fate", "desc": "Use Fate Twist 3 times (all runs). Fill your Fate to 4, then click a face under a die.", "stat": "fate_twists", "goal": 3, "reward": 25 },
 	{ "id": "cursed_victory", "name": "Bearer of Curses", "desc": "Defeat the Bishop while a hero carries a cursed weapon.", "stat": "cursed_wins", "goal": 1, "reward": 40 },
 	{ "id": "bishop_slayer", "name": "The Bishop Falls", "desc": "Defeat the Rotting Bishop.", "stat": "wins", "goal": 1, "reward": 50 },
 	{ "id": "bishop_thrice", "name": "Thrice Damned", "desc": "Defeat the Rotting Bishop 3 times.", "stat": "wins", "goal": 3, "reward": 60 }

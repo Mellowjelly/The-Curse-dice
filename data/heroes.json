@@ -17,17 +17,19 @@
 			{ "type": "attack", "value": 2 },
 			{ "type": "attack", "value": 3 },
 			{ "type": "shield", "value": 3 },
+			{ "type": "blank", "value": 0 },
 			{ "type": "shield", "value": 4 },
-			{ "type": "guard", "value": 2 },
-			{ "type": "blank", "value": 0 }
-		]
+			{ "type": "guard", "value": 2 }
+		],
+		"starter": true,
+		"lore": "He swore to protect a king. The king is dead; the oath is not."
 	},
 	{
 		"id": "lys",
 		"skill": {"id": "hollow_flame", "name": "Hollow Flame", "cost": 5, "desc": "Deal 4 to ALL enemies (ignores shields), add 1 burn. Costs Lys 3 HP."},
 		"name": "Lys the Hollow",
 		"role": "mage",
-		"hp": 18,
+		"hp": 20,
 		"carve_pool": [
 			{ "type": "fire", "value": 3 },
 			{ "type": "attack", "value": 4 },
@@ -39,11 +41,13 @@
 		"faces": [
 			{ "type": "fire", "value": 2 },
 			{ "type": "fire", "value": 3 },
-			{ "type": "attack", "value": 4 },
-			{ "type": "blood", "value": 6 },
 			{ "type": "blank", "value": 0 },
+			{ "type": "blood", "value": 6 },
+			{ "type": "attack", "value": 4 },
 			{ "type": "blank", "value": 0 }
-		]
+		],
+		"starter": true,
+		"lore": "She traded her soul for fire. Now she is hollow, and always cold."
 	},
 	{
 		"id": "aldric",
@@ -62,10 +66,87 @@
 		"faces": [
 			{ "type": "heal", "value": 3 },
 			{ "type": "heal", "value": 4 },
-			{ "type": "heal", "value": 2 },
+			{ "type": "blank", "value": 0 },
 			{ "type": "guard", "value": 1 },
+			{ "type": "heal", "value": 2 },
+			{ "type": "attack", "value": 2 }
+		],
+		"starter": true,
+		"lore": "He prayed for thirty years. On the thirty-first, nothing answered."
+	},
+	{
+		"id": "rook",
+		"skill": {"id": "backstab", "name": "Backstab", "cost": 4, "desc": "Deal 9 to the target, ignoring shields. Costs Rook 2 HP."},
+		"name": "Rook the Gravedigger",
+		"role": "assassin",
+		"hp": 22,
+		"starter": false,
+		"lore": "He buried the town twice. The second time, some of them were still breathing.",
+		"carve_pool": [
+			{ "type": "attack", "value": 4 },
+			{ "type": "cleave", "value": 2 },
+			{ "type": "blood", "value": 6 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "fire", "value": 2 },
+			{ "type": "attack", "value": 5 }
+		],
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "shield", "value": 2 },
+			{ "type": "cleave", "value": 2 },
+			{ "type": "attack", "value": 2 }
+		]
+	},
+	{
+		"id": "vael",
+		"skill": {"id": "miasma", "name": "Miasma", "cost": 4, "desc": "Every enemy starts burning (+3 burn, max 4). Costs Vael 2 HP."},
+		"name": "Sister Vael",
+		"role": "plague doctor",
+		"hp": 21,
+		"starter": false,
+		"lore": "Her beak mask hides a smile. The plague taught her that fire cures everything.",
+		"carve_pool": [
+			{ "type": "fire", "value": 3 },
+			{ "type": "heal", "value": 3 },
+			{ "type": "guard", "value": 2 },
+			{ "type": "fire", "value": 4 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "cleave", "value": 1 }
+		],
+		"faces": [
+			{ "type": "fire", "value": 2 },
+			{ "type": "fire", "value": 3 },
+			{ "type": "heal", "value": 2 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "shield", "value": 2 },
+			{ "type": "fire", "value": 1 }
+		]
+	},
+	{
+		"id": "mordecai",
+		"skill": {"id": "loaded_dice", "name": "Loaded Dice", "cost": 3, "desc": "Turn Mordecai's die to its best face and gain 2 Fate. Costs Mordecai 3 HP."},
+		"name": "Mordecai the Gambler",
+		"role": "gambler",
+		"hp": 23,
+		"starter": false,
+		"lore": "He bet his shadow at a crossroads and lost. He has been winning ever since.",
+		"carve_pool": [
+			{ "type": "attack", "value": 6 },
+			{ "type": "blood", "value": 9 },
+			{ "type": "guard", "value": 2 },
+			{ "type": "attack", "value": 1 },
+			{ "type": "fire", "value": 5 },
+			{ "type": "shield", "value": 4 }
+		],
+		"faces": [
 			{ "type": "attack", "value": 2 },
-			{ "type": "blank", "value": 0 }
+			{ "type": "attack", "value": 6 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "blood", "value": 8 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "attack", "value": 3 }
 		]
 	}
 ]

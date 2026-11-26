@@ -103,7 +103,8 @@ func _snapshot(run: Run) -> String:
 	var ms: Array[String] = []
 	for m in c.monsters:
 		if Combat.is_alive(m):
-			ms.append("%s %d/%dhp (%s)" % [m["name"], m["hp"], m["max_hp"], c.intent_text(m)])
+			ms.append("%s %d/%dhp%s (%s)" % [m["name"], m["hp"], m["max_hp"],
+				(" shield %d" % m["shield"]) if m["shield"] > 0 else "", c.intent_text(m)])
 	return ">> STATE R%d  heroes: %s | enemies: %s | fate %d" % [c.round_number, ", ".join(hs), ", ".join(ms), c.fate]
 
 

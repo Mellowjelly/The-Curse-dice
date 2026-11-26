@@ -3,9 +3,10 @@
 		{
 			"id": "chapel",
 			"name": "Ruined Chapel",
-			"desc": "+2 max HP for every hero per level.",
+			"desc": "+1 max HP for every hero per level.",
 			"costs": [
-				90,
+				60,
+				120,
 				180
 			]
 		},

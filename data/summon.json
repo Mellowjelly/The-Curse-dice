@@ -1,0 +1,27 @@
+{
+	"cost": 3,
+	"pity": 6,
+	"rates": [
+		{
+			"kind": "hero",
+			"weight": 20
+		},
+		{
+			"kind": "relic",
+			"weight": 30
+		},
+		{
+			"kind": "embers",
+			"weight": 50,
+			"amount": 20
+		}
+	],
+	"duplicate_embers": {
+		"hero": 40,
+		"relic": 25
+	},
+	"dice_per_run": 1,
+	"dice_per_elite": 1,
+	"dice_per_victory": 2,
+	"dice_per_quest": 1
+}

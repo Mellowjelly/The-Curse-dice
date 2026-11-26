@@ -4,8 +4,23 @@
 		"title": "The Bleeding Altar",
 		"text": "A stone altar weeps fresh blood. Carved into it: a die with a single eye. It wants to be fed.",
 		"options": [
-			{ "label": "Feed it (one hero loses 6 HP). Carve a die.", "effects": [{ "op": "hp", "who": "healthiest", "value": -6 }, { "op": "carve" }] },
-			{ "label": "Walk away.", "effects": [] }
+			{
+				"label": "Feed it (one hero loses 6 HP). Carve a die.",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "healthiest",
+						"value": -6
+					},
+					{
+						"op": "carve"
+					}
+				]
+			},
+			{
+				"label": "Walk away.",
+				"effects": []
+			}
 		]
 	},
 	{
@@ -13,8 +28,36 @@
 		"title": "A Hanged Man's Purse",
 		"text": "A body sways from an oak. A fat purse hangs from his belt. His fingers twitch.",
 		"options": [
-			{ "label": "Cut him down and take the purse.", "effects": [{ "op": "gold", "value": 25 }, { "op": "chance", "p": 0.4, "win": [{ "op": "fight", "pool": "early", "text": "He was not quite dead." }], "lose": [] }] },
-			{ "label": "Leave the dead in peace.", "effects": [{ "op": "fate", "value": 1 }] }
+			{
+				"label": "Cut him down and take the purse.",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 25
+					},
+					{
+						"op": "chance",
+						"p": 0.4,
+						"win": [
+							{
+								"op": "fight",
+								"pool": "early",
+								"text": "He was not quite dead."
+							}
+						],
+						"lose": []
+					}
+				]
+			},
+			{
+				"label": "Leave the dead in peace.",
+				"effects": [
+					{
+						"op": "fate",
+						"value": 1
+					}
+				]
+			}
 		]
 	},
 	{
@@ -22,8 +65,25 @@
 		"title": "The Pilgrim's Fire",
 		"text": "An old pilgrim with no eyes tends a small fire. \"Sit,\" she says. \"Or ask, and I will read your dice.\"",
 		"options": [
-			{ "label": "Rest by the fire (all heroes heal 6).", "effects": [{ "op": "hp", "who": "all", "value": 6 }] },
-			{ "label": "Ask for a reading (+3 Fate).", "effects": [{ "op": "fate", "value": 3 }] }
+			{
+				"label": "Rest by the fire (all heroes heal 6).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "all",
+						"value": 6
+					}
+				]
+			},
+			{
+				"label": "Ask for a reading (+3 Fate).",
+				"effects": [
+					{
+						"op": "fate",
+						"value": 3
+					}
+				]
+			}
 		]
 	},
 	{
@@ -31,8 +91,40 @@
 		"title": "The Whispering Die",
 		"text": "A black die lies in the mud, whispering your name. It is warm.",
 		"options": [
-			{ "label": "Roll it. (50%: carve a die and +2 Fate. 50%: a hero loses 8 HP.)", "effects": [{ "op": "chance", "p": 0.5, "win": [{ "op": "carve" }, { "op": "fate", "value": 2 }], "lose": [{ "op": "hp", "who": "random", "value": -8 }] }] },
-			{ "label": "Bury it (+1 Fate).", "effects": [{ "op": "fate", "value": 1 }] }
+			{
+				"label": "Roll it. (50%: carve a die and +2 Fate. 50%: a hero loses 8 HP.)",
+				"effects": [
+					{
+						"op": "chance",
+						"p": 0.5,
+						"win": [
+							{
+								"op": "carve"
+							},
+							{
+								"op": "fate",
+								"value": 2
+							}
+						],
+						"lose": [
+							{
+								"op": "hp",
+								"who": "random",
+								"value": -8
+							}
+						]
+					}
+				]
+			},
+			{
+				"label": "Bury it (+1 Fate).",
+				"effects": [
+					{
+						"op": "fate",
+						"value": 1
+					}
+				]
+			}
 		]
 	},
 	{
@@ -40,8 +132,24 @@
 		"title": "The Ossuary Merchant",
 		"text": "A smiling man in a coat of finger bones. \"I buy what you won't miss. A little life, for a lot of gold.\"",
 		"options": [
-			{ "label": "Sell life (a hero loses 5 max HP) for 50 gold.", "effects": [{ "op": "max_hp", "who": "healthiest", "value": -5 }, { "op": "gold", "value": 50 }] },
-			{ "label": "Refuse.", "effects": [] }
+			{
+				"label": "Sell life (a hero loses 5 max HP) for 50 gold.",
+				"effects": [
+					{
+						"op": "max_hp",
+						"who": "healthiest",
+						"value": -5
+					},
+					{
+						"op": "gold",
+						"value": 50
+					}
+				]
+			},
+			{
+				"label": "Refuse.",
+				"effects": []
+			}
 		]
 	},
 	{
@@ -49,8 +157,24 @@
 		"title": "The Drowned Bell",
 		"text": "A church bell rises from a black pond. Its rope is wet and cold.",
 		"options": [
-			{ "label": "Ring it (all heroes lose 3 HP, +5 Fate).", "effects": [{ "op": "hp", "who": "all", "value": -3 }, { "op": "fate", "value": 5 }] },
-			{ "label": "Do not wake what sleeps below.", "effects": [] }
+			{
+				"label": "Ring it (all heroes lose 3 HP, +5 Fate).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "all",
+						"value": -3
+					},
+					{
+						"op": "fate",
+						"value": 5
+					}
+				]
+			},
+			{
+				"label": "Do not wake what sleeps below.",
+				"effects": []
+			}
 		]
 	},
 	{
@@ -58,8 +182,30 @@
 		"title": "Crow Feast",
 		"text": "Crows tear at a fallen soldier. Something bigger moves behind them.",
 		"options": [
-			{ "label": "Chase them off (fight).", "effects": [{ "op": "fight", "pool": "mid", "text": "Something bigger was waiting." }] },
-			{ "label": "Search the body quickly (+12 gold, a hero loses 3 HP).", "effects": [{ "op": "gold", "value": 12 }, { "op": "hp", "who": "random", "value": -3 }] }
+			{
+				"label": "Chase them off (fight).",
+				"effects": [
+					{
+						"op": "fight",
+						"pool": "mid",
+						"text": "Something bigger was waiting."
+					}
+				]
+			},
+			{
+				"label": "Search the body quickly (+12 gold, a hero loses 3 HP).",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 12
+					},
+					{
+						"op": "hp",
+						"who": "random",
+						"value": -3
+					}
+				]
+			}
 		]
 	},
 	{
@@ -67,8 +213,29 @@
 		"title": "The Confessor",
 		"text": "A priest without a face sits in a ruined booth. \"Confess, and be made whole. The church accepts donations.\"",
 		"options": [
-			{ "label": "Confess and donate 20 gold (all heal 10, revive the fallen).", "require_gold": 20, "effects": [{ "op": "gold", "value": -20 }, { "op": "revive", "percent": 50 }, { "op": "hp", "who": "all", "value": 10 }] },
-			{ "label": "You have nothing to confess.", "effects": [] }
+			{
+				"label": "Confess and donate 20 gold (all heal 10, revive the fallen).",
+				"require_gold": 20,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -20
+					},
+					{
+						"op": "revive",
+						"percent": 50
+					},
+					{
+						"op": "hp",
+						"who": "all",
+						"value": 10
+					}
+				]
+			},
+			{
+				"label": "You have nothing to confess.",
+				"effects": []
+			}
 		]
 	},
 	{
@@ -76,8 +243,28 @@
 		"title": "Cracked Shrine of Fate",
 		"text": "Six stone faces, five of them broken. The last one still smiles.",
 		"options": [
-			{ "label": "Pray (all heroes lose 2 max HP). Carve a die.", "effects": [{ "op": "max_hp", "who": "all", "value": -2 }, { "op": "carve" }] },
-			{ "label": "Steal the offerings (+20 gold).", "effects": [{ "op": "gold", "value": 20 }] }
+			{
+				"label": "Pray (all heroes lose 2 max HP). Carve a die.",
+				"effects": [
+					{
+						"op": "max_hp",
+						"who": "all",
+						"value": -2
+					},
+					{
+						"op": "carve"
+					}
+				]
+			},
+			{
+				"label": "Steal the offerings (+20 gold).",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 20
+					}
+				]
+			}
 		]
 	},
 	{
@@ -85,8 +272,167 @@
 		"title": "The Wounded Knight",
 		"text": "A knight bleeds against a milestone. \"Take my blade's secret,\" he gasps, \"if you end my pain.\"",
 		"options": [
-			{ "label": "Grant him mercy. Carve a die.", "effects": [{ "op": "carve" }] },
-			{ "label": "Bandage him (-10 gold, +2 Fate).", "require_gold": 10, "effects": [{ "op": "gold", "value": -10 }, { "op": "fate", "value": 2 }] }
+			{
+				"label": "Grant him mercy. Carve a die.",
+				"effects": [
+					{
+						"op": "carve"
+					}
+				]
+			},
+			{
+				"label": "Bandage him (-10 gold, +2 Fate).",
+				"require_gold": 10,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -10
+					},
+					{
+						"op": "fate",
+						"value": 2
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "weeping_statue",
+		"title": "The Weeping Statue",
+		"text": "A stone saint cries real tears into a bowl. The water is warm and smells of iron.",
+		"options": [
+			{
+				"label": "Drink (all heroes heal 8, one hero loses 3 max HP).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "all",
+						"value": 8
+					},
+					{
+						"op": "max_hp",
+						"who": "random",
+						"value": -3
+					}
+				]
+			},
+			{
+				"label": "Fill a flask for later (+2 Fate).",
+				"effects": [
+					{
+						"op": "fate",
+						"value": 2
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "gravediggers_bet",
+		"title": "The Gravedigger's Bet",
+		"text": "\"Double or nothing,\" grins a man leaning on a spade. \"Your gold against my grave goods.\"",
+		"options": [
+			{
+				"label": "Bet 15 gold (50%: +40 gold. 50%: lose it).",
+				"require_gold": 15,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -15
+					},
+					{
+						"op": "chance",
+						"p": 0.5,
+						"win": [
+							{
+								"op": "gold",
+								"value": 40
+							}
+						],
+						"lose": []
+					}
+				]
+			},
+			{
+				"label": "Ask what is in the graves (a carving, a hero loses 4 HP).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "healthiest",
+						"value": -4
+					},
+					{
+						"op": "carve"
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "lost_child",
+		"title": "A Lost Child",
+		"text": "A small girl stands in the road, holding a lantern. She asks you to walk her home. She has no shadow.",
+		"options": [
+			{
+				"label": "Walk her home.",
+				"effects": [
+					{
+						"op": "chance",
+						"p": 0.5,
+						"win": [
+							{
+								"op": "revive",
+								"percent": 60
+							},
+							{
+								"op": "hp",
+								"who": "all",
+								"value": 5
+							}
+						],
+						"lose": [
+							{
+								"op": "fight",
+								"pool": "mid",
+								"text": "Her home is full of teeth."
+							}
+						]
+					}
+				]
+			},
+			{
+				"label": "Do not look into the lantern. Walk on.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "burning_library",
+		"title": "The Burning Library",
+		"text": "Books scream as they burn. One of them is bound in skin and is not burning at all.",
+		"options": [
+			{
+				"label": "Take the book (carve a die, a hero loses 5 HP).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "random",
+						"value": -5
+					},
+					{
+						"op": "carve"
+					}
+				]
+			},
+			{
+				"label": "Save what you can (+20 gold).",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 20
+					}
+				]
+			}
 		]
 	}
 ]

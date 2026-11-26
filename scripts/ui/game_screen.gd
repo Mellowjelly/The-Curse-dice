@@ -9,6 +9,7 @@ const CombatView = preload("res://scripts/ui/combat_view.gd")
 const UI = preload("res://scripts/ui/ui_kit.gd")
 const Profile = preload("res://scripts/core/profile.gd")
 const TownScreen = preload("res://scripts/ui/town_screen.gd")
+const Sfx = preload("res://scripts/ui/sfx.gd")
 
 const TOWN_SCENE := "res://scenes/town.tscn"
 
@@ -41,6 +42,7 @@ func _ready() -> void:
 	add_child(UI.full_rect(_combat_view))
 	_combat_view.hide()
 	_combat_view.finished.connect(_on_combat_finished)
+	Sfx.music(self)
 	profile = Profile.new()
 	profile.load_profile()
 	var saved := Profile.load_run_data()
@@ -52,7 +54,7 @@ func _ready() -> void:
 
 func new_run() -> void:
 	Profile.delete_saved_run()
-	_attach(Run.new(-1, profile.levels))
+	_attach(Run.new(-1, profile.run_options(), profile.party))
 
 
 func _attach(r: Run) -> void:
@@ -241,7 +243,7 @@ func _refresh_actions() -> void:
 	if run.phase != "map":
 		return
 	if run.move_options.is_empty():
-		var roll := UI.choice_button("Roll the bone dice", func(): run.roll_move(), UI.GOLD)
+		var roll := UI.choice_button("Roll the bone dice", func(): Sfx.play(self, "dice"); run.roll_move(), UI.GOLD)
 		roll.autowrap_mode = TextServer.AUTOWRAP_OFF
 		roll.custom_minimum_size = Vector2(300, 80)
 		_action_box.add_child(roll)
@@ -370,7 +372,7 @@ func _refresh_modal() -> void:
 func _end_buttons() -> void:
 	var res: Dictionary = TownScreen.last_result
 	if not res.is_empty():
-		var t := "+%d Soul Embers" % int(res["embers"])
+		var t := "+%d Soul Embers, +%d Grave Dice" % [int(res["embers"]), int(res.get("dice", 0))]
 		for q in res["quests"]:
 			t += "\nQuest complete: %s" % q["name"]
 		_modal_text(t, Color("#e08a3c"))

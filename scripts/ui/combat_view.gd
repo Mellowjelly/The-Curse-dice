@@ -7,6 +7,7 @@ signal finished(victory: bool)
 
 const Combat = preload("res://scripts/core/combat.gd")
 const UI = preload("res://scripts/ui/ui_kit.gd")
+const Sfx = preload("res://scripts/ui/sfx.gd")
 
 const ROLL_ANIM_TIME := 0.35
 
@@ -60,8 +61,11 @@ func bind(c: Combat, fight_title: String) -> void:
 	combat.phase_changed.connect(_on_phase_changed)
 	_overlay.hide()
 	_banner.modulate.a = 0.0
-	_log.clear()
 	_last_round = -1
+	_log.append_text("\n[color=#c9a227][b]== %s ==[/b][/color]\n" % fight_title)
+	_on_log("--- Round %d ---" % combat.round_number)
+	if not combat.pet.is_empty() and combat.pet["passive"] in ["first_strike", "fate_start"]:
+		_on_log("%s is ready." % combat.pet["name"])
 	_refresh()
 
 
@@ -172,6 +176,15 @@ func _build_ui() -> void:
 # ---------------------------------------------------------------- events
 
 func _on_log(text: String) -> void:
+	# Sound hooks on the big moments.
+	if text.begins_with("COMBO!"):
+		Sfx.play(self, "triple")
+	elif text.begins_with("Combo:") or text.contains("Fate twists") or text.contains("Fate overflows"):
+		Sfx.play(self, "fate")
+	elif text.begins_with("* "):
+		Sfx.play(self, "skill")
+	elif text.contains("rises"):
+		Sfx.play(self, "fate", -2.0)
 	if text.begins_with("!!"):
 		text = "[color=#e0573f][b]%s[/b][/color]" % text
 	elif text.begins_with("*"):
@@ -183,6 +196,7 @@ func _on_log(text: String) -> void:
 
 func _on_battle_ended(victory: bool) -> void:
 	_victory = victory
+	Sfx.play(self, "victory" if victory else "defeat")
 	_overlay_text.text = "Victory!" if victory else "Your party has fallen.\nThe dice show no mercy."
 	_overlay_text.add_theme_color_override("font_color", UI.GOLD if victory else UI.BLOOD)
 	# Let the last floating numbers play before covering the screen.
@@ -190,10 +204,13 @@ func _on_battle_ended(victory: bool) -> void:
 
 
 func _on_damaged(unit: Dictionary, amount: int, blocked: int) -> void:
+	if _pending_numbers.is_empty():
+		Sfx.play(self, "hit", -10.0)
 	_pending_numbers.append([unit, amount, blocked])
 
 
 func _on_phase_changed(_unit: Dictionary, text: String) -> void:
+	Sfx.play(self, "phase", 0.0)
 	_show_banner(text)
 
 
@@ -209,6 +226,7 @@ func _show_banner(text: String) -> void:
 
 func _start_roll_anim() -> void:
 	_rolling = ROLL_ANIM_TIME
+	Sfx.play(self, "dice", -8.0)
 
 
 func _process(delta: float) -> void:
@@ -372,8 +390,9 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	var face := Combat.current_face(h)
 	var value := Combat.effective_value(face, combos)
 	var die := Button.new()
-	die.custom_minimum_size = Vector2(0, 70)
-	die.add_theme_font_size_override("font_size", 22)
+	var twisting := combat.fate >= Combat.FATE_TWIST_COST and not combat.finished
+	die.custom_minimum_size = Vector2(0, 48 if twisting else 70)
+	die.add_theme_font_size_override("font_size", 20 if twisting else 22)
 	var face_text: String = UI.FACE_NAMES[face["type"]]
 	if face["type"] != "blank":
 		face_text += "  %d" % value
@@ -393,7 +412,13 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	box.add_child(die)
 	if combat.fate >= Combat.FATE_TWIST_COST and not combat.finished:
 		# Fate Twist: click any face to set the die to it.
-		box.add_child(UI.label("Fate Twist (-%d): pick a face" % Combat.FATE_TWIST_COST, 12, UI.GOLD))
+		var tl := UI.label("Fate Twist (-%d): click a face to set this die" % Combat.FATE_TWIST_COST, 12, UI.GOLD)
+		if combat.fate >= Combat.MAX_FATE:
+			tl.text = "FATE IS FULL - twist a die! (-%d)" % Combat.FATE_TWIST_COST
+			var tw := tl.create_tween().set_loops()
+			tw.tween_property(tl, "modulate:a", 0.35, 0.5)
+			tw.tween_property(tl, "modulate:a", 1.0, 0.5)
+		box.add_child(tl)
 		var grid := GridContainer.new()
 		grid.columns = 3
 		for fi in h["faces"].size():
@@ -415,7 +440,11 @@ func _skill_button(h: Dictionary, index: int) -> Control:
 	var cost := Combat.skill_cost(h)
 	var is_ready := combat.can_use_skill(index)
 	var b := Button.new()
-	b.text = "%s  %s\n%s" % [h["skill"]["name"], "READY!" if is_ready else "(%d/%d)" % [h["charge"], cost], h["skill"]["desc"]]
+	var hint := ""
+	if is_ready and h["skill"]["id"] == "broken_oath" and not combat.monsters.any(
+			func(m): return Combat.is_alive(m) and Combat.current_face(m)["type"] == "attack"):
+		hint = "  (no single attacks incoming)"
+	b.text = "%s  %s%s\n%s" % [h["skill"]["name"], "READY!" if is_ready else "(%d/%d)" % [h["charge"], cost], hint, h["skill"]["desc"]]
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.add_theme_font_size_override("font_size", 12)
 	b.disabled = not is_ready

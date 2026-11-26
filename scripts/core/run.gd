@@ -54,7 +54,7 @@ var upgrades := {}            # town building levels (see data/town.json)
 var _start_queue: Array = []  # steps after choosing a pet: "loot", "carve"
 
 
-func _init(seed_value: int = -1, town_levels: Dictionary = {}) -> void:
+func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []) -> void:
 	upgrades = town_levels
 	if seed_value >= 0:
 		rng.seed = seed_value
@@ -63,15 +63,24 @@ func _init(seed_value: int = -1, town_levels: Dictionary = {}) -> void:
 	region = GameData.load_json("res://data/region1.json")
 	monster_defs = GameData.load_monsters()
 	events = GameData.load_json("res://data/events.json")
-	for def in GameData.load_heroes():
+	var defs: Array = GameData.load_heroes()
+	if party.is_empty():
+		defs = defs.filter(func(d): return d.get("starter", false))
+	else:
+		var by_id := {}
+		for d in defs:
+			by_id[d["id"]] = d
+		defs = party.map(func(id): return by_id[id])
+	for def in defs:
 		var u := Combat.make_unit(def)
 		u["carve_pool"] = def.get("carve_pool", [])
 		u["weapon"] = {}
-		var bonus_hp := 2 * int(upgrades.get("chapel", 0))
+		var bonus_hp := int(upgrades.get("chapel", 0))
 		u["max_hp"] += bonus_hp
 		u["hp"] += bonus_hp
 		heroes.append(u)
-	weapons_db = GameData.load_weapons()
+	var unlocked: Array = upgrades.get("unlocked_weapons", [])
+	weapons_db = GameData.load_weapons().filter(func(w): return not w.get("locked", false) or w["id"] in unlocked)
 	pets_db = GameData.load_pets()
 	# The combat object lives for the whole run, so Fate carries between fights.
 	combat = Combat.new(rng.randi())
@@ -98,10 +107,11 @@ func _generate_board() -> void:
 	for i in range(1, length):
 		var tier := "early" if i < length / 3 else ("mid" if i < 2 * length / 3 else "late")
 		board.append({"type": _weighted_pick(region["tile_weights"][tier]), "visited": false})
+	var gates: Array = region.get("gate_tiles", []).map(func(g): return int(g))  # JSON numbers are floats!
 	for k in region.get("fixed_tiles", {}):
 		var idx := int(k)
 		if idx > 0 and idx < length - 1:
-			board[idx] = {"type": region["fixed_tiles"][k], "visited": false, "gate": idx in region.get("gate_tiles", [])}
+			board[idx] = {"type": region["fixed_tiles"][k], "visited": false, "gate": idx in gates}
 	# Fixed landmarks: a gate campfire right before the boss (movement always stops there).
 	board[length - 1] = {"type": "rest", "visited": false, "gate": true}
 	board.append({"type": "boss", "visited": false, "gate": true})
@@ -211,6 +221,12 @@ func _enter_tile(tile: Dictionary) -> void:
 			phase = "shop"
 			changed.emit()
 		"rest":
+			if tile.get("gate", false) and pos == board.size() - 2:
+				# The Last Campfire always heals before you choose (v0.5 critique: it was a trap).
+				var pct: int = region["rest_heal_percent"]
+				for h in heroes:
+					h["hp"] = min(h["max_hp"], max(h["hp"], 0) + max(1, h["max_hp"] * pct / 100))
+				_log("The last campfire warms you (+%d%% HP)." % pct)
 			phase = "rest"
 			changed.emit()
 		_:
@@ -234,11 +250,13 @@ func _start_fight(kind: String, tier: String) -> void:
 ## Enemies get tougher further down the road (region1.json "scaling").
 func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 	var sc: Dictionary = region.get("scaling", {}).get(kind if kind in ["elite", "boss"] else tier, {})
-	if sc.is_empty():
+	var curse := int(upgrades.get("curse", 0))
+	if sc.is_empty() and curse == 0:
 		return def
 	var d := def.duplicate(true)
-	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0))))
-	var bonus := int(sc.get("damage", 0))
+	# Curse levels (opt-in difficulty): +12% enemy HP per level, +1 damage from level 2.
+	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.0 + 0.12 * curse)))
+	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 else 0)
 	for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:
 		for f in faces:
 			if f["type"] in ["attack", "sweep"]:
@@ -304,12 +322,14 @@ func _offer_carving(return_to: String) -> void:
 	var count := CARVE_OFFERS + (1 if int(upgrades.get("carver", 0)) >= 1 else 0)
 	for k in count:
 		var hi: int = hero_order[k % hero_order.size()]
-		carve_offers.append(_make_offer(hi))
+		carve_offers.append(_make_offer(hi, k == 0))
 	phase = "reward"
 	changed.emit()
 
 
-func _make_offer(hi: int) -> Dictionary:
+const MAX_FACE_VALUE := 7
+
+func _make_offer(hi: int, force_new_face: bool = false) -> Dictionary:
 	var h: Dictionary = heroes[hi]
 	var faces: Array = h["faces"]
 	var blanks: Array = []
@@ -320,14 +340,27 @@ func _make_offer(hi: int) -> Dictionary:
 		(blanks if faces[i]["type"] == "blank" else others).append(i)
 	var fi: int
 	var new_face: Dictionary
-	if not blanks.is_empty() and (others.is_empty() or rng.randf() < BLANK_CARVE_CHANCE) and not h["carve_pool"].is_empty():
-		fi = blanks[rng.randi_range(0, blanks.size() - 1)]
-		var pool: Array = h["carve_pool"]
+	var maxed := others.filter(func(i): return int(faces[i]["value"]) >= MAX_FACE_VALUE)
+	var upgradable := others.filter(func(i): return int(faces[i]["value"]) < MAX_FACE_VALUE)
+	var pool: Array = h["carve_pool"]
+	var new_face_offer := force_new_face or upgradable.is_empty() or (not blanks.is_empty() and rng.randf() < BLANK_CARVE_CHANCE)
+	if new_face_offer and not pool.is_empty():
+		# Replace a blank, or the weakest face, with a new face from the hero's carve pool.
+		if not blanks.is_empty():
+			fi = blanks[rng.randi_range(0, blanks.size() - 1)]
+		else:
+			fi = others[0]
+			for i in others:
+				if int(faces[i]["value"]) < int(faces[fi]["value"]):
+					fi = i
 		new_face = pool[rng.randi_range(0, pool.size() - 1)].duplicate()
+		if new_face["type"] == faces[fi]["type"] and int(new_face["value"]) <= int(faces[fi]["value"]):
+			new_face = faces[fi].duplicate()
+			new_face["value"] = min(MAX_FACE_VALUE, int(new_face["value"]) + 1)
 	else:
-		fi = others[rng.randi_range(0, others.size() - 1)]
+		fi = upgradable[rng.randi_range(0, upgradable.size() - 1)] if not upgradable.is_empty() else others[0]
 		new_face = faces[fi].duplicate()
-		new_face["value"] = int(new_face["value"]) + 1
+		new_face["value"] = min(MAX_FACE_VALUE, int(new_face["value"]) + 1)
 	return {
 		"hero": hi, "face": fi, "new": new_face,
 		"text": "%s: %s -> %s" % [Combat.short_name(h), face_text(faces[fi]), face_text(new_face)],
