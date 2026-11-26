@@ -434,5 +434,271 @@
 				]
 			}
 		]
+	},
+	{
+		"id": "tallow_peddler",
+		"title": "The Tallow Peddler",
+		"text": "A hunched man sells candles from a cart. They smell of pork, and of something sweeter. \"Light for the road,\" he says. \"Made from those who walked it before you.\"",
+		"options": [
+			{
+				"label": "Buy a candle (-15 gold, +3 Fate).",
+				"require_gold": 15,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -15
+					},
+					{
+						"op": "fate",
+						"value": 3
+					}
+				]
+			},
+			{
+				"label": "Ask what else is in the cart (a hero loses 4 HP. Choose a weapon).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "healthiest",
+						"value": -4
+					},
+					{
+						"op": "weapon",
+						"count": 2
+					}
+				]
+			},
+			{
+				"label": "Walk on, and do not breathe too deeply.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "hollow_well",
+		"title": "The Hollow Well",
+		"text": "A well with no bottom. Coins glint far below, and a patient voice is counting them.",
+		"options": [
+			{
+				"label": "Climb down for the coins (+30 gold, a hero loses 6 HP. 30%: something climbs up after you).",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 30
+					},
+					{
+						"op": "hp",
+						"who": "random",
+						"value": -6
+					},
+					{
+						"op": "chance",
+						"p": 0.3,
+						"win": [
+							{
+								"op": "fight",
+								"pool": "mid",
+								"text": "The voice stops counting. Something climbs up after you."
+							}
+						],
+						"lose": []
+					}
+				]
+			},
+			{
+				"label": "Throw down 10 gold and make a wish (60%: all heroes heal 8. Otherwise +1 Fate).",
+				"require_gold": 10,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -10
+					},
+					{
+						"op": "chance",
+						"p": 0.6,
+						"win": [
+							{
+								"op": "hp",
+								"who": "all",
+								"value": 8
+							}
+						],
+						"lose": [
+							{
+								"op": "fate",
+								"value": 1
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "chained_pilgrims",
+		"title": "Pilgrims in Chains",
+		"text": "A line of pilgrims shuffles along, chained to a cart and singing. Their warden dozes on the driver's bench, a cudgel across his knees.",
+		"options": [
+			{
+				"label": "Break their chains (fight the warden. Their blessing: +2 Fate).",
+				"effects": [
+					{
+						"op": "fate",
+						"value": 2
+					},
+					{
+						"op": "fight",
+						"pool": "elite",
+						"text": "The warden wakes, and he is not alone."
+					}
+				]
+			},
+			{
+				"label": "Pay their toll to the warden (-20 gold). They pray for you: the fallen rise, all heal 4.",
+				"require_gold": 20,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -20
+					},
+					{
+						"op": "revive",
+						"percent": 50
+					},
+					{
+						"op": "hp",
+						"who": "all",
+						"value": 4
+					}
+				]
+			},
+			{
+				"label": "Some songs are not yours to stop. Walk on.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "bone_dicer",
+		"title": "The Bone Dicer",
+		"text": "A skeleton sits at a crossroads, throwing knucklebones against itself. It has been losing for a hundred years. It pats the empty seat.",
+		"options": [
+			{
+				"label": "Play one round (50%: carve a die. 50%: a hero loses 3 max HP).",
+				"effects": [
+					{
+						"op": "chance",
+						"p": 0.5,
+						"win": [
+							{
+								"op": "carve"
+							}
+						],
+						"lose": [
+							{
+								"op": "max_hp",
+								"who": "random",
+								"value": -3
+							}
+						]
+					}
+				]
+			},
+			{
+				"label": "Steal its dice (+2 Fate, it will not let you leave quietly).",
+				"effects": [
+					{
+						"op": "fate",
+						"value": 2
+					},
+					{
+						"op": "fight",
+						"pool": "early",
+						"text": "The Bone Dicer rises. Its friends were only sleeping."
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "ash_mirror",
+		"title": "The Ash Mirror",
+		"text": "A tall mirror stands alone in the road. Your reflection is a little stronger than you, and a little hungrier.",
+		"options": [
+			{
+				"label": "Trade places for a moment (the healthiest hero gains 4 max HP, all heroes lose 3 HP).",
+				"effects": [
+					{
+						"op": "max_hp",
+						"who": "healthiest",
+						"value": 4
+					},
+					{
+						"op": "hp",
+						"who": "all",
+						"value": -3
+					}
+				]
+			},
+			{
+				"label": "Shatter it (+15 gold, a hero loses 5 HP).",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 15
+					},
+					{
+						"op": "hp",
+						"who": "random",
+						"value": -5
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "widows_forge",
+		"title": "The Widow's Forge",
+		"text": "A cold forge stands by the road. A widow works the bellows, but nothing burns. \"Feed it,\" she says, \"and it will make you something.\"",
+		"options": [
+			{
+				"label": "Feed it blood (the healthiest hero loses 3 max HP). Choose a weapon.",
+				"effects": [
+					{
+						"op": "max_hp",
+						"who": "healthiest",
+						"value": -3
+					},
+					{
+						"op": "weapon",
+						"count": 2
+					}
+				]
+			},
+			{
+				"label": "Feed it gold (-25 gold). Choose a weapon.",
+				"require_gold": 25,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -25
+					},
+					{
+						"op": "weapon",
+						"count": 2
+					}
+				]
+			},
+			{
+				"label": "Warm your hands at the dead coals and go (all heroes heal 3).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "all",
+						"value": 3
+					}
+				]
+			}
+		]
 	}
 ]

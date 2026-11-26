@@ -406,6 +406,9 @@ func _refresh_time_box() -> void:
 	var colors := {"dawn": Color("#f0a890"), "day": Color("#f4e08a"), "dusk": Color("#d08aa0"), "night": Color("#9fb4ff")}
 	info.add_child(UI.label(tr("Time: %s") % tr(Profile.TIME_NAMES[t]), 17, colors[t]))
 	info.add_child(UI.wrap_label(tr(Profile.TIME_EFFECTS[t]), 12, UI.DIM, 380))
+	var omen := String(profile.road_boss().get("omen", ""))
+	if omen != "":
+		info.add_child(UI.wrap_label(tr(omen), 12, Color("#d08a6a"), 380))  # 3.4: which boss waits on the road now
 	_time_box.add_child(info)
 	var next: String = Profile.TIMES[(Profile.TIMES.find(t) + 1) % Profile.TIMES.size()]
 	var wait := UI.button(tr("Wait until %s") % tr(Profile.TIME_NAMES[next]), func(): profile.advance_time(); Sfx.play(self, "fate"); _refresh(), 14)

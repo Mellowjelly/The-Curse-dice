@@ -62,7 +62,7 @@ func _init(save_path: String = DEFAULT_PATH) -> void:
 # ---------------------------------------------------------------- save / load
 
 ## Bump when the save layout changes, and add a step to migrate().
-const SAVE_VERSION := 4
+const SAVE_VERSION := 5
 
 ## Villager request order before 3.3 (saves stored a position in this list; 3.3 stores request ids instead).
 const _OLD_REQUEST_ORDER := {
@@ -101,6 +101,15 @@ static func migrate(d: Dictionary) -> Dictionary:
 		d["npc_active"] = active
 		d.erase("npc_step")
 		v = 4
+	if v < 5:
+		# v5 (3.4): the road has two bosses, so Marla's "Rest for the Dead" counts Bishop kills, not road wins.
+		# Keep her progress exactly: move the request's starting point from the wins counter to the Bishop counter.
+		var active5: Dictionary = d.get("npc_active", {})
+		var st5: Dictionary = d.get("stats", {})
+		if active5.has("marla") and active5["marla"].get("req", "") == "marla_bishop":
+			var done_so_far := int(st5.get("wins", 0)) - int(active5["marla"].get("base", 0))
+			active5["marla"]["base"] = int(st5.get("kills_rotting_bishop", 0)) - done_so_far
+		v = 5
 	d["version"] = v
 	return d
 
@@ -259,6 +268,7 @@ func run_options() -> Dictionary:
 	o["curse"] = curse
 	o["owned_pets"] = owned_pets.duplicate()
 	o["time"] = time_name()
+	o["road_wins"] = stat("wins")  # 3.4: the second road boss appears only after the first win
 	o["stars"] = stars.duplicate()
 	o["gear"] = gear_bonuses()
 	o["unlocked_weapons"] = unlocked_weapons.duplicate()
@@ -769,6 +779,12 @@ const TIME_EFFECTS := {
 
 func time_name() -> String:
 	return TIMES[time_of_day % TIMES.size()]
+
+
+## The boss that would guard the Hollow Road if the player set out now (3.4: shown in town).
+func road_boss() -> Dictionary:
+	var Run = load("res://scripts/core/run.gd")
+	return Run.pick_road_boss(GameData.load_json("res://data/region1.json"), time_name(), stat("wins"))
 
 
 func advance_time() -> void:

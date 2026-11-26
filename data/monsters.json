@@ -60,6 +60,23 @@
 		"element": "dark"
 	},
 	{
+		"id": "wick_mother",
+		"name": "The Wick-Mother",
+		"hp": 62,
+		"boss": true,
+		"faces": [
+			{ "type": "attack", "value": 6 },
+			{ "type": "attack", "value": 7 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "heal", "value": 6 },
+			{ "type": "shield", "value": 7 }
+		],
+		"phase2": {"at": 0.5, "text": "The Wick-Mother sets her own hair alight. The wax runs down her face, and she laughs like a guttering candle.", "faces": [{"type": "attack", "value": 9}, {"type": "attack", "value": 7}, {"type": "sweep", "value": 5}, {"type": "sweep", "value": 6}, {"type": "heal", "value": 5}, {"type": "attack", "value": 8}]},
+		"death_line": "She gutters out. Every candle on the Hollow Road dims at once, then, one by one, they light again.",
+		"element": "fire"
+	},
+	{
 		"id": "plague_rat",
 		"name": "Plague Rat",
 		"hp": 5,

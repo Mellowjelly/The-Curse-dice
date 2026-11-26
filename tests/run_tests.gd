@@ -52,6 +52,7 @@ func _init() -> void:
 	test_v32_translations()
 	test_v32_player_bugs()
 	test_v33_changes()
+	test_v34_road()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -92,7 +93,7 @@ func test_data_is_valid() -> void:
 		for enc in region["encounters"][pool]:
 			for id in enc:
 				check(monsters.has(id), "region pool %s uses unknown monster %s" % [pool, id])
-	var ops := ["hp", "max_hp", "gold", "fate", "revive", "carve", "fight", "chance"]
+	var ops := ["hp", "max_hp", "gold", "fate", "revive", "carve", "fight", "chance", "weapon"]
 	for ev in GameData.load_events():
 		check(ev["options"].size() >= 2, "event %s needs at least 2 options" % ev["id"])
 		for opt in ev["options"]:
@@ -1057,3 +1058,76 @@ func test_v33_changes() -> void:
 				idle += 1
 			c._start_round()
 	check(idle == 0, "elites never roll an idle blank (%d idle rounds)" % idle)
+
+
+## 3.4: a second road boss, six new events and the "weapon" event effect.
+func test_v34_road() -> void:
+	var region: Dictionary = GameData.load_json("res://data/region1.json")
+	check(Run.pick_road_boss(region, "night", 0)["id"] == "rotting_bishop", "the first journey always meets the Bishop")
+	check(Run.pick_road_boss(region, "night", 1)["id"] == "wick_mother", "after a win, the Wick-Mother walks at night")
+	check(Run.pick_road_boss(region, "dusk", 3)["id"] == "wick_mother", "... and at dusk")
+	check(Run.pick_road_boss(region, "day", 3)["id"] == "rotting_bishop", "the Bishop keeps the day")
+	var mons := GameData.load_monsters()
+	var lore: Dictionary = GameData.load_json("res://data/bestiary.json")["lore"]
+	for b in region["bosses"]:
+		var def: Dictionary = mons.get(b["id"], {})
+		check(def.get("boss", false) and not def.get("phase2", {}).is_empty() and def.get("death_line", "") != "" and def.get("element", "") != "",
+			"road boss %s has faces, phase 2, a death line and an element" % b["id"])
+		check(lore.has(b["id"]), "road boss %s has a bestiary page" % b["id"])
+		check(ResourceLoader.exists("res://assets/sprites/%s.png" % b["id"]), "road boss %s has a sprite" % b["id"])
+		for k in ["lair", "scene", "omen", "gate_text", "victory_title", "victory_text"]:
+			check(String(b.get(k, "")) != "", "road boss %s has %s" % [b["id"], k])
+	# A night journey after the first win ends at the Wick-Mother.
+	var r := Run.new(341, {"time": "night", "road_wins": 1})
+	check(r.boss_id == "wick_mother", "the run remembers its boss")
+	r.pos = r.board.size() - 1
+	r._start_fight("boss", "late")
+	check(r.combat.monsters.size() == 1 and r.combat.monsters[0]["id"] == "wick_mother", "the boss tile starts the chosen boss")
+	var back = Run.from_dict(r.to_dict())
+	check(back.boss_id == "wick_mother", "the boss survives save and load")
+	var old := r.to_dict()
+	old.erase("boss_id")
+	check(Run.from_dict(old).boss_id == "rotting_bishop", "a save from before 3.4 still ends at the Bishop")
+	# Bots and tests (no time of day) meet both bosses.
+	var seen := {}
+	for seed in 30:
+		seen[Run.new(3400 + seed).boss_id] = true
+	check(seen.size() == 2, "sandbox runs meet both bosses (%s)" % str(seen.keys()))
+	# Events: at least 20, and the new "weapon" effect offers loot with the event's own words.
+	var events: Array = GameData.load_events()
+	check(events.size() >= 20, "the road has 20+ events (%d)" % events.size())
+	var forge: Dictionary = events.filter(func(e): return e["id"] == "widows_forge")[0]
+	var w := Run.new(342)
+	w.phase = "event"
+	w.event = forge
+	w.gold = 0
+	var hp_before: int = w.heroes.map(func(h): return h["max_hp"]).reduce(func(a, b): return a + b)
+	check(not w.can_choose_event_option(1), "feeding the forge gold needs 25 gold")
+	w.choose_event_option(0)
+	var hp_after: int = w.heroes.map(func(h): return h["max_hp"]).reduce(func(a, b): return a + b)
+	check(w.phase == "loot" and w.weapon_offers.size() == 2, "the Widow's Forge offers 2 weapons")
+	check(hp_after == hp_before - 3, "... for 3 max HP")
+	check(not w.last_reward_text.contains("Bone Carver") and w.last_reward_text != "", "the loot screen shows the event's words")
+	w.equip(0, 0)
+	check(w.phase == "map", "after taking the weapon the journey goes on")
+	# Every event can be played through on a fresh run without breaking the run.
+	for i in events.size():
+		for o in events[i]["options"].size():
+			var e := Run.new(500 + i * 7 + o)
+			e.gold = 100
+			e.phase = "event"
+			e.event = events[i]
+			e.choose_event_option(o)
+			check(e.phase in ["event", "combat", "reward", "loot"], "event %s option %d leads somewhere (%s)" % [events[i]["id"], o, e.phase])
+	# Marla wants the Bishop himself; old saves keep her progress (save v5).
+	var marla: Dictionary = {"version": 4, "stats": {"wins": 3, "kills_rotting_bishop": 5},
+		"npc_active": {"marla": {"base": 3, "run_best": 0, "req": "marla_bishop"}}, "npc_done": {"marla": ["marla_camps", "marla_twist"]}}
+	var mm := Profile.migrate(marla)
+	check(int(mm["version"]) == 5 and int(mm["npc_active"]["marla"]["base"]) == 5, "Marla's Bishop request keeps 0 progress after the update")
+	var p := _fresh_profile("test_v34")
+	check(p.road_boss()["id"] == "rotting_bishop", "town shows the Bishop before the first win")
+	p.stats["wins"] = 1
+	p.time_of_day = Profile.TIMES.find("night")
+	check(p.road_boss()["id"] == "wick_mother", "town shows the Wick-Mother at night after a win")
+	p.stats["kills_wick_mother"] = 1
+	check(p._complete_quests().any(func(q): return q["id"] == "wick_snuffed"), "Lights Out completes when the Wick-Mother falls")

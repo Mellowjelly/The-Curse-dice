@@ -185,5 +185,29 @@
 		21,
 		30
 	],
-	"elite_heal_percent": 35
+	"elite_heal_percent": 35,
+	"bosses": [
+		{
+			"id": "rotting_bishop",
+			"times": ["dawn", "day"],
+			"after_wins": 0,
+			"lair": "The Chapel of Rot",
+			"scene": "battle_boss",
+			"omen": "The chapel bells toll ahead. The Rotting Bishop waits.",
+			"gate_text": "The chapel bells toll ahead. This is the last rest before the Bishop.",
+			"victory_title": "The Rotting Bishop is no more",
+			"victory_text": "The chapel bells fall silent. One shard of the Dice of Fate glows in the ashes."
+		},
+		{
+			"id": "wick_mother",
+			"times": ["dusk", "night"],
+			"after_wins": 1,
+			"lair": "The Candle Mill",
+			"scene": "battle_late",
+			"omen": "Candles burn along the road tonight. The Wick-Mother waits.",
+			"gate_text": "Ahead, a mill burns without smoke. This is the last rest before the Wick-Mother.",
+			"victory_title": "The Wick-Mother is snuffed out",
+			"victory_text": "The mill falls dark. In the cold wax, one shard of the Dice of Fate glows."
+		}
+	]
 }

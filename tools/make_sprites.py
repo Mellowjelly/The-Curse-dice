@@ -313,6 +313,37 @@ def rotting_bishop(enraged=False):
     return frames(c.img, 38)
 
 
+def wick_mother(enraged=False):
+    """3.4 road boss: an old chandler with a crown of candles and a dipping pole."""
+    c = Canvas(48)
+    tallow, tallow_d = (196, 178, 130), (140, 120, 84)
+    dress = CLOTH_L if enraged else tallow_d
+    c.poly([(17, 20), (7, 47), (37, 47), (29, 20)], dress)                     # long dress
+    c.poly([(20, 24), (16, 47), (28, 47), (26, 24)], CLOTH)                    # apron, stiff with wax
+    for x, y in ((11, 38), (33, 40), (19, 30), (25, 36)):
+        c.rect(x, y, x, y + 4, tallow)                                         # wax runs down the dress
+    c.ell(15, 9, 30, 23, PALE if not enraged else tallow)                      # face of soft wax
+    c.rect(17, 20, 18, 25, PALE); c.rect(27, 21, 28, 27, PALE)                 # drips off the chin
+    c.rect(18, 14, 20, 16, K); c.rect(24, 14, 26, 16, K)                       # sunken eye-holes
+    c.px(19, 15, RED if enraged else EMBER); c.px(25, 15, RED if enraged else EMBER)
+    c.rect(20, 19, 24, 21, K); c.px(21, 19, PALE_D); c.px(23, 21, PALE_D)      # a mouth melted open
+    for i, x in enumerate((15, 19, 23, 27)):                                    # crown of candles
+        top = 4 + (i % 2) * 2
+        c.rect(x, top, x + 2, 10, WHITE)
+        c.px(x + 1, top - 1, FLAME); c.px(x + 1, top - 2, EMBER)
+    c.rect(30, 22, 35, 24, dress); c.rect(34, 21, 36, 25, PALE)                # arm + hand
+    c.rect(35, 2, 36, 46, BROWN_D)                                             # dipping pole
+    c.rect(32, 2, 42, 3, BROWN_D)                                              # cross-bar
+    for x in (33, 40):
+        c.line([(x, 4), (x, 10)], BONE_D)                                      # wicks
+        c.ell(x - 2, 10, x + 2, 18, tallow)                                    # something dipped in tallow
+        c.px(x, 9, FLAME)
+    if enraged:
+        for x, y in ((12, 6), (14, 2), (30, 3), (32, 8), (11, 12), (22, 1)):
+            c.px(x, y, EMBER); c.px(x, y + 1, FLAME)                           # her hair is burning
+    return frames(c.img, 36)
+
+
 # ---------------------------------------------------------------- pets (small creatures, bottom of a 32x32 canvas)
 
 def ash_crow():
@@ -563,6 +594,7 @@ SPRITES = {
     "ghoul": ghoul, "cultist": cultist, "bone_hound": bone_hound, "plague_rat": plague_rat,
     "weeping_nun": weeping_nun, "grave_knight": grave_knight, "bone_colossus": bone_colossus,
     "rotting_bishop": rotting_bishop, "rotting_bishop_enraged": lambda: rotting_bishop(True),
+    "wick_mother": wick_mother, "wick_mother_enraged": lambda: wick_mother(True),
     "ash_crow": ash_crow, "grave_pup": grave_pup, "candle_moth": candle_moth, "black_cat": black_cat,
     "ember_salamander": ember_salamander, "lantern_wisp": lantern_wisp, "gilded_rat": gilded_rat,
     "villager_farmer": villager_farmer, "villager_woman": villager_woman, "villager_child": villager_child,

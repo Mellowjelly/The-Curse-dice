@@ -58,15 +58,15 @@
 	{
 		"id": "cursed_victory",
 		"name": "Bearer of Curses",
-		"desc": "Defeat the Bishop while a hero carries a cursed weapon.",
+		"desc": "Defeat the road's boss while a hero carries a cursed weapon.",
 		"stat": "cursed_wins",
 		"goal": 1,
 		"reward": 40
 	},
 	{
 		"id": "bishop_slayer",
-		"name": "The Bishop Falls",
-		"desc": "Defeat the Rotting Bishop.",
+		"name": "The Road's End",
+		"desc": "Defeat the boss at the end of the Hollow Road.",
 		"stat": "wins",
 		"goal": 1,
 		"reward": 50
@@ -74,10 +74,18 @@
 	{
 		"id": "bishop_thrice",
 		"name": "Thrice Damned",
-		"desc": "Defeat the Rotting Bishop 3 times.",
+		"desc": "Defeat the Hollow Road's bosses 3 times.",
 		"stat": "wins",
 		"goal": 3,
 		"reward": 60
+	},
+	{
+		"id": "wick_snuffed",
+		"name": "Lights Out",
+		"desc": "Defeat the Wick-Mother. She walks the road at dusk and night, after your first victory.",
+		"stat": "kills_wick_mother",
+		"goal": 1,
+		"reward": 50
 	},
 	{
 		"id": "isle_landfall",

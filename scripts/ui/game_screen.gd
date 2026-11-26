@@ -295,8 +295,9 @@ func _enter_combat() -> void:
 	_modal.hide()
 	_map_root.hide()
 	_combat_view.show()
-	var names := {"fight": tr("Fight"), "elite": tr("ELITE"), "boss": tr("BOSS: The Chapel of Rot")}
-	var scene := "battle_boss" if run.combat_kind == "boss" else "battle_" + run.tier_at(run.pos)
+	var boss: Dictionary = run.boss_info()
+	var names := {"fight": tr("Fight"), "elite": tr("ELITE"), "boss": tr("BOSS: %s") % tr(String(boss.get("lair", "The Chapel of Rot")))}
+	var scene: String = String(boss.get("scene", "battle_boss")) if run.combat_kind == "boss" else "battle_" + run.tier_at(run.pos)
 	var tint: Color = UI.TIME_TINT.get(run.time_of_day(), Color.WHITE)
 	_combat_view.bind(run.combat, names.get(run.combat_kind, tr("Fight")), scene, tint)
 
@@ -445,14 +446,15 @@ func _refresh_modal() -> void:
 		"rest":
 			var gate: bool = run.board[run.pos].get("gate", false)
 			_modal_title(tr("The Last Campfire") if gate else tr("Campfire"), Color("#e08a3c"))
-			_modal_text(tr("The chapel bells toll ahead. This is the last rest before the Bishop.") if gate
+			_modal_text(tr(String(run.boss_info().get("gate_text", "The chapel bells toll ahead. This is the last rest before the Bishop."))) if gate
 				else tr("Embers crackle. For one night, nothing hunts you."))
 			_modal_box.add_child(UI.choice_button(tr("Rest: heal %d%% HP (the fallen rise)") % int(run.region["rest_heal_percent"]),
 				func(): run.rest_heal(), UI.GREEN))
 			_modal_box.add_child(UI.choice_button(tr("Whittle: carve a die instead"), func(): run.rest_carve(), UI.GOLD))
 		"victory":
-			_modal_title(tr("The Rotting Bishop is no more"), UI.GOLD)
-			_modal_text(tr("The chapel bells fall silent. One shard of the Dice of Fate glows in the ashes."))
+			var boss: Dictionary = run.boss_info()
+			_modal_title(tr(String(boss.get("victory_title", "The Rotting Bishop is no more"))), UI.GOLD)
+			_modal_text(tr(String(boss.get("victory_text", "The chapel bells fall silent. One shard of the Dice of Fate glows in the ashes."))))
 			_modal_text(_run_summary(), UI.DIM)
 			_end_buttons()
 		"defeat":

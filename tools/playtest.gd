@@ -127,6 +127,7 @@ func _measure(style: String, runs: int) -> Array[String]:
 	var boss_rounds := 0.0
 	var by_pet := {}     # pet -> [wins, runs]
 	var by_weapon := {}  # weapon -> [wins, runs]
+	var by_boss := {}    # road boss -> [boss fights won, boss fights reached]
 	for s in runs:
 		var r := play_run(style, 5000 + s)
 		var run: Run = r["run"]
@@ -151,6 +152,7 @@ func _measure(style: String, runs: int) -> Array[String]:
 			boss_n += 1
 			if r["won"]:
 				boss_rounds += run.combat.round_number
+			by_boss[run.boss_id] = [by_boss.get(run.boss_id, [0, 0])[0] + int(r["won"]), by_boss.get(run.boss_id, [0, 0])[1] + 1]
 		var pet_name: String = run.combat.pet.get("name", "none")
 		by_pet[pet_name] = [by_pet.get(pet_name, [0, 0])[0] + int(r["won"]), by_pet.get(pet_name, [0, 0])[1] + 1]
 		for h in run.heroes:
@@ -171,6 +173,10 @@ func _measure(style: String, runs: int) -> Array[String]:
 		_avg(totals["minutes"], runs), _avg(totals["rounds"], runs), _avg(totals["decisions"], runs)])
 	lines.append("- Blank faces: %.0f%% of rolls; per run %.1f rerolls, %.2f Fate rerolls" % [
 		100.0 * totals["blank"] / max(totals["rolls"], 1), _avg(totals["rerolls"], runs), _avg(totals["fate_rerolls"], runs)])
+	var bb: Array[String] = []
+	for k in by_boss:
+		bb.append("%s %.0f%% of %d boss fights" % [k, 100.0 * by_boss[k][0] / by_boss[k][1], by_boss[k][1]])
+	lines.append("- Boss fights won, by road boss: " + ", ".join(bb))
 	var sk: Array[String] = []
 	for k in skills:
 		sk.append("%s %.1f" % [k, float(skills[k]) / runs])

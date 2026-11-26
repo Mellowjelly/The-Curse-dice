@@ -53,6 +53,7 @@ var _seen_events: Array = []
 var tile_snapshot: Dictionary = {}  # saved while a tile (fight/event/shop...) is in progress
 var upgrades := {}            # town building levels (see data/town.json)
 var _start_queue: Array = []  # steps after choosing a pet: "loot", "carve"
+var boss_id := ""             # which boss guards the end of this road (see region1.json "bosses")
 
 
 func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []) -> void:
@@ -91,6 +92,7 @@ func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []
 	combat.log_added.connect(func(t): log_added.emit(t))
 	combat.bonus_fate_start = int(upgrades.get("fortune", 0)) + (1 if time_of_day() == "dusk" else 0)
 	_generate_board()
+	boss_id = String(pick_road_boss(region, time_of_day(), int(upgrades.get("road_wins", 0)), rng).get("id", ""))
 	# A stray follows you onto the road: pick 1 of 2 companions.
 	var owned: Array = upgrades.get("owned_pets", [])
 	var pool := pets_db.filter(func(p): return p.get("starter", false) or p["id"] in owned)
@@ -247,11 +249,35 @@ func _start_fight(kind: String, tier: String) -> void:
 	combat_kind = kind
 	var pool_name := kind if kind in ["elite", "boss"] else tier
 	var pool: Array = region["encounters"][pool_name]
-	var ids: Array = pool[rng.randi_range(0, pool.size() - 1)]
+	var ids: Array = [boss_id] if kind == "boss" and monster_defs.has(boss_id) else pool[rng.randi_range(0, pool.size() - 1)]
 	phase = "combat"
 	_log("== %s ==" % (tr("BOSS") if kind == "boss" else (tr("Elite fight") if kind == "elite" else tr("Fight"))))
 	combat.start_battle(heroes, ids.map(func(id): return scaled_monster(monster_defs[id], kind, tier)))
 	changed.emit()
+
+
+## Which boss waits at the end of the road (3.4). The first journey always meets the Rotting Bishop
+## (bosses with "after_wins" above the player's road wins are hidden); after that the time of day decides.
+## With no time of day (bot playtests, tests) every boss is equally likely, so balance checks see them all.
+static func pick_road_boss(reg: Dictionary, time: String, road_wins: int, r: RandomNumberGenerator = null) -> Dictionary:
+	var bosses: Array = reg.get("bosses", [])
+	if bosses.is_empty():
+		return {"id": String(reg["encounters"]["boss"][0][0])}
+	if time == "":
+		return bosses[r.randi_range(0, bosses.size() - 1)] if r != null else bosses[0]
+	var avail := bosses.filter(func(b): return int(b.get("after_wins", 0)) <= road_wins)
+	for b in avail:
+		if time in b.get("times", []):
+			return b
+	return avail[0] if not avail.is_empty() else bosses[0]
+
+
+## The data entry of this road's boss (lair name, scenery, gate and victory text).
+func boss_info() -> Dictionary:
+	for b in region.get("bosses", []):
+		if b["id"] == boss_id:
+			return b
+	return {"id": boss_id}
 
 
 ## Enemies get tougher further down the road (region1.json "scaling").
@@ -372,7 +398,7 @@ const CURSE_RULES := [
 	"I. The Hungry Dead: enemies have +15% HP.",
 	"II. Sharpened Bones: enemy attacks deal +1 damage.",
 	"III. Cold Fires: camps heal 10% less, the fallen rise with 25% HP.",
-	"IV. The Bishop Wakes: elites hit +1 harder, the Bishop enrages at 70% HP.",
+	"IV. The Road Wakes: elites hit +1 harder, the road's boss enrages at 70% HP.",
 ]
 
 
@@ -554,6 +580,10 @@ func choose_event_option(index: int) -> void:
 		last_reward_text = event_result  # the event's own words, not a stale shop/chest message
 		_offer_carving("map")
 		return
+	if next == "loot":
+		last_reward_text = event_result
+		_offer_loot(_event_loot, "map")
+		return
 	changed.emit()
 
 
@@ -564,7 +594,9 @@ func close_event() -> void:
 		changed.emit()
 
 
-## Applies a list of effects. Returns "fight", "carve" or "" (what should happen next).
+var _event_loot := 2  # how many weapons an event's "weapon" effect offers
+
+## Applies a list of effects. Returns "fight", "carve", "loot" or "" (what should happen next).
 func _apply_effects(effects: Array, lines: Array[String]) -> String:
 	var next := ""
 	for e in effects:
@@ -594,6 +626,9 @@ func _apply_effects(effects: Array, lines: Array[String]) -> String:
 						lines.append(tr("%s rises.") % Combat.short_name(h))
 			"carve":
 				next = "carve"
+			"weapon":
+				_event_loot = int(e.get("count", 2))
+				next = "loot"
 			"fight":
 				lines.append(tr(e.get("text", "You are attacked!")))
 				event_result = " ".join(lines)
@@ -836,7 +871,7 @@ func to_dict() -> Dictionary:
 		"version": SAVE_VERSION, "rng_seed": rng.seed, "rng_state": rng.state, "combat_rng_state": combat.rng.state,
 		"board": board, "pos": pos, "gold": gold, "heroes": heroes, "fate": combat.fate, "pet": combat.pet,
 		"twists": combat.twists, "stats": stats, "seen_events": _seen_events, "upgrades": upgrades,
-		"move_options": move_options,
+		"move_options": move_options, "boss_id": boss_id,
 	}
 
 
@@ -856,6 +891,7 @@ static func from_dict(d: Dictionary) -> RefCounted:
 	r.stats = d["stats"]
 	r._seen_events = d["seen_events"]
 	r.move_options = d.get("move_options", [])
+	r.boss_id = String(d.get("boss_id", "rotting_bishop"))  # saves from before 3.4 always met the Bishop
 	r._start_queue = []
 	r.pet_offers = []
 	r.phase = "map"

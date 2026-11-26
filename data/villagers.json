@@ -142,7 +142,7 @@
 				"ask": "The Bishop keeps the dead from sleeping. Defeat him, and my husband can finally rest.",
 				"done": "...He is quiet now. Thank you. A sister of the chapel wants to walk with you.",
 				"goal": {
-					"stat": "wins",
+					"stat": "kills_rotting_bishop",
 					"amount": 1,
 					"scope": "total"
 				},
