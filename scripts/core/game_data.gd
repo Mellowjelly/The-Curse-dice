@@ -4,7 +4,8 @@ extends RefCounted
 
 const HEROES_PATH := "res://data/heroes.json"
 const MONSTERS_PATH := "res://data/monsters.json"
-const ENCOUNTERS_PATH := "res://data/encounters.json"
+const REGION_PATH := "res://data/region1.json"
+const EVENTS_PATH := "res://data/events.json"
 
 ## Every face type the combat code knows how to resolve.
 const FACE_TYPES := ["attack", "fire", "blood", "shield", "guard", "heal", "sweep", "blank"]
@@ -33,5 +34,9 @@ static func load_monsters() -> Dictionary:
 	return by_id
 
 
-static func load_encounters() -> Array:
-	return load_json(ENCOUNTERS_PATH)
+static func load_region() -> Dictionary:
+	return load_json(REGION_PATH)
+
+
+static func load_events() -> Array:
+	return load_json(EVENTS_PATH)

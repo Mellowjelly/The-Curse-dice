@@ -1,10 +1,15 @@
 [
 	{
 		"id": "varek",
-		"skill": { "id": "broken_oath", "name": "Broken Oath", "cost": 4, "desc": "Gain 5 shield. All single-target attacks this round hit Varek." },
+		"skill": {"id": "broken_oath", "name": "Broken Oath", "cost": 4, "desc": "Gain 5 shield. Every single-target attack this round hits Varek. Costs Varek 2 HP."},
 		"name": "Varek the Oathbroken",
 		"role": "tank",
 		"hp": 28,
+		"carve_pool": [
+			{ "type": "shield", "value": 3 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "guard", "value": 2 }
+		],
 		"faces": [
 			{ "type": "attack", "value": 2 },
 			{ "type": "attack", "value": 3 },
@@ -16,10 +21,15 @@
 	},
 	{
 		"id": "lys",
-		"skill": { "id": "hollow_flame", "name": "Hollow Flame", "cost": 5, "desc": "Deal 4 to ALL enemies and add 1 burn. Costs Lys 3 HP." },
+		"skill": {"id": "hollow_flame", "name": "Hollow Flame", "cost": 5, "desc": "Deal 4 to ALL enemies (ignores shields), add 1 burn. Costs Lys 3 HP."},
 		"name": "Lys the Hollow",
 		"role": "mage",
 		"hp": 18,
+		"carve_pool": [
+			{ "type": "fire", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "blood", "value": 7 }
+		],
 		"faces": [
 			{ "type": "fire", "value": 2 },
 			{ "type": "fire", "value": 3 },
@@ -31,10 +41,15 @@
 	},
 	{
 		"id": "aldric",
-		"skill": { "id": "last_rite", "name": "Last Rite", "cost": 6, "desc": "Heal all allies 3. Revive one fallen ally with 4 HP. Costs Aldric 3 HP." },
+		"skill": {"id": "last_rite", "name": "Last Rite", "cost": 6, "desc": "Heal all allies 3. Revive one fallen ally with 4 HP. Costs Aldric 3 HP."},
 		"name": "Brother Aldric",
 		"role": "support",
 		"hp": 22,
+		"carve_pool": [
+			{ "type": "heal", "value": 3 },
+			{ "type": "guard", "value": 2 },
+			{ "type": "attack", "value": 3 }
+		],
 		"faces": [
 			{ "type": "heal", "value": 3 },
 			{ "type": "heal", "value": 4 },

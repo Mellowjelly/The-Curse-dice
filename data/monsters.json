@@ -28,20 +28,20 @@
 	{
 		"id": "bone_hound",
 		"name": "Bone Hound",
-		"hp": 11,
+		"hp": 12,
 		"faces": [
 			{ "type": "attack", "value": 3 },
 			{ "type": "attack", "value": 4 },
 			{ "type": "attack", "value": 4 },
 			{ "type": "attack", "value": 6 },
-			{ "type": "blank", "value": 0 },
+			{ "type": "attack", "value": 2 },
 			{ "type": "blank", "value": 0 }
 		]
 	},
 	{
 		"id": "rotting_bishop",
 		"name": "The Rotting Bishop",
-		"hp": 70,
+		"hp": 60,
 		"boss": true,
 		"faces": [
 			{ "type": "attack", "value": 6 },
@@ -49,7 +49,62 @@
 			{ "type": "sweep", "value": 4 },
 			{ "type": "sweep", "value": 5 },
 			{ "type": "shield", "value": 6 },
-			{ "type": "heal", "value": 5 }
+			{ "type": "attack", "value": 5 }
+		],
+		"phase2": {"at": 0.5, "text": "The Rotting Bishop tears off his vestments. Something underneath was never human.", "faces": [{"type": "attack", "value": 8}, {"type": "attack", "value": 10}, {"type": "sweep", "value": 5}, {"type": "sweep", "value": 6}, {"type": "heal", "value": 6}, {"type": "attack", "value": 7}]}
+	},
+	{
+		"id": "plague_rat",
+		"name": "Plague Rat",
+		"hp": 5,
+		"faces": [
+			{ "type": "attack", "value": 2 },
+			{ "type": "attack", "value": 2 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "weeping_nun",
+		"name": "Weeping Nun",
+		"hp": 14,
+		"faces": [
+			{ "type": "heal", "value": 4 },
+			{ "type": "heal", "value": 4 },
+			{ "type": "shield", "value": 4 },
+			{ "type": "sweep", "value": 2 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "grave_knight",
+		"name": "Grave Knight",
+		"hp": 22,
+		"elite": true,
+		"faces": [
+			{ "type": "attack", "value": 5 },
+			{ "type": "attack", "value": 6 },
+			{ "type": "shield", "value": 6 },
+			{ "type": "shield", "value": 5 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "bone_colossus",
+		"name": "Bone Colossus",
+		"hp": 40,
+		"elite": true,
+		"faces": [
+			{ "type": "attack", "value": 7 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "shield", "value": 8 },
+			{ "type": "blank", "value": 0 }
 		]
 	}
 ]

@@ -1,5 +1,0 @@
-[
-	{ "name": "The Hollow Road", "monsters": ["ghoul", "cultist"] },
-	{ "name": "Kennels of Bone", "monsters": ["bone_hound", "bone_hound", "cultist"] },
-	{ "name": "Chapel of Rot", "monsters": ["rotting_bishop"] }
-]

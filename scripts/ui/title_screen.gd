@@ -1,7 +1,7 @@
 extends Control
 ## Title screen: New Game, How to Play, Quit. Built in code (no art yet).
 
-const COMBAT_SCENE := "res://scenes/combat.tscn"
+const GAME_SCENE := "res://scenes/game.tscn"
 
 const COL_BG := Color("#0e0b12")
 const COL_TEXT := Color("#d8cfc4")
@@ -84,7 +84,7 @@ func _build() -> void:
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
 
-	var version := _label("Prototype 0.2", 14, COL_DIM)
+	var version := _label("Prototype 0.3", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
 
@@ -94,7 +94,7 @@ func _build() -> void:
 
 
 func _on_new_game() -> void:
-	get_tree().change_scene_to_file(COMBAT_SCENE)
+	get_tree().change_scene_to_file(GAME_SCENE)
 
 
 func _build_help() -> Control:

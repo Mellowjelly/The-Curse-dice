@@ -30,14 +30,21 @@ Monetization is NOT a goal. Gacha must be fair: all currency earnable by playing
 
 ### Folders
 ```
-data/            heroes.json, monsters.json, encounters.json  (content - designers edit these)
-scenes/          title.tscn (main scene), combat.tscn
-scripts/core/    combat.gd (dice combat rules + hero skills), game_data.gd (JSON loading)
-scripts/ui/      title_screen.gd, combat_screen.gd
+data/            heroes.json, monsters.json, region1.json (board, encounter pools, shop), events.json
+scenes/          title.tscn (main scene), game.tscn (a run: map + combat)
+scripts/core/    combat.gd (dice combat + skills), run.gd (board, events, shop, rest, carving), game_data.gd
+scripts/ui/      ui_kit.gd (palette + widgets), title_screen.gd, game_screen.gd (map + panels), combat_view.gd
+tools/           playtest.gd (bot playtests -> docs/playtests/<ver>/), bots/player_bot.gd (3 bot styles)
 tests/           run_tests.gd (automated tests + balance simulation)
 docs/            GDD.md (design), art/ (art & audio direction), screenshot.png
 .claude/agents/  the AI team
 ```
+
+### Playtest loop (every version)
+1. `godot --headless --path . -s tools/playtest.gd -- v0.X` (bots play 300 runs per style, writes docs/playtests/v0.X/)
+2. Add screenshots `screen_*.png` to that folder.
+3. Ask the `playtester` agent to critique it -> `critique.md`. Fix the top issues in the next version.
+Balance targets: newbie bot 65-75% wins, tactician ~90%, gap >= 15 points, session 12-20 min.
 
 ### Commands
 - Run tests (must pass before calling any change done):

@@ -1,0 +1,45 @@
+{
+	"id": "hollow_road",
+	"name": "The Hollow Road",
+	"board_length": 36,
+	"tile_weights": {
+		"early": { "fight": 50, "event": 25, "chest": 15, "rest": 5, "shop": 5 },
+		"mid": { "fight": 38, "elite": 12, "event": 22, "chest": 10, "rest": 9, "shop": 9 },
+		"late": { "fight": 35, "elite": 15, "event": 18, "chest": 8, "rest": 12, "shop": 12 }
+	},
+	"encounters": {
+		"early": [
+			["ghoul"],
+			["cultist", "ghoul"],
+			["bone_hound", "bone_hound"],
+			["plague_rat", "plague_rat", "plague_rat"]
+		],
+		"mid": [
+			["bone_hound", "bone_hound", "cultist"],
+			["ghoul", "ghoul", "cultist"],
+			["weeping_nun", "ghoul"],
+			["plague_rat", "plague_rat", "bone_hound", "cultist"]
+		],
+		"late": [
+			["weeping_nun", "bone_hound", "bone_hound"],
+			["ghoul", "weeping_nun", "cultist"],
+			["grave_knight", "plague_rat", "plague_rat"]
+		],
+		"elite": [
+			["grave_knight", "cultist"],
+			["bone_colossus"]
+		],
+		"boss": [
+			["rotting_bishop"]
+		]
+	},
+	"gold": { "fight": [8, 14], "elite": [22, 30], "chest": [15, 30] },
+	"shop": [
+		{ "id": "tonic", "name": "Bitter Tonic", "desc": "Heal all heroes 8 HP.", "cost": 20 },
+		{ "id": "carving", "name": "Bone Carver", "desc": "Choose 1 of 3 die carvings.", "cost": 35 },
+		{ "id": "fate_shard", "name": "Fate Shard", "desc": "+3 Fate.", "cost": 15 },
+		{ "id": "resurrect", "name": "Grave Candle", "desc": "Revive all fallen heroes at half HP.", "cost": 25 }
+	],
+	"rest_heal_percent": 30,
+	"revive_after_fight_percent": 25
+}

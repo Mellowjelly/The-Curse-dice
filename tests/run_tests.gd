@@ -5,6 +5,7 @@ extends SceneTree
 
 const Combat = preload("res://scripts/core/combat.gd")
 const GameData = preload("res://scripts/core/game_data.gd")
+const Run = preload("res://scripts/core/run.gd")
 
 var _failures := 0
 var _checks := 0
@@ -23,7 +24,11 @@ func _init() -> void:
 	test_hollow_flame_hits_all_and_costs_hp()
 	test_last_rite_revives_one()
 	test_skill_finishing_blow_wins()
-	test_many_random_battles_finish()
+	test_full_runs_finish()
+	test_board_rules()
+	test_carving_changes_die()
+	test_shop_and_rest()
+	test_event_gold_requirement()
 	print("\n%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -51,11 +56,19 @@ func test_data_is_valid() -> void:
 	for def in all_defs:
 		check(def["faces"].size() == 6, "%s must have 6 faces" % def["id"])
 		check(int(def["hp"]) > 0, "%s must have hp > 0" % def["id"])
-		for f in def["faces"]:
+		for f in def["faces"] + def.get("carve_pool", []) + def.get("phase2", {}).get("faces", []):
 			check(f["type"] in GameData.FACE_TYPES, "%s has unknown face type %s" % [def["id"], f["type"]])
-	for enc in GameData.load_encounters():
-		for id in enc["monsters"]:
-			check(monsters.has(id), "encounter %s uses unknown monster %s" % [enc["name"], id])
+	var region := GameData.load_region()
+	for pool in region["encounters"]:
+		for enc in region["encounters"][pool]:
+			for id in enc:
+				check(monsters.has(id), "region pool %s uses unknown monster %s" % [pool, id])
+	var ops := ["hp", "max_hp", "gold", "fate", "revive", "carve", "fight", "chance"]
+	for ev in GameData.load_events():
+		check(ev["options"].size() >= 2, "event %s needs at least 2 options" % ev["id"])
+		for opt in ev["options"]:
+			for e in opt["effects"]:
+				check(e["op"] in ops, "event %s uses unknown op %s" % [ev["id"], e["op"]])
 
 
 func test_shield_absorbs_damage() -> void:
@@ -88,7 +101,7 @@ func test_blank_gives_fate_capped() -> void:
 func test_fate_reroll() -> void:
 	var c := Combat.new(3)
 	c.start_battle(_heroes(), [_monster("ghoul")])
-	c.fate = 2
+	c.fate = Combat.FATE_REROLL_COST - 1
 	check(not c.fate_reroll(), "fate reroll must fail without enough fate")
 	c.fate = Combat.FATE_REROLL_COST
 	var before := c.rerolls_left
@@ -199,33 +212,70 @@ func test_skill_finishing_blow_wins() -> void:
 	check(c.finished and won[0], "killing the last enemy with a skill wins the battle")
 
 
-## Plays 300 full runs with a naive strategy (never reroll) to catch crashes / endless fights.
-## Also prints a win rate so designers can see balance at a glance.
-func test_many_random_battles_finish() -> void:
-	var encounters := GameData.load_encounters()
-	var monsters := GameData.load_monsters()
-	var runs := 300
-	var reached := [0, 0, 0, 0]  # how many runs cleared 0,1,2,3 fights
+## Plays full runs with the tactician bot to catch crashes, soft-locks and endless loops.
+func test_full_runs_finish() -> void:
+	var PlayerBot = load("res://tools/bots/player_bot.gd")
+	var wins := 0
+	var runs := 40
 	for seed_value in runs:
-		var c := Combat.new(seed_value)
-		var heroes := _heroes()
-		var cleared := 0
-		for enc in encounters:
-			var won := [false]
-			c.battle_ended.connect(func(v): won[0] = v, CONNECT_ONE_SHOT)
-			c.start_battle(heroes, enc["monsters"].map(func(id): return monsters[id]))
-			var guard := 0
-			while not c.finished and guard < 200:
-				for i in c.heroes.size():
-					c.use_skill(i)  # naive: fire every skill as soon as it is ready
-				c.end_turn()
-				guard += 1
-			check(c.finished, "battle should end within 200 rounds (seed %d)" % seed_value)
-			if not won[0]:
-				break
-			cleared += 1
-			for h in heroes:
-				h["hp"] = min(h["max_hp"], h["hp"] + 5) if Combat.is_alive(h) else 5
-		reached[cleared] += 1
-	print("Naive-play balance, no rerolls, skills on cooldown (%d runs): died in fight1=%d fight2=%d boss=%d, full clear=%d (%.0f%%)" % [
-		runs, reached[0], reached[1], reached[2], reached[3], 100.0 * reached[3] / runs])
+		var run := Run.new(seed_value)
+		var bot = PlayerBot.new("tactician", seed_value)
+		var steps := 0
+		while not run.is_over() and steps < 3000:
+			bot.play_run_step(run)
+			steps += 1
+		check(run.is_over(), "run %d should end (stuck in phase %s at tile %d)" % [seed_value, run.phase, run.pos])
+		if run.phase == "victory":
+			wins += 1
+	print("Tactician bot: %d/%d full runs won (use tools/playtest.gd for the full report)" % [wins, runs])
+
+
+func test_board_rules() -> void:
+	var run := Run.new(3)
+	var last := run.board.size() - 1
+	check(run.board[last]["type"] == "boss", "the last tile is the boss")
+	check(run.board[last - 1]["type"] == "rest" and run.board[last - 1].get("gate", false), "a gate campfire sits before the boss")
+	run.pos = last - 3
+	check(run.destination(6) == last - 1, "movement stops at the gate campfire")
+	run.pos = last - 1
+	check(run.destination(6) == last, "movement from the campfire reaches the boss")
+
+
+func test_carving_changes_die() -> void:
+	var run := Run.new(4)
+	run._offer_carving("map")
+	check(run.phase == "reward" and run.carve_offers.size() == Run.CARVE_OFFERS, "carving offers 3 choices")
+	var o: Dictionary = run.carve_offers[0]
+	run.choose_carving(0)
+	check(run.heroes[o["hero"]]["faces"][o["face"]] == o["new"], "the chosen carving changes the hero's die")
+	check(run.phase == "map", "after carving we return to the map")
+
+
+func test_shop_and_rest() -> void:
+	var run := Run.new(5)
+	run.phase = "shop"
+	run.gold = 10
+	check(not run.can_buy("tonic"), "cannot buy without enough gold")
+	run.gold = 100
+	run.heroes[0]["hp"] = 5
+	run.buy("tonic")
+	check(run.gold == 80 and run.heroes[0]["hp"] == 13, "tonic costs 20 and heals 8")
+	check(not run.can_buy("tonic"), "each item once per visit")
+	check(not run.can_buy("resurrect"), "cannot buy a revive when nobody is dead")
+	run.leave_shop()
+	run.phase = "rest"
+	run.heroes[1]["hp"] = 0
+	run.rest_heal()
+	check(Combat.is_alive(run.heroes[1]), "resting revives the fallen")
+
+
+func test_event_gold_requirement() -> void:
+	var run := Run.new(6)
+	for ev in run.events:
+		if ev["id"] == "confessor":
+			run.event = ev
+	run.phase = "event"
+	run.event_result = ""
+	run.gold = 5
+	check(not run.can_choose_event_option(0), "option needing 20 gold is locked with 5 gold")
+	check(run.can_choose_event_option(1), "free option is always available")

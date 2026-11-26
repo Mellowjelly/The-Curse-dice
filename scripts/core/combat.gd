@@ -11,11 +11,14 @@ extends RefCounted
 signal log_added(text: String)
 signal state_changed
 signal battle_ended(victory: bool)
+signal damaged(unit: Dictionary, amount: int, blocked: int)  # for floating numbers in the UI
+signal phase_changed(unit: Dictionary, text: String)          # boss second phase
 
 const REROLLS_PER_TURN := 2
 const MAX_FATE := 5
-const FATE_REROLL_COST := 3
+const FATE_REROLL_COST := 2
 const BURN_PER_FIRE := 2
+const MAX_BURN := 4  # burn cannot stack forever (v0.3 critique)
 const BLOOD_SELF_DAMAGE := 2
 
 # Skills: heroes charge every round (+1 more if their die is part of a combo).
@@ -24,6 +27,7 @@ const CHARGE_PER_ROUND := 1
 const CHARGE_PER_COMBO := 1
 # Skill numbers (tunable by the designer).
 const OATH_SHIELD := 5
+const OATH_HP_COST := 2
 const HOLLOW_FLAME_DAMAGE := 4
 const HOLLOW_FLAME_BURN := 1
 const HOLLOW_FLAME_HP_COST := 3
@@ -63,6 +67,8 @@ static func make_unit(def: Dictionary) -> Dictionary:
 		"target": -1,     # monsters only: which hero they intend to hit
 		"boss": def.get("boss", false),
 		"skill": def.get("skill", {}),  # heroes only, see data/heroes.json
+		"phase2": def.get("phase2", {}),  # monsters only: { "at": 0.5, "faces": [...], "text": "..." }
+		"phased": false,
 		"charge": 0,
 	}
 
@@ -77,6 +83,8 @@ static func short_name(unit: Dictionary) -> String:
 
 
 static func current_face(unit: Dictionary) -> Dictionary:
+	if unit.has("held_face"):
+		return unit["held_face"]  # boss mid phase-change: keep the announced intent
 	return unit["faces"][unit["face"]]
 
 
@@ -188,12 +196,16 @@ func use_skill(hero_index: int) -> bool:
 				if is_alive(m) and current_face(m)["type"] == "attack":
 					m["target"] = hero_index
 			_log("%s gains %d shield and draws every attack to himself" % [who, OATH_SHIELD])
+			var oath_cost: int = min(OATH_HP_COST, h["hp"] - 1)
+			if oath_cost > 0:
+				h["hp"] -= oath_cost
+				_log("The broken oath bleeds %s (-%d HP)" % [who, oath_cost])
 		"hollow_flame":
 			for m in monsters:
 				if is_alive(m):
-					_damage(m, HOLLOW_FLAME_DAMAGE, who)
+					_damage(m, HOLLOW_FLAME_DAMAGE, who, true)
 					if is_alive(m):
-						m["burn"] += HOLLOW_FLAME_BURN
+						m["burn"] = min(MAX_BURN, m["burn"] + HOLLOW_FLAME_BURN)
 			var cost: int = min(HOLLOW_FLAME_HP_COST, h["hp"] - 1)
 			if cost > 0:
 				h["hp"] -= cost
@@ -280,6 +292,7 @@ func _start_round() -> void:
 		if is_alive(h):
 			h["face"] = rng.randi_range(0, h["faces"].size() - 1)
 	for m in monsters:
+		m.erase("held_face")
 		if is_alive(m):
 			m["face"] = rng.randi_range(0, m["faces"].size() - 1)
 			m["target"] = _random_alive_index(heroes)
@@ -309,7 +322,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 			var t := _get_target()
 			_damage(t, value, who)
 			if is_alive(t):
-				t["burn"] += BURN_PER_FIRE
+				t["burn"] = min(MAX_BURN, t["burn"] + BURN_PER_FIRE)
 				_log("%s is burning (%d)" % [t["name"], t["burn"]])
 		"blood":
 			var t := _get_target()
@@ -331,10 +344,13 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 			var ally := _lowest_hp_ratio(heroes)
 			var healed: int = min(value, ally["max_hp"] - ally["hp"])
 			ally["hp"] += healed
+			var extra := value - healed
 			if healed > 0:
 				_log("%s heals %s for %d" % [who, short_name(ally), healed])
-			else:
-				_log("%s prays, but everyone is unhurt" % who)
+			if extra > 0:
+				# Healing nobody needs is not wasted: it becomes a ward.
+				ally["shield"] += extra
+				_log("%s's prayer wards %s (+%d shield)" % [who, short_name(ally), extra])
 		"blank":
 			if fate < MAX_FATE:
 				fate += 1
@@ -352,6 +368,7 @@ func _monster_phase() -> void:
 		if m["burn"] > 0:
 			m["hp"] = max(0, m["hp"] - m["burn"])
 			_log("%s burns for %d" % [m["name"], m["burn"]])
+			_check_phase(m)
 			m["burn"] -= 1
 			if not is_alive(m):
 				m["burn"] = 0
@@ -391,10 +408,10 @@ func _monster_phase() -> void:
 			return
 
 
-func _damage(unit: Dictionary, amount: int, source: String) -> void:
+func _damage(unit: Dictionary, amount: int, source: String, pierce := false) -> void:
 	if unit.is_empty() or not is_alive(unit):
 		return
-	var absorbed: int = min(unit["shield"], amount)
+	var absorbed: int = 0 if pierce else min(unit["shield"], amount)
 	unit["shield"] -= absorbed
 	var dealt := amount - absorbed
 	unit["hp"] = max(0, unit["hp"] - dealt)
@@ -402,10 +419,26 @@ func _damage(unit: Dictionary, amount: int, source: String) -> void:
 	if absorbed > 0:
 		text += " (%d blocked)" % absorbed
 	_log(text)
+	damaged.emit(unit, dealt, absorbed)
+	_check_phase(unit)
 	if not is_alive(unit):
 		unit["burn"] = 0
 		unit["shield"] = 0
 		_log("%s falls!" % unit["name"])
+
+
+## Marks a boss for its second phase when its HP drops low enough.
+## The new faces take over at the start of the next round, so this round's intent stays honest.
+func _check_phase(unit: Dictionary) -> void:
+	var p2: Dictionary = unit.get("phase2", {})
+	if p2.is_empty() or unit["phased"] or not is_alive(unit):
+		return
+	if unit["hp"] <= int(unit["max_hp"] * float(p2["at"])):
+		unit["held_face"] = current_face(unit)
+		unit["phased"] = true
+		unit["faces"] = p2["faces"].duplicate(true)
+		_log("!! " + p2["text"])
+		phase_changed.emit(unit, p2["text"])
 
 
 func _get_target() -> Dictionary:
