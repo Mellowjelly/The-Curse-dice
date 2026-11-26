@@ -13,6 +13,7 @@ signal state_changed
 signal battle_ended(victory: bool)
 signal damaged(unit: Dictionary, amount: int, blocked: int)  # for floating numbers in the UI
 signal phase_changed(unit: Dictionary, text: String)          # boss second phase
+signal acted(unit: Dictionary)                                # a hero or monster takes its action (for animation)
 
 const REROLLS_PER_TURN := 2
 const MAX_FATE := 5
@@ -396,6 +397,8 @@ func _gain_charge(combos: Dictionary) -> void:
 
 func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 	var who := short_name(h)
+	if face["type"] != "blank":
+		acted.emit(h)
 	match face["type"]:
 		"attack":
 			var t := _get_target()
@@ -515,6 +518,8 @@ func _monster_phase() -> void:
 			continue
 		var face := current_face(m)
 		var v := int(face["value"])
+		if face["type"] != "blank":
+			acted.emit(m)
 		match face["type"]:
 			"attack":
 				var t: int = m["target"]

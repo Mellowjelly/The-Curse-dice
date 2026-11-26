@@ -1,0 +1,328 @@
+"""Draws the character sprites into assets/sprites/ (run: python3 tools/make_sprites.py).
+
+Original pixel art, drawn from simple shapes in code. Every character gets 3 frames,
+saved side by side in one strip PNG:  [idle A][idle B (breath)][attack (lean forward)]
+Heroes face RIGHT. Monsters are drawn facing RIGHT too; the game flips them to face left.
+Canvas: 32x32 (boss 48x48). A 1px dark outline is added automatically.
+"""
+from PIL import Image, ImageDraw
+
+# ---------------------------------------------------------------- palette
+K = (14, 11, 18)          # outline / void
+SKIN = (214, 180, 150)
+SKIN_D = (170, 130, 105)
+PALE = (205, 200, 195)
+PALE_D = (150, 145, 145)
+ST_D = (62, 68, 84)       # dark steel
+ST = (120, 128, 146)      # steel
+ST_L = (186, 192, 204)    # light steel
+RUST = (120, 82, 52)
+CAPE = (128, 24, 30)
+CAPE_D = (78, 14, 20)
+GOLD = (201, 162, 39)
+GOLD_D = (140, 105, 25)
+EMBER = (230, 120, 40)
+FLAME = (252, 214, 90)
+ROBE = (92, 88, 100)
+ROBE_D = (58, 54, 66)
+BROWN = (112, 80, 50)
+BROWN_D = (72, 50, 34)
+ROT = (112, 142, 92)
+ROT_D = (64, 88, 56)
+BONE = (218, 208, 194)
+BONE_D = (160, 150, 134)
+PURP = (98, 52, 112)
+PURP_D = (58, 30, 70)
+CLOTH = (36, 30, 42)
+CLOTH_L = (58, 50, 66)
+WHITE = (236, 232, 222)
+RED = (200, 40, 36)
+GREEN_GLOW = (140, 220, 110)
+CLAY = (176, 104, 66)
+
+
+class Canvas:
+    def __init__(self, size=32):
+        self.size = size
+        self.img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        self.d = ImageDraw.Draw(self.img)
+
+    def px(self, x, y, c):
+        if 0 <= x < self.size and 0 <= y < self.size:
+            self.img.putpixel((x, y), c + (255,))
+
+    def rect(self, x0, y0, x1, y1, c):
+        self.d.rectangle([x0, y0, x1, y1], fill=c + (255,))
+
+    def ell(self, x0, y0, x1, y1, c):
+        self.d.ellipse([x0, y0, x1, y1], fill=c + (255,))
+
+    def line(self, pts, c, w=1):
+        self.d.line(pts, fill=c + (255,), width=w)
+
+    def poly(self, pts, c):
+        self.d.polygon(pts, fill=c + (255,))
+
+
+def outline(img):
+    """Adds a 1px near-black outline around every opaque pixel."""
+    w, h = img.size
+    src = img.copy()
+    out = img.copy()
+    for y in range(h):
+        for x in range(w):
+            if src.getpixel((x, y))[3] > 0:
+                continue
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < w and 0 <= ny < h and src.getpixel((nx, ny))[3] > 0 and src.getpixel((nx, ny))[:3] != K:
+                    out.putpixel((x, y), K + (255,))
+                    break
+    return out
+
+
+def frames(img, split_y):
+    """idle A, idle B (upper body sinks 1px), attack (upper body leans 2px forward)."""
+    w, h = img.size
+    top = img.crop((0, 0, w, split_y))
+    legs = img.crop((0, split_y, w, h))
+    b = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    b.paste(legs, (0, split_y))
+    b.alpha_composite(top, (0, 1))
+    atk = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    atk.paste(legs, (0, split_y))
+    atk.alpha_composite(top, (2, 0))
+    strip = Image.new("RGBA", (w * 3, h), (0, 0, 0, 0))
+    for i, f in enumerate((img, b, atk)):
+        strip.paste(outline(f), (i * w, 0))
+    return strip
+
+
+# ---------------------------------------------------------------- heroes
+
+def varek():
+    c = Canvas()
+    c.rect(7, 13, 11, 29, CAPE_D); c.rect(8, 13, 11, 27, CAPE)              # cape behind
+    c.rect(12, 25, 14, 31, ST_D); c.rect(17, 25, 19, 31, ST_D)               # legs
+    c.rect(11, 14, 20, 25, ST); c.rect(12, 15, 15, 20, ST_L)                 # torso + shine
+    c.rect(11, 22, 20, 23, ST_D)                                              # belt
+    c.rect(12, 4, 19, 13, ST); c.rect(12, 4, 14, 7, ST_L)                     # helmet
+    c.rect(13, 9, 15, 9, K); c.rect(17, 9, 19, 9, K)                          # split visor
+    c.px(14, 9, EMBER)                                                        # an eye in the dark
+    for x, y in ((12, 14), (13, 15), (14, 14), (15, 15)):
+        c.px(x, y, GOLD)                                                      # broken chain
+    c.rect(19, 15, 25, 25, ST_D); c.rect(20, 16, 24, 24, ST)                  # tower shield
+    c.line([(21, 17), (23, 20), (22, 23)], K)                                 # crack
+    return frames(c.img, 24)
+
+
+def lys():
+    c = Canvas()
+    c.poly([(15, 12), (9, 31), (22, 31), (17, 12)], ROBE)                     # robe
+    c.poly([(16, 14), (13, 31), (16, 31)], ROBE_D)                            # robe fold
+    c.ell(10, 2, 21, 14, ROBE_D)                                              # hood
+    c.ell(12, 6, 19, 13, K)                                                   # hollow face
+    c.px(14, 9, EMBER); c.px(17, 9, EMBER)                                    # burning eyes
+    c.px(15, 11, PALE)                                                        # crack of porcelain
+    c.rect(19, 15, 23, 16, ROBE); c.rect(23, 15, 24, 16, PALE)               # arm + hand
+    c.ell(22, 9, 27, 14, EMBER); c.ell(23, 10, 26, 13, FLAME)                # flame
+    c.px(24, 8, EMBER); c.px(25, 7, FLAME)
+    return frames(c.img, 24)
+
+
+def aldric():
+    c = Canvas()
+    c.poly([(14, 12), (10, 31), (21, 31), (18, 12)], BROWN)                   # robe
+    c.poly([(16, 14), (14, 31), (16, 31)], BROWN_D)
+    c.rect(11, 21, 20, 21, BONE_D)                                            # rope belt
+    c.ell(12, 3, 19, 12, SKIN); c.rect(12, 9, 19, 12, SKIN_D)                 # bald head
+    c.px(14, 7, K); c.px(17, 7, K); c.px(14, 8, PALE_D); c.px(17, 8, PALE_D)  # tired eyes
+    c.rect(15, 10, 16, 10, SKIN_D)
+    c.rect(15, 15, 15, 18, GOLD); c.rect(14, 17, 16, 17, GOLD)                # upside-down holy symbol
+    c.rect(19, 16, 22, 17, BROWN); c.px(23, 17, SKIN)                         # arm
+    c.rect(23, 18, 23, 19, BROWN_D)                                           # lantern chain
+    c.rect(22, 20, 25, 24, GOLD_D); c.rect(23, 21, 24, 23, FLAME)            # lantern
+    return frames(c.img, 24)
+
+
+def rook():
+    c = Canvas()
+    c.rect(22, 5, 22, 25, BROWN); c.rect(20, 25, 24, 30, ST); c.rect(21, 30, 23, 31, ST_L)  # spade
+    c.rect(12, 25, 14, 31, CLOTH); c.rect(17, 25, 19, 31, CLOTH)              # legs
+    c.rect(11, 13, 20, 26, CLOTH_L); c.rect(15, 13, 16, 26, CLOTH)            # coat
+    c.rect(12, 12, 19, 13, CAPE)                                              # scarf
+    c.rect(13, 6, 18, 12, PALE); c.rect(13, 10, 18, 12, PALE_D)               # face
+    c.px(14, 8, K); c.px(17, 8, K); c.rect(14, 11, 17, 11, K)                 # grim face
+    c.rect(9, 5, 22, 6, CLOTH); c.rect(12, 1, 19, 5, CLOTH)                   # wide-brim hat
+    c.rect(12, 4, 19, 4, CAPE_D)
+    c.rect(20, 16, 22, 17, CLOTH_L)                                           # arm on spade
+    return frames(c.img, 24)
+
+
+def vael():
+    c = Canvas()
+    c.poly([(13, 12), (9, 31), (22, 31), (19, 12)], CLOTH)                    # long coat
+    c.poly([(16, 14), (15, 31), (17, 31)], CLOTH_L)
+    c.ell(11, 4, 20, 13, BONE)                                                # mask
+    c.poly([(19, 8), (27, 11), (19, 12)], BONE)                               # beak
+    c.line([(19, 12), (26, 11)], BONE_D)
+    c.ell(14, 6, 16, 8, RED); c.px(15, 7, FLAME)                              # glass eye
+    c.rect(9, 3, 22, 4, CLOTH); c.rect(12, 0, 19, 3, CLOTH)                   # hat
+    c.rect(19, 18, 22, 19, CLOTH); c.px(23, 19, BONE)                         # arm
+    c.rect(23, 20, 23, 21, ST_D); c.ell(21, 22, 25, 26, ST_D)                 # censer
+    c.px(22, 21, GREEN_GLOW); c.px(24, 20, GREEN_GLOW); c.px(25, 18, GREEN_GLOW); c.px(24, 16, GREEN_GLOW)
+    return frames(c.img, 24)
+
+
+def mordecai():
+    c = Canvas()
+    c.rect(12, 25, 14, 31, PURP_D); c.rect(17, 25, 19, 31, PURP_D)            # legs
+    c.rect(11, 13, 20, 26, PURP); c.rect(15, 13, 16, 26, PURP_D)              # coat
+    c.px(14, 17, GOLD); c.px(14, 20, GOLD); c.px(17, 17, GOLD); c.px(17, 20, GOLD)  # buttons
+    c.rect(13, 7, 18, 12, PALE)                                               # face
+    c.px(14, 9, K); c.px(17, 9, K)
+    c.rect(14, 11, 17, 11, K); c.px(13, 10, K); c.px(18, 10, K)               # wide grin
+    c.rect(11, 6, 20, 6, CLOTH); c.rect(13, 0, 18, 5, CLOTH)                  # top hat
+    c.rect(13, 4, 18, 4, RED)
+    c.rect(19, 15, 22, 16, PURP); c.px(23, 15, PALE)                          # arm
+    c.rect(23, 11, 26, 14, WHITE); c.px(24, 12, K); c.px(25, 13, K)           # die
+    c.rect(25, 16, 27, 18, WHITE); c.px(26, 17, K)                            # die
+    return frames(c.img, 24)
+
+
+# ---------------------------------------------------------------- monsters (drawn facing right)
+
+def ghoul():
+    c = Canvas()
+    c.rect(10, 24, 11, 31, ROT_D); c.rect(16, 24, 17, 31, ROT_D)             # thin legs
+    c.ell(7, 12, 21, 26, ROT); c.ell(9, 14, 15, 20, ROT_D)                    # hunched body
+    c.rect(8, 20, 20, 26, CLOTH_L)                                            # burial rags
+    c.ell(17, 9, 25, 17, ROT)                                                 # head thrust forward
+    c.px(22, 12, FLAME); c.px(20, 12, FLAME)                                  # eyes
+    c.rect(20, 15, 25, 16, K); c.px(21, 15, BONE); c.px(23, 15, BONE)         # open jaw + teeth
+    c.line([(19, 19), (25, 22), (27, 25)], ROT, 2)                            # long arm
+    c.px(28, 26, BONE); c.px(27, 27, BONE); c.px(26, 27, BONE)                # claws
+    return frames(c.img, 23)
+
+
+def cultist():
+    c = Canvas()
+    c.poly([(14, 11), (9, 31), (22, 31), (18, 11)], ROBE)                     # ash robe
+    for x, y in ((11, 26), (14, 22), (18, 28), (20, 24), (13, 30)):
+        c.px(x, y, PALE_D)                                                    # ash flecks
+    c.ell(11, 2, 20, 13, ROBE_D)                                              # hood
+    c.ell(12, 5, 19, 12, CLAY)                                                # clay mask
+    c.px(14, 8, K); c.px(17, 8, K); c.line([(16, 5), (15, 9), (16, 12)], K)   # eye holes + crack
+    c.rect(19, 15, 22, 16, ROBE); c.rect(23, 16, 23, 18, ST_D)
+    c.ell(21, 19, 25, 22, ST_D)                                               # censer
+    c.px(24, 17, PALE); c.px(25, 15, PALE); c.px(24, 13, PALE_D)              # smoke
+    return frames(c.img, 24)
+
+
+def bone_hound():
+    c = Canvas()
+    for x in (9, 12, 19, 22):
+        c.rect(x, 22, x, 31, BONE)                                            # four legs
+    c.line([(7, 16), (24, 15)], BONE, 2)                                      # spine
+    for x in range(11, 21, 2):
+        c.line([(x, 16), (x, 22)], BONE_D)                                    # ribs
+    c.ell(13, 18, 18, 21, EMBER); c.px(15, 19, FLAME)                         # ember in the ribcage
+    c.line([(7, 16), (3, 12)], BONE)                                          # tail
+    c.ell(22, 10, 29, 16, BONE)                                               # skull
+    c.px(26, 12, RED)                                                         # eye socket glow
+    c.rect(25, 16, 30, 17, BONE_D); c.px(27, 17, K); c.px(29, 17, K)          # jaw
+    return frames(c.img, 21)
+
+
+def plague_rat():
+    c = Canvas()
+    c.line([(5, 27), (2, 24), (3, 20)], PALE_D)                               # tail
+    c.ell(6, 22, 20, 30, BROWN); c.ell(8, 24, 14, 29, BROWN_D)                # body
+    c.ell(16, 21, 24, 28, BROWN)                                              # head
+    c.px(20, 23, RED); c.px(22, 25, PALE)                                     # eye, tooth
+    c.ell(16, 18, 19, 22, PALE_D)                                             # ear
+    c.px(11, 24, ROT); c.px(9, 27, ROT)                                       # sores
+    c.rect(9, 30, 10, 31, PALE_D); c.rect(17, 30, 18, 31, PALE_D)             # feet
+    return frames(c.img, 28)
+
+
+def weeping_nun():
+    c = Canvas()
+    c.poly([(13, 11), (8, 31), (23, 31), (19, 11)], CLOTH)                    # habit
+    c.ell(10, 2, 21, 15, CLOTH)                                               # veil
+    c.ell(12, 4, 19, 14, WHITE)                                               # wimple
+    c.ell(13, 6, 18, 12, PALE)                                                # face
+    c.px(14, 8, K); c.px(17, 8, K)
+    c.rect(14, 9, 14, 12, CAPE_D); c.rect(17, 9, 17, 12, CAPE_D)              # bloody tears
+    c.rect(14, 18, 17, 22, PALE)                                              # praying hands
+    c.rect(15, 16, 16, 17, GOLD)                                              # rosary
+    return frames(c.img, 24)
+
+
+def grave_knight():
+    c = Canvas()
+    c.rect(12, 25, 14, 31, RUST); c.rect(17, 25, 19, 31, RUST)
+    c.rect(11, 13, 20, 25, ROT_D); c.rect(12, 14, 15, 19, ST)                 # rusted armour
+    c.rect(11, 22, 20, 23, RUST)
+    c.rect(12, 3, 19, 12, ROT_D); c.rect(12, 3, 13, 6, ST)                    # helm
+    c.rect(13, 8, 18, 8, K); c.px(14, 8, GREEN_GLOW); c.px(17, 8, GREEN_GLOW)  # dead eyes
+    c.rect(20, 3, 21, 24, ST_L); c.rect(18, 22, 23, 23, RUST)                 # greatsword
+    c.rect(20, 24, 21, 27, BROWN_D)
+    c.px(13, 17, ROT); c.px(18, 20, ROT); c.px(16, 24, ROT)                   # moss
+    return frames(c.img, 24)
+
+
+def bone_colossus():
+    c = Canvas()
+    c.rect(9, 22, 12, 31, BONE); c.rect(19, 22, 22, 31, BONE)                 # huge legs
+    c.ell(7, 18, 24, 25, BONE_D)                                              # pelvis
+    c.rect(14, 8, 17, 20, BONE)                                               # spine
+    for y in (10, 13, 16):
+        c.line([(8, y), (23, y + 1)], BONE)                                   # ribs
+    c.ell(11, 0, 21, 9, BONE)                                                 # skull
+    c.px(14, 4, EMBER); c.px(18, 4, EMBER); c.rect(14, 7, 18, 7, K)
+    c.line([(23, 10), (28, 17), (29, 24)], BONE, 3)                           # arm
+    c.ell(26, 23, 31, 28, BONE_D)                                             # fist of skulls
+    c.line([(8, 10), (3, 18), (4, 26)], BONE, 3)
+    return frames(c.img, 21)
+
+
+def rotting_bishop(enraged=False):
+    c = Canvas(48)
+    vest = CAPE if enraged else GOLD
+    vest_d = CAPE_D if enraged else GOLD_D
+    c.poly([(19, 18), (8, 47), (39, 47), (29, 18)], vest)                     # vestments
+    c.poly([(23, 20), (20, 47), (27, 47), (25, 20)], WHITE if not enraged else CLOTH)  # stole
+    c.poly([(9, 40), (14, 47), (6, 47)], vest_d); c.poly([(37, 38), (41, 47), (33, 47)], vest_d)  # tatters
+    for x, y in ((14, 30), (31, 34), (17, 41), (29, 26)):
+        c.ell(x, y, x + 2, y + 2, ROT)                                        # rot showing through
+    c.ell(17, 9, 30, 22, ROT)                                                 # rotting face
+    c.ell(18, 15, 22, 20, ROT_D)
+    c.px(21, 14, RED if enraged else FLAME); c.px(26, 14, RED if enraged else FLAME)
+    c.rect(21, 18, 27, 19, K); c.px(22, 18, BONE); c.px(25, 19, BONE)
+    c.poly([(17, 10), (23, 0), (30, 10)], WHITE if not enraged else CLOTH)    # mitre
+    c.rect(22, 2, 24, 9, vest); c.rect(19, 6, 28, 7, vest)
+    c.rect(36, 4, 37, 44, GOLD_D)                                             # crozier
+    c.ell(33, 0, 40, 7, GOLD_D); c.ell(35, 2, 38, 5, (0, 0, 0))
+    c.rect(30, 22, 36, 24, vest); c.rect(35, 21, 38, 25, ROT)                 # arm + hand
+    for y in (26, 30, 35):
+        c.px(37, y, CLOTH)                                                    # dripping ichor
+    if enraged:
+        for x, y in ((10, 20), (38, 16), (6, 30), (42, 28)):
+            c.px(x, y, RED)
+    return frames(c.img, 38)
+
+
+SPRITES = {
+    "varek": varek, "lys": lys, "aldric": aldric, "rook": rook, "vael": vael, "mordecai": mordecai,
+    "ghoul": ghoul, "cultist": cultist, "bone_hound": bone_hound, "plague_rat": plague_rat,
+    "weeping_nun": weeping_nun, "grave_knight": grave_knight, "bone_colossus": bone_colossus,
+    "rotting_bishop": rotting_bishop, "rotting_bishop_enraged": lambda: rotting_bishop(True),
+}
+
+if __name__ == "__main__":
+    import os
+    os.makedirs("assets/sprites", exist_ok=True)
+    for name, fn in SPRITES.items():
+        fn().save(f"assets/sprites/{name}.png")
+        print("wrote", name)

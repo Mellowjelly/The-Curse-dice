@@ -8,6 +8,11 @@ signal finished(victory: bool)
 const Combat = preload("res://scripts/core/combat.gd")
 const UI = preload("res://scripts/ui/ui_kit.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
+const UnitSprite = preload("res://scripts/ui/unit_sprite.gd")
+
+const FX_STEP := 0.2        # seconds between animated actions in a turn
+const HERO_SPRITE := 64
+const MONSTER_SPRITE := 96
 
 const ROLL_ANIM_TIME := 0.35
 
@@ -37,8 +42,10 @@ var _die_buttons := {}    # hero index -> Button
 var _rolling := 0.0
 var _last_round := -1
 var _last_rerolls := -1
-var _pending_numbers: Array = []
+var _pending_numbers: Array = []  # queued visual events: ["act", unit] or ["hit", unit, amount, blocked]
+var _sprites := {}                 # "h0"/"m1" -> UnitSprite (kept alive across card rebuilds)
 var _anim_rng := RandomNumberGenerator.new()
+var _death_delay := 0.0
 
 
 func _ready() -> void:
@@ -50,7 +57,7 @@ func bind(c: Combat, fight_title: String) -> void:
 	if combat != null:
 		for pair in [[combat.log_added, _on_log], [combat.state_changed, _refresh],
 				[combat.battle_ended, _on_battle_ended], [combat.damaged, _on_damaged],
-				[combat.phase_changed, _on_phase_changed]]:
+				[combat.phase_changed, _on_phase_changed], [combat.acted, _on_acted]]:
 			if pair[0].is_connected(pair[1]):
 				pair[0].disconnect(pair[1])
 	combat = c
@@ -60,6 +67,11 @@ func bind(c: Combat, fight_title: String) -> void:
 	combat.battle_ended.connect(_on_battle_ended)
 	combat.damaged.connect(_on_damaged)
 	combat.phase_changed.connect(_on_phase_changed)
+	combat.acted.connect(_on_acted)
+	for sp in _sprites.values():
+		sp.queue_free()
+	_sprites.clear()
+	_pending_numbers.clear()
 	_overlay.hide()
 	_banner.modulate.a = 0.0
 	_last_round = -1
@@ -206,13 +218,20 @@ func _on_battle_ended(victory: bool) -> void:
 
 
 func _on_damaged(unit: Dictionary, amount: int, blocked: int) -> void:
-	if _pending_numbers.is_empty():
+	if not _pending_numbers.any(func(e): return e[0] == "hit"):
 		Sfx.play(self, "hit", -10.0)
-	_pending_numbers.append([unit, amount, blocked])
+	_pending_numbers.append(["hit", unit, amount, blocked])
 
 
-func _on_phase_changed(_unit: Dictionary, text: String) -> void:
+func _on_acted(unit: Dictionary) -> void:
+	_pending_numbers.append(["act", unit])
+
+
+func _on_phase_changed(unit: Dictionary, text: String) -> void:
 	Sfx.play(self, "phase", 0.0)
+	var sp = _sprites.get(_uid(unit))
+	if sp != null and ResourceLoader.exists("res://assets/sprites/%s_enraged.png" % unit["id"]):
+		sp.enrage("%s_enraged" % unit["id"])
 	_show_banner(text)
 
 
@@ -254,17 +273,25 @@ func _spawn_numbers() -> void:
 	var delay := 0.0
 	var per_unit := {}
 	for item in _pending_numbers:
-		var key := _uid(item[0])
+		var key := _uid(item[1])
 		if key == "":
 			continue
+		var sp = _sprites.get(key)
+		if item[0] == "act":
+			if sp != null:
+				sp.attack(delay)
+			delay += FX_STEP
+			continue
+		if sp != null:
+			sp.hurt(delay + 0.08)
 		# Place by slot in the row (cards may have just been rebuilt and not laid out yet).
 		var is_hero := key.begins_with("h")
 		var row: Control = _hero_row if is_hero else _monster_row
 		var count: int = combat.heroes.size() if is_hero else combat.monsters.size()
 		var slot := int(key.substr(1))
 		var slot_w: float = row.size.x / float(max(count, 1))
-		var text := "-%d" % item[1] if item[1] > 0 else "blocked"
-		var l := UI.label(text, 30, UI.BLOOD if item[1] > 0 else Color("#7fa7d1"))
+		var text := "-%d" % item[2] if item[2] > 0 else "blocked"
+		var l := UI.label(text, 30, UI.BLOOD if item[2] > 0 else Color("#7fa7d1"))
 		l.add_theme_color_override("font_shadow_color", Color.BLACK)
 		l.add_theme_constant_override("shadow_offset_x", 2)
 		l.add_theme_constant_override("shadow_offset_y", 2)
@@ -274,6 +301,8 @@ func _spawn_numbers() -> void:
 		per_unit[key] = nth + 1
 		# Several hits on one unit fan out side by side instead of overlapping.
 		var start := row.global_position + Vector2(slot_w * (slot + 0.5) - 30 + nth * 46, 40 - nth * 6)
+		if sp != null and sp.is_inside_tree() and sp.size.x > 0:
+			start = sp.global_position + Vector2(sp.size.x * 0.5 - 16 + nth * 40, -6 - nth * 6)
 		l.global_position = start
 		l.modulate.a = 0.0
 		var tw := create_tween()
@@ -282,7 +311,7 @@ func _spawn_numbers() -> void:
 		tw.parallel().tween_property(l, "global_position", start + Vector2(0, -50), 0.9)
 		tw.tween_property(l, "modulate:a", 0.0, 0.3)
 		tw.tween_callback(l.queue_free)
-		delay += 0.12
+		delay += FX_STEP * 0.6
 	_pending_numbers.clear()
 
 
@@ -339,6 +368,11 @@ func _refresh() -> void:
 
 	_cards.clear()
 	_die_buttons.clear()
+	for sp in _sprites.values():
+		if sp.get_parent() != null:
+			sp.get_parent().remove_child(sp)
+	# Deaths play after this turn's queued attacks and hits.
+	_death_delay = _pending_numbers.size() * FX_STEP * 0.8 + 0.2
 	for c in _monster_row.get_children():
 		c.queue_free()
 	for i in combat.monsters.size():
@@ -351,6 +385,24 @@ func _refresh() -> void:
 		var card := _hero_card(combat.heroes[i], i, combos)
 		_cards["h%d" % i] = card
 		_hero_row.add_child(card)
+
+
+func _sprite_row(key: String, u: Dictionary, info: Control, is_hero: bool) -> Control:
+	var sp = _sprites.get(key)
+	if sp == null:
+		var id: String = u["id"] + ("_enraged" if u.get("phased", false) and ResourceLoader.exists("res://assets/sprites/%s_enraged.png" % u["id"]) else "")
+		var px := HERO_SPRITE if is_hero else (144 if u.get("boss", false) else MONSTER_SPRITE)
+		sp = UnitSprite.create(id, px, not is_hero)
+		_sprites[key] = sp
+		if not Combat.is_alive(u):
+			sp.set_dead(true)
+	sp.set_dead(not Combat.is_alive(u), _death_delay)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	row.add_child(sp)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(info)
+	return row
 
 
 func _status_text(u: Dictionary) -> String:
@@ -368,15 +420,20 @@ func _monster_card(m: Dictionary, index: int) -> Control:
 	var border := UI.BLOOD if targeted else (Color("#8a1f4a") if m.get("boss", false) else UI.BORDER)
 	var panel := UI.panel(border, 3 if targeted else 1)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.modulate.a = 1.0 if alive else 0.35
+	panel.modulate.a = 1.0 if alive else 0.6
+	var outer := VBoxContainer.new()
+	panel.add_child(outer)
 	var box := VBoxContainer.new()
-	panel.add_child(box)
+	outer.add_child(_sprite_row("m%d" % index, m, box, false))
 	var name_text: String = ("[BOSS] " if m["boss"] else "") + m["name"]
 	if m.get("phased", false):
 		name_text += "  (enraged)"
-	box.add_child(UI.label(name_text, 18))
+	var nl := UI.label(name_text, 17)
+	nl.clip_text = true
+	box.add_child(nl)
 	box.add_child(UI.hp_bar(m["hp"], m["max_hp"]))
 	box.add_child(UI.label(_status_text(m), 14, UI.DIM))
+	box = outer
 	if alive:
 		var face := Combat.current_face(m)
 		box.add_child(UI.label("Intent: " + combat.intent_text(m), 17, UI.FACE_COLORS[face["type"]].lightened(0.4)))
@@ -392,13 +449,17 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	var alive := Combat.is_alive(h)
 	var panel := UI.panel(UI.GOLD if h["locked"] else UI.BORDER, 3 if h["locked"] else 1)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.modulate.a = 1.0 if alive else 0.35
+	panel.modulate.a = 1.0 if alive else 0.6
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
 	panel.add_child(box)
-	box.add_child(UI.label(h["name"], 17))
-	box.add_child(UI.hp_bar(h["hp"], h["max_hp"]))
-	box.add_child(UI.label(_status_text(h), 14, UI.DIM))
+	var info := VBoxContainer.new()
+	var nl := UI.label(h["name"], 16)
+	nl.clip_text = true
+	info.add_child(nl)
+	info.add_child(UI.hp_bar(h["hp"], h["max_hp"]))
+	info.add_child(UI.label(_status_text(h), 14, UI.DIM))
+	box.add_child(_sprite_row("h%d" % index, h, info, true))
 	if not alive:
 		box.add_child(UI.label("Fallen", 18, UI.DIM))
 		return panel

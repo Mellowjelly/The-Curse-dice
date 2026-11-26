@@ -1,9 +1,9 @@
-# Cursed Dice: ลูกเต๋าต้องสาป — เวอร์ชัน 1.0
+# Cursed Dice: ลูกเต๋าต้องสาป — เวอร์ชัน 1.1
 
 เกมโร้กไลต์ดาร์กแฟนตาซี ต่อสู้ด้วยลูกเต๋า 2D สร้างด้วย Godot 4
 ภูมิภาคแรก **The Hollow Road** เล่นจบได้ครบ: เมือง → ถนน 42 ช่อง → บอส The Rotting Bishop
 
-![map](docs/screenshot.png)
+![combat](docs/combat_animation.gif)
 
 ## วิธีเปิดเกม
 1. ดาวน์โหลด **Godot 4.3+** (Standard) จาก https://godotengine.org/download (แตก zip แล้วเปิดได้เลย)

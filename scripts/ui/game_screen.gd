@@ -10,6 +10,7 @@ const UI = preload("res://scripts/ui/ui_kit.gd")
 const Profile = preload("res://scripts/core/profile.gd")
 const TownScreen = preload("res://scripts/ui/town_screen.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
+const UnitSprite = preload("res://scripts/ui/unit_sprite.gd")
 
 const TOWN_SCENE := "res://scenes/town.tscn"
 
@@ -227,8 +228,15 @@ func _refresh_party() -> void:
 	for c in _party_box.get_children():
 		c.queue_free()
 	for h in run.heroes:
+		var holder := HBoxContainer.new()
+		holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var sp := UnitSprite.create(h["id"], 64, false)
+		if not Combat.is_alive(h):
+			sp.set_dead(true)
+		holder.add_child(sp)
 		var card := VBoxContainer.new()
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		holder.add_child(card)
 		card.add_theme_constant_override("separation", 4)
 		var alive := Combat.is_alive(h)
 		card.add_child(UI.label(h["name"] + ("" if alive else "  (fallen)"), 15, UI.TEXT if alive else UI.DIM))
@@ -238,7 +246,7 @@ func _refresh_party() -> void:
 		var w: Dictionary = h.get("weapon", {})
 		card.add_child(UI.label("Weapon: " + (w["name"] if not w.is_empty() else "bare hands"), 12,
 			UI.BLOOD if w.get("rarity", "") == "cursed" else UI.DIM))
-		_party_box.add_child(card)
+		_party_box.add_child(holder)
 
 
 func _refresh_actions() -> void:

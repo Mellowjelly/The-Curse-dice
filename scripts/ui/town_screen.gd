@@ -145,6 +145,10 @@ func _refresh_party() -> void:
 			" ".join(h["faces"].map(UI.face_short))] if owned else "???\nNot yet summoned\n(Summon Roll tab)"
 		var b := UI.choice_button(text, func(): _toggle_party(id), UI.GOLD if chosen else UI.BORDER, owned)
 		b.custom_minimum_size = Vector2(390, 92)
+		if owned:
+			b.icon = load("res://scripts/ui/unit_sprite.gd").portrait(id)
+			b.expand_icon = true
+			b.add_theme_constant_override("icon_max_width", 64)
 		b.add_theme_font_size_override("font_size", 14)
 		grid.add_child(b)
 	# Curse level (opt-in difficulty).

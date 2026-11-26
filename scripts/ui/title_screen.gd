@@ -95,9 +95,21 @@ func _build() -> void:
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
 
-	var version := _label("Version 1.0", 14, COL_DIM)
+	var version := _label("Version 1.1", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
+
+	# The heroes face the Bishop across the bottom of the screen.
+	var US = load("res://scripts/ui/unit_sprite.gd")
+	var x := 60
+	for id in ["varek", "lys", "aldric"]:
+		var sp: Control = US.create(id, 96, false)
+		sp.position = Vector2(x, 600)
+		add_child(sp)
+		x += 90
+	var boss: Control = US.create("rotting_bishop", 144, true)
+	boss.position = Vector2(1080, 548)
+	add_child(boss)
 
 	_help = _build_help()
 	add_child(_help)

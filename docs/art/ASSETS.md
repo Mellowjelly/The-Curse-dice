@@ -1,4 +1,9 @@
-# Asset List — Batch 1 (for v0.3)
+# Asset List — Batch 1
+
+> **v1.1:** placeholder pixel sprites for all 6 heroes, 7 monsters and the boss (normal + enraged) are now drawn in code by
+> `tools/make_sprites.py` → `assets/sprites/<id>.png` (3 frames side by side: idle A, idle B, attack; 32x32, boss 48x48).
+> To use real art, replace a PNG with the same layout (3 square frames in a row, facing right). The game picks it up automatically.
+> Die-face icons: `tools/make_icons.py` → `assets/icons/`.
 
 Status: `todo` → `generated` → `cleaned` (fixed in Aseprite) → `in game`
 Before shipping any asset: confirm the AI tool's plan allows **commercial use** and fill in the "Tool / plan" column.
