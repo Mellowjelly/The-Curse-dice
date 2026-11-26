@@ -256,6 +256,116 @@ def world_map():
     return img
 
 
+# ---------------------------------------------------------------- the town of Ashfall
+# Building rectangles (art pixels, x4 on screen). town_screen.gd uses the same numbers for hotspots.
+TOWN_BUILDINGS = {
+    "chapel": (6, 34, 36, 104),
+    "smithy": (40, 62, 70, 104),
+    "carver": (74, 70, 98, 104),
+    "fortune": (102, 72, 126, 104),
+    "kennel": (130, 84, 150, 104),
+    "market": (112, 116, 156, 142),
+}
+
+
+def town():
+    rng = random.Random(21)
+    img = Image.new("RGBA", (W, H))
+    sky(img, (10, 8, 22), (52, 34, 54), 0, 100)
+    stars(img, rng, 50, 60)
+    d = ImageDraw.Draw(img)
+    d.ellipse([126, 12, 144, 30], fill=(226, 218, 196)); d.ellipse([131, 11, 147, 28], fill=(26, 20, 40))   # crescent moon
+    for i in range(9):                                                   # mountains
+        x = i * 40 + rng.randint(-10, 10)
+        top = 34 + rng.randint(0, 12)
+        d.polygon([(x - 30, 80), (x, top), (x + 30, 80)], fill=(34, 28, 44))
+        d.polygon([(x - 5, top + 7), (x, top), (x + 5, top + 7)], fill=(120, 112, 136))
+    ridge(d, rng, 92, 2, (26, 20, 32))
+    # far houses on the right (behind the UI panel)
+    for i in range(9):
+        x = 160 + i * 18 + rng.randint(-3, 3)
+        h = rng.randint(14, 24)
+        d.rectangle([x, 100 - h, x + 14, 104], fill=(30, 22, 30))
+        d.polygon([(x - 2, 100 - h), (x + 7, 92 - h), (x + 16, 100 - h)], fill=(44, 26, 30))
+        if rng.random() < 0.6:
+            d.rectangle([x + 5, 104 - h + 6, x + 7, 104 - h + 9], fill=(230, 170, 70))
+    # the town wall and the gate to the Hollow Road
+    d.rectangle([160, 96, W, 106], fill=(48, 42, 50))
+    for x in range(160, W, 6):
+        d.rectangle([x, 92, x + 3, 96], fill=(48, 42, 50))
+    d.rectangle([286, 84, 310, 106], fill=(40, 34, 44)); d.rectangle([292, 92, 304, 106], fill=(12, 8, 14))
+    # cobbled square
+    d.rectangle([0, 104, W, H], fill=(40, 34, 38))
+    for y in range(106, H, 4):
+        off = (y // 4) % 2 * 3
+        for x in range(-3, W, 6):
+            d.rectangle([x + off, y, x + off + 4, y + 2], fill=rng.choice([(48, 41, 44), (44, 38, 42), (52, 45, 46)]))
+    # --- the six buildings ---
+    x0, y0, x1, y1 = TOWN_BUILDINGS["chapel"]                            # Ruined Chapel
+    d.rectangle([x0, y0 + 26, x1, y1], fill=(62, 56, 66)); d.rectangle([x0, y0 + 26, x0 + 4, y1], fill=(76, 70, 80))
+    d.polygon([(x0 - 2, y0 + 26), ((x0 + x1) // 2, y0 + 8), (x1 + 2, y0 + 26)], fill=(52, 34, 40))
+    d.rectangle([(x0 + x1) // 2 - 4, y0, (x0 + x1) // 2 + 4, y0 + 20], fill=(62, 56, 66))
+    d.polygon([((x0 + x1) // 2 - 6, y0), ((x0 + x1) // 2, y0 - 10), ((x0 + x1) // 2 + 6, y0)], fill=(52, 34, 40))
+    d.rectangle([(x0 + x1) // 2 - 1, y0 - 16, (x0 + x1) // 2 + 1, y0 - 10], fill=(201, 162, 39))
+    d.rectangle([(x0 + x1) // 2 - 3, y0 - 14, (x0 + x1) // 2 + 3, y0 - 13], fill=(201, 162, 39))
+    d.ellipse([(x0 + x1) // 2 - 6, y0 + 32, (x0 + x1) // 2 + 6, y0 + 44], fill=(160, 50, 60))   # rose window
+    d.rectangle([(x0 + x1) // 2 - 4, y1 - 16, (x0 + x1) // 2 + 4, y1], fill=(30, 22, 26))
+    d.polygon([(x1 - 6, y0 + 26), (x1, y0 + 30), (x1, y0 + 26)], fill=(10, 8, 14))         # broken corner
+    x0, y0, x1, y1 = TOWN_BUILDINGS["smithy"]                            # Gravesmith
+    d.rectangle([x0, y0 + 12, x1, y1], fill=(70, 50, 40))
+    d.polygon([(x0 - 3, y0 + 12), ((x0 + x1) // 2, y0), (x1 + 3, y0 + 12)], fill=(46, 40, 44))
+    d.rectangle([x1 - 8, y0 - 8, x1 - 3, y0 + 6], fill=(56, 50, 54))                         # chimney
+    d.rectangle([x0 + 4, y1 - 16, x0 + 16, y1], fill=(250, 140, 50)); d.rectangle([x0 + 6, y1 - 14, x0 + 14, y1 - 2], fill=(252, 210, 90))  # forge
+    d.rectangle([x0 + 18, y1 - 7, x0 + 26, y1 - 4], fill=(30, 30, 36)); d.rectangle([x0 + 20, y1 - 4, x0 + 24, y1], fill=(30, 30, 36))  # anvil
+    x0, y0, x1, y1 = TOWN_BUILDINGS["carver"]                            # Bone Carver's Hut
+    d.rectangle([x0, y0 + 10, x1, y1], fill=(84, 66, 46))
+    d.polygon([(x0 - 3, y0 + 10), ((x0 + x1) // 2, y0), (x1 + 3, y0 + 10)], fill=(150, 140, 120))
+    for bx in range(x0, x1, 4):
+        d.point((bx, y0 + 9), fill=(220, 210, 190))                      # bones on the roof
+    d.ellipse([(x0 + x1) // 2 - 3, y0 + 1, (x0 + x1) // 2 + 3, y0 + 7], fill=(225, 215, 198))  # skull sign
+    d.point(((x0 + x1) // 2 - 1, y0 + 4), fill=(14, 11, 18)); d.point(((x0 + x1) // 2 + 1, y0 + 4), fill=(14, 11, 18))
+    d.rectangle([x0 + 9, y1 - 12, x0 + 15, y1], fill=(36, 26, 22))
+    x0, y0, x1, y1 = TOWN_BUILDINGS["fortune"]                           # Fortune Teller's Tent
+    d.polygon([(x0, y1), ((x0 + x1) // 2, y0), (x1, y1)], fill=(100, 52, 120))
+    for i in range(3):
+        d.polygon([(x0 + 4 + i * 7, y1), ((x0 + x1) // 2, y0), (x0 + 7 + i * 7, y1)], fill=(140, 90, 40))
+    d.polygon([((x0 + x1) // 2 - 4, y1), ((x0 + x1) // 2, y1 - 12), ((x0 + x1) // 2 + 4, y1)], fill=(20, 10, 26))
+    d.point(((x0 + x1) // 2, y0 - 2), fill=(230, 210, 120))
+    x0, y0, x1, y1 = TOWN_BUILDINGS["kennel"]                            # Kennel of Strays
+    d.rectangle([x0, y0 + 6, x1, y1], fill=(96, 70, 44))
+    d.polygon([(x0 - 2, y0 + 6), ((x0 + x1) // 2, y0), (x1 + 2, y0 + 6)], fill=(70, 46, 30))
+    d.ellipse([(x0 + x1) // 2 - 4, y1 - 9, (x0 + x1) // 2 + 4, y1 + 3], fill=(16, 10, 12))
+    d.point(((x0 + x1) // 2 - 1, y1 - 4), fill=(240, 200, 80)); d.point(((x0 + x1) // 2 + 2, y1 - 4), fill=(240, 200, 80))  # eyes in the dark
+    x0, y0, x1, y1 = TOWN_BUILDINGS["market"]                            # Night Market stall
+    for i in range(6):
+        d.rectangle([x0 + i * 7, y0, x0 + i * 7 + 6, y0 + 5], fill=(150, 40, 40) if i % 2 == 0 else (210, 190, 160))
+    d.rectangle([x0 + 1, y0 + 5, x0 + 2, y1], fill=(70, 50, 34)); d.rectangle([x1 - 2, y0 + 5, x1 - 1, y1], fill=(70, 50, 34))
+    d.rectangle([x0, y1 - 8, x1, y1 - 4], fill=(90, 64, 40))
+    for i in range(6):
+        d.ellipse([x0 + 3 + i * 6, y1 - 12, x0 + 7 + i * 6, y1 - 8], fill=rng.choice([(200, 170, 60), (110, 160, 90), (160, 60, 60), (200, 200, 210)]))
+    d.rectangle([x0 + 18, y0 + 6, x0 + 22, y0 + 10], fill=(250, 200, 90))        # lantern
+    # campfire in the middle of the square (the party stands around it)
+    fx, fy = 64, 150
+    glow = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    for r, a in ((46, 22), (32, 30), (20, 40)):
+        gd.ellipse([fx - r, fy - r * 0.6, fx + r, fy + r * 0.6], fill=(240, 130, 40, a))
+    img.alpha_composite(glow)
+    d = ImageDraw.Draw(img)
+    d.line([(fx - 7, fy + 4), (fx + 7, fy)], fill=(90, 60, 36), width=2); d.line([(fx - 7, fy), (fx + 7, fy + 4)], fill=(90, 60, 36), width=2)
+    for i in range(7):
+        a = i / 7 * math.tau
+        d.rectangle([fx + int(10 * math.cos(a)) - 1, fy + 2 + int(4 * math.sin(a)) - 1, fx + int(10 * math.cos(a)) + 1, fy + 2 + int(4 * math.sin(a))], fill=(90, 86, 92))
+    d.polygon([(fx - 5, fy + 2), (fx, fy - 12), (fx + 5, fy + 2)], fill=(240, 120, 40))
+    d.polygon([(fx - 2, fy + 2), (fx, fy - 6), (fx + 2, fy + 2)], fill=(252, 214, 90))
+    vig = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    vd = ImageDraw.Draw(vig)
+    for i in range(10):
+        vd.rectangle([i, i, W - 1 - i, H - 1 - i], outline=(0, 0, 0, 120 - i * 11))
+    img.alpha_composite(vig)
+    return img
+
+
 # ---------------------------------------------------------------- map tile icons (16x16)
 
 def icon(draw_fn):
@@ -304,7 +414,7 @@ if __name__ == "__main__":
     os.makedirs("assets/backgrounds", exist_ok=True)
     os.makedirs("assets/icons", exist_ok=True)
     for name, fn in {"battle_early": battle_early, "battle_mid": battle_mid, "battle_late": battle_late,
-                     "battle_boss": battle_boss, "map": world_map}.items():
+                     "battle_boss": battle_boss, "map": world_map, "town": town}.items():
         fn().convert("RGB").save(f"assets/backgrounds/{name}.png")
         print("wrote", name)
     for name, fn in TILE_ICONS.items():
