@@ -1,0 +1,683 @@
+TRANSCRIPT - bot style: tactician, seed 7
+Lines starting with [TACTICIAN] are the player's own reasoning; '>> STATE' is what the screen shows at the start of a combat round.
+[TACTICIAN] adopts pet Ash Crow
+Ash Crow follows you.
+[TACTICIAN] moves 4 -> tile 4 (fight). Options: ["fight", "chest"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 28/28hp [guard 2] chg 0/4, Lys 20/20hp [fire 3] chg 0/5, Aldric 22/22hp [attack 2] chg 0/6 | enemies: Ghoul 16/16hp (Attack 2 -> Aldric), Ash Cultist 12/12hp (Heal 3), Plague Rat 6/6hp (Attack 2 -> Varek) | fate 2
+[TACTICIAN] ends turn with: Varek guard 2, Lys fire 3, Aldric attack 2
+Varek guards the party (+2 shield all)
+Lys hits Plague Rat for 3
+Plague Rat is burning (2)
+Aldric hits Plague Rat for 2
+Ash Crow hits Plague Rat for 1
+Plague Rat falls!
+Ghoul hits Brother Aldric for 0 (2 blocked)
+Ash Cultist wards Ghoul (+3 shield)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 28/28hp [blank 0] chg 1/4, Lys 20/20hp [fire 3] chg 1/5, Aldric 22/22hp [heal 4] chg 1/6 | enemies: Ghoul 16/16hp shield 3 (Attack 2 -> Lys), Ash Cultist 12/12hp (Attack 3 -> Lys) | fate 2
+[TACTICIAN] ends turn with: Varek attack 2, Lys fire 3, Aldric guard 1
+Varek hits Ash Cultist for 2
+Lys hits Ash Cultist for 3
+Ash Cultist is burning (2)
+Aldric guards the party (+1 shield all)
+Ash Crow hits Ash Cultist for 2
+Ash Cultist burns for 2
+Ghoul hits Lys the Hollow for 1 (1 blocked)
+Ash Cultist hits Lys the Hollow for 3
+--- Round 3 ---
+>> STATE R3  heroes: Varek 28/28hp [attack 3] chg 2/4, Lys 16/20hp [shield 2] chg 2/5, Aldric 22/22hp [heal 2] chg 2/6 | enemies: Ghoul 16/16hp (Shield 2), Ash Cultist 3/12hp (Attack 4 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 3, Aldric attack 2
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate +1 Fate
+Varek hits Ash Cultist for 4
+Ash Cultist falls!
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric hits Ghoul for 3
+Ash Crow hits Ghoul for 2
+Ghoul burns for 2
+Ghoul shields itself (2)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 28/28hp [shield 4] chg 4/4, Lys 16/20hp [fire 3] chg 3/5, Aldric 22/22hp [blank 0] chg 4/6 | enemies: Ghoul 6/16hp shield 2 (Hesitates) | fate 3
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 3, Aldric heal 2
+Varek hits Ghoul for 1 (2 blocked)
+Lys hits Ghoul for 3
+Ghoul is burning (3)
+Aldric heals Lys for 2
+Ash Crow hits Ghoul for 2
+Ghoul falls!
+VICTORY!
+[TACTICIAN] carves: Varek: blank -> BLOOD 5
+Carved: Varek: blank -> BLOOD 5
+[TACTICIAN] moves 2 -> tile 6 (fight). Options: ["fight", "chest"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 28/28hp [shield 4] chg 0/4, Lys 18/20hp [blank 0] chg 0/5, Aldric 22/22hp [heal 2] chg 0/6 | enemies: Bone Hound 14/14hp (Attack 2 -> Varek), Bone Hound 14/14hp (Hesitates) | fate 5
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 2, Aldric heal 2
+Varek hits Bone Hound for 3
+Lys hits Bone Hound for 2
+Bone Hound is burning (2)
+Aldric heals Lys for 2
+Ash Crow hits Bone Hound for 2
+Bone Hound burns for 2
+Bone Hound hits Varek the Oathbroken for 2
+Bone Hound hesitates
+--- Round 2 ---
+>> STATE R2  heroes: Varek 26/28hp [shield 4] chg 1/4, Lys 20/20hp [blood 6] chg 1/5, Aldric 22/22hp [attack 2] chg 1/6 | enemies: Bone Hound 5/14hp (Attack 3 -> Varek), Bone Hound 14/14hp (Attack 4 -> Aldric) | fate 5
+[TACTICIAN] ends turn with: Varek blood 5, Lys blood 6, Aldric attack 2
+Combo: pair of BLOOD - +1 each
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek (blood magic) hits Bone Hound for 6
+Bone Hound falls!
+Varek pays 2 HP in blood
+Lys (blood magic) hits Bone Hound for 7
+Lys pays 2 HP in blood
+Aldric hits Bone Hound for 2
+Ash Crow hits Bone Hound for 1
+Bone Hound hits Brother Aldric for 4
+--- Round 3 ---
+>> STATE R3  heroes: Varek 24/28hp [attack 2] chg 3/4, Lys 18/20hp [blank 0] chg 3/5, Aldric 18/22hp [heal 4] chg 2/6 | enemies: Bone Hound 4/14hp (Attack 4 -> Varek) | fate 5
+[TACTICIAN] ends turn with: Varek guard 2, Lys attack 4, Aldric heal 4
+Varek guards the party (+2 shield all)
+Lys hits Bone Hound for 4
+Bone Hound falls!
+VICTORY!
+[TACTICIAN] carves: Aldric: HEAL 4 -> HEAL 5
+Carved: Aldric: HEAL 4 -> HEAL 5
+[TACTICIAN] moves 2 -> tile 8 (fight). Options: ["event", "fight"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 24/28hp [shield 4] chg 0/4, Lys 18/20hp [blood 6] chg 0/5, Aldric 18/22hp [blank 0] chg 0/6 | enemies: Ghoul 16/16hp (Shield 2), Ash Cultist 12/12hp (Attack 2 -> Varek), Plague Rat 6/6hp (Hesitates) | fate 5
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 3
+Varek hits Plague Rat for 3
+Lys (blood magic) hits Plague Rat for 6
+Plague Rat falls!
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Ash Crow hits Ghoul for 2
+Ghoul shields itself (2)
+Ash Cultist hits Varek the Oathbroken for 2
+--- Round 2 ---
+>> STATE R2  heroes: Varek 22/28hp [guard 2] chg 1/4, Lys 19/20hp [blood 6] chg 1/5, Aldric 18/22hp [guard 1] chg 1/6 | enemies: Ghoul 14/16hp shield 2 (Hesitates), Ash Cultist 12/12hp (Shield 3) | fate 5
+* Fate twists Varek's die to BLOOD 5 (-4 Fate)
+[TACTICIAN] spends Fate to twist Varek's die to blood 5
+[TACTICIAN] ends turn with: Varek blood 5, Lys blood 6, Aldric heal 3
+Combo: pair of BLOOD - +1 each
+The combo feeds your Fate +1 Fate
+Varek (blood magic) hits Ash Cultist for 6
+Varek pays 2 HP in blood
+Lys (blood magic) hits Ash Cultist for 7
+Ash Cultist falls!
+Lys pays 2 HP in blood
+Aldric heals Varek for 3
+Ash Crow hits Ghoul for 0 (1 blocked)
+Ghoul hesitates
+--- Round 3 ---
+>> STATE R3  heroes: Varek 23/28hp [attack 2] chg 3/4, Lys 17/20hp [fire 3] chg 3/5, Aldric 18/22hp [guard 1] chg 2/6 | enemies: Ghoul 14/16hp (Shield 2) | fate 2
+[TACTICIAN] ends turn with: Varek attack 2, Lys fire 3, Aldric heal 2
+Varek hits Ghoul for 2
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric heals Aldric for 2
+Ghoul burns for 2
+Ghoul shields itself (2)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 23/28hp [attack 2] chg 4/4, Lys 17/20hp [blood 6] chg 4/5, Aldric 20/22hp [heal 5] chg 3/6 | enemies: Ghoul 7/16hp shield 2 (Attack 2 -> Lys) | fate 2
+[TACTICIAN] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 5
+Varek hits Ghoul for 0 (2 blocked)
+Lys (blood magic) hits Ghoul for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 5
+Ash Crow hits Ghoul for 1
+Ghoul falls!
+VICTORY!
+[TACTICIAN] carves: Lys: blank -> FIRE 3
+Carved: Lys: blank -> FIRE 3
+[TACTICIAN] moves 1 -> tile 9 (fight). Options: ["event", "fight"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 23/28hp [blood 5] chg 0/4, Lys 20/20hp [fire 2] chg 0/5, Aldric 20/22hp [guard 1] chg 0/6 | enemies: Bone Hound 14/14hp (Attack 3 -> Varek), Bone Hound 14/14hp (Attack 4 -> Lys) | fate 5
+[TACTICIAN] ends turn with: Varek blood 5, Lys attack 4, Aldric guard 1
+Varek (blood magic) hits Bone Hound for 5
+Varek pays 2 HP in blood
+Lys hits Bone Hound for 4
+Aldric guards the party (+1 shield all)
+Ash Crow hits Bone Hound for 2
+Bone Hound hits Varek the Oathbroken for 2 (1 blocked)
+Bone Hound hits Lys the Hollow for 3 (1 blocked)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 19/28hp [blood 5] chg 1/4, Lys 17/20hp [blood 6] chg 1/5, Aldric 20/22hp [guard 1] chg 1/6 | enemies: Bone Hound 14/14hp (Attack 4 -> Aldric), Bone Hound 3/14hp (Attack 3 -> Varek) | fate 5
+* Fate twists Aldric's die to HEAL 5 (-4 Fate)
+[TACTICIAN] spends Fate to twist Aldric's die to heal 5
+[TACTICIAN] ends turn with: Varek blood 5, Lys blood 6, Aldric heal 5
+Combo: pair of BLOOD - +1 each
+The combo feeds your Fate +1 Fate
+Varek (blood magic) hits Bone Hound for 6
+Bone Hound falls!
+Varek pays 2 HP in blood
+Lys (blood magic) hits Bone Hound for 7
+Lys pays 2 HP in blood
+Aldric heals Varek for 5
+Ash Crow hits Bone Hound for 2
+Bone Hound hits Brother Aldric for 4
+--- Round 3 ---
+>> STATE R3  heroes: Varek 22/28hp [shield 4] chg 3/4, Lys 15/20hp [fire 3] chg 3/5, Aldric 16/22hp [guard 1] chg 2/6 | enemies: Bone Hound 5/14hp (Attack 4 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 3, Aldric heal 3
+Varek hits Bone Hound for 3
+Lys hits Bone Hound for 3
+Bone Hound falls!
+VICTORY!
+[TACTICIAN] carves: Aldric: blank -> ATTACK 3
+Carved: Aldric: blank -> ATTACK 3
+[TACTICIAN] moves 2 -> tile 11 (fight). Options: ["fight", "rest"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 22/28hp [attack 2] chg 0/4, Lys 15/20hp [fire 3] chg 0/5, Aldric 16/22hp [guard 1] chg 0/6 | enemies: Plague Rat 6/6hp (Attack 2 -> Lys), Plague Rat 6/6hp (Attack 2 -> Aldric), Plague Rat 6/6hp (Attack 2 -> Aldric) | fate 5
+[TACTICIAN] ends turn with: Varek guard 2, Lys fire 3, Aldric heal 5
+Varek guards the party (+2 shield all)
+Lys hits Plague Rat for 3
+Plague Rat is burning (2)
+Aldric heals Aldric for 5
+Ash Crow hits Plague Rat for 2
+Plague Rat burns for 2
+Plague Rat is reduced to ash!
+Plague Rat hits Brother Aldric for 0 (2 blocked)
+Plague Rat hits Brother Aldric for 2
+--- Round 2 ---
+>> STATE R2  heroes: Varek 22/28hp [attack 2] chg 1/4, Lys 15/20hp [fire 3] chg 1/5, Aldric 19/22hp [heal 3] chg 1/6 | enemies: Plague Rat 6/6hp (Attack 3 -> Lys), Plague Rat 6/6hp (Attack 3 -> Varek) | fate 5
+[TACTICIAN] ends turn with: Varek blood 5, Lys fire 3, Aldric heal 3
+Varek (blood magic) hits Plague Rat for 5
+Varek pays 2 HP in blood
+Lys hits Plague Rat for 3
+Plague Rat falls!
+Aldric heals Varek for 3
+Plague Rat hits Varek the Oathbroken for 3
+--- Round 3 ---
+>> STATE R3  heroes: Varek 20/28hp [attack 2] chg 2/4, Lys 15/20hp [shield 2] chg 2/5, Aldric 19/22hp [guard 1] chg 2/6 | enemies: Plague Rat 6/6hp (Hesitates) | fate 5
+[TACTICIAN] ends turn with: Varek attack 2, Lys attack 4, Aldric heal 3
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate Fate overflows: +1 free reroll next round
+Varek hits Plague Rat for 3
+Lys hits Plague Rat for 5
+Plague Rat falls!
+VICTORY!
+[TACTICIAN] carves: Aldric: GUARD 1 -> ATTACK 3
+Carved: Aldric: GUARD 1 -> ATTACK 3
+[TACTICIAN] moves 5 -> tile 16 (event). Options: ["event", "chest"]
+[TACTICIAN] event 'A Hanged Man's Purse': picks "Cut him down and take the purse."
++25 gold.
+[TACTICIAN] moves 1 -> tile 17 (fight). Options: ["shop", "fight"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 20/28hp [shield 4] chg 0/4, Lys 15/20hp [fire 3] chg 0/5, Aldric 19/22hp [heal 5] chg 0/6 | enemies: Weeping Nun 18/18hp (Heal 4), Ghoul 18/18hp (Attack 5 -> Lys) | fate 5
+[TACTICIAN] ends turn with: Varek blood 5, Lys fire 3, Aldric heal 5
+Varek (blood magic) hits Ghoul for 5
+Varek pays 2 HP in blood
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric heals Varek for 5
+Ash Crow hits Ghoul for 1
+Ghoul burns for 2
+Weeping Nun heals Ghoul for 4
+Ghoul hits Lys the Hollow for 5
+--- Round 2 ---
+>> STATE R2  heroes: Varek 23/28hp [guard 2] chg 1/4, Lys 10/20hp [fire 3] chg 1/5, Aldric 19/22hp [heal 5] chg 1/6 | enemies: Weeping Nun 18/18hp (Sweep 3 -> ALL), Ghoul 11/18hp (Attack 4 -> Aldric) | fate 5
+[TACTICIAN] ends turn with: Varek guard 2, Lys fire 3, Aldric heal 5
+Varek guards the party (+2 shield all)
+Lys hits Weeping Nun for 3
+Weeping Nun is burning (2)
+Aldric heals Lys for 5
+Ash Crow hits Weeping Nun for 2
+Weeping Nun burns for 2
+Ghoul burns for 1
+Weeping Nun sweeps the whole party!
+Weeping Nun hits Varek the Oathbroken for 1 (2 blocked)
+Weeping Nun hits Lys the Hollow for 1 (2 blocked)
+Weeping Nun hits Brother Aldric for 1 (2 blocked)
+Ghoul hits Brother Aldric for 4
+--- Round 3 ---
+>> STATE R3  heroes: Varek 22/28hp [blood 5] chg 2/4, Lys 14/20hp [fire 3] chg 2/5, Aldric 14/22hp [attack 2] chg 2/6 | enemies: Weeping Nun 11/18hp (Attack 4 -> Lys), Ghoul 10/18hp (Attack 6 -> Lys) | fate 5
+* Fate twists Aldric's die to HEAL 5 (-4 Fate)
+[TACTICIAN] spends Fate to twist Aldric's die to heal 5
+[TACTICIAN] ends turn with: Varek blood 5, Lys fire 3, Aldric heal 5
+Varek (blood magic) hits Ghoul for 5
+Varek pays 2 HP in blood
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric heals Aldric for 5
+Ash Crow hits Ghoul for 2
+Ghoul falls!
+Weeping Nun burns for 1
+Weeping Nun hits Lys the Hollow for 4
+--- Round 4 ---
+>> STATE R4  heroes: Varek 20/28hp [attack 2] chg 3/4, Lys 10/20hp [fire 2] chg 3/5, Aldric 19/22hp [attack 2] chg 3/6 | enemies: Weeping Nun 10/18hp (Hesitates) | fate 1
+[TACTICIAN] ends turn with: Varek attack 2, Lys fire 3, Aldric heal 5
+Varek hits Weeping Nun for 2
+Lys hits Weeping Nun for 3
+Weeping Nun is burning (2)
+Aldric heals Lys for 5
+Ash Crow hits Weeping Nun for 2
+Weeping Nun burns for 2
+Weeping Nun hesitates
+--- Round 5 ---
+>> STATE R5  heroes: Varek 20/28hp [attack 3] chg 4/4, Lys 15/20hp [fire 3] chg 4/5, Aldric 19/22hp [heal 2] chg 4/6 | enemies: Weeping Nun 1/18hp (Heal 4) | fate 1
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 3, Aldric heal 3
+Varek hits Weeping Nun for 3
+Weeping Nun falls!
+VICTORY!
+[TACTICIAN] carves: Varek: BLOOD 5 -> BLOOD 6
+Carved: Varek: BLOOD 5 -> BLOOD 6
+[TACTICIAN] moves 1 -> tile 18 (fight). Options: ["fight", "shop"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 20/28hp [attack 3] chg 0/4, Lys 15/20hp [attack 4] chg 0/5, Aldric 19/22hp [heal 2] chg 0/6 | enemies: Plague Rat 7/7hp (Attack 3 -> Lys), Plague Rat 7/7hp (Attack 2 -> Lys), Bone Hound 16/16hp (Attack 5 -> Varek), Ash Cultist 13/13hp (Attack 3 -> Lys) | fate 4
+* Fate twists Varek's die to GUARD 2 (-4 Fate)
+[TACTICIAN] spends Fate to twist Varek's die to guard 2
+[TACTICIAN] ends turn with: Varek guard 2, Lys attack 4, Aldric heal 5
+Varek guards the party (+2 shield all)
+Lys hits Plague Rat for 4
+Aldric heals Varek for 5
+Ash Crow hits Plague Rat for 1
+Plague Rat hits Lys the Hollow for 1 (2 blocked)
+Plague Rat hits Lys the Hollow for 2
+Bone Hound hits Varek the Oathbroken for 3 (2 blocked)
+Ash Cultist hits Lys the Hollow for 3
+--- Round 2 ---
+>> STATE R2  heroes: Varek 22/28hp [attack 2] chg 1/4, Lys 9/20hp [fire 3] chg 1/5, Aldric 19/22hp [heal 3] chg 1/6 | enemies: Plague Rat 2/7hp (Attack 2 -> Varek), Plague Rat 7/7hp (Attack 4 -> Varek), Bone Hound 16/16hp (Attack 4 -> Varek), Ash Cultist 13/13hp (Hesitates) | fate 0
+[TACTICIAN] ends turn with: Varek shield 4, Lys fire 3, Aldric heal 3
+Varek raises a shield (4)
+Lys hits Plague Rat for 3
+Plague Rat falls!
+Aldric heals Lys for 3
+Plague Rat hits Varek the Oathbroken for 0 (4 blocked)
+Bone Hound hits Varek the Oathbroken for 4
+Ash Cultist hesitates
+--- Round 3 ---
+>> STATE R3  heroes: Varek 18/28hp [shield 3] chg 2/4, Lys 12/20hp [blood 6] chg 2/5, Aldric 19/22hp [attack 2] chg 2/6 | enemies: Plague Rat 7/7hp (Attack 4 -> Varek), Bone Hound 16/16hp (Attack 5 -> Varek), Ash Cultist 13/13hp (Heal 3) | fate 0
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 6, Aldric attack 2
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate +1 Fate
+Varek hits Plague Rat for 4
+Lys (blood magic) hits Plague Rat for 6
+Plague Rat falls!
+Lys pays 2 HP in blood
+Aldric hits Bone Hound for 3
+Ash Crow hits Bone Hound for 1
+Bone Hound hits Varek the Oathbroken for 5
+Ash Cultist heals Bone Hound for 3
+--- Round 4 ---
+>> STATE R4  heroes: Varek 13/28hp [shield 4] chg 4/4, Lys 10/20hp [fire 2] chg 3/5, Aldric 19/22hp [attack 2] chg 4/6 | enemies: Bone Hound 15/16hp (Attack 5 -> Varek), Ash Cultist 13/13hp (Attack 4 -> Varek) | fate 1
+[TACTICIAN] ends turn with: Varek shield 4, Lys shield 2, Aldric attack 3
+Combo: pair of SHIELD - +1 each
+The combo feeds your Fate +1 Fate
+Varek raises a shield (5)
+Lys raises a shield (3)
+Aldric hits Bone Hound for 3
+Ash Crow hits Bone Hound for 2
+Bone Hound hits Varek the Oathbroken for 0 (5 blocked)
+Ash Cultist hits Varek the Oathbroken for 4
+--- Round 5 ---
+>> STATE R5  heroes: Varek 9/28hp [attack 3] chg 4/4, Lys 10/20hp [blood 6] chg 5/5, Aldric 19/22hp [heal 3] chg 5/6 | enemies: Bone Hound 10/16hp (Attack 4 -> Aldric), Ash Cultist 13/13hp (Hesitates) | fate 2
+[TACTICIAN] uses hollow_flame (incoming 4, party missing 32 HP)
+* Lys uses Hollow Flame!
+Lys hits Bone Hound for 4
+Lys hits Ash Cultist for 4
+The flame feeds on Lys (-3 HP)
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 3
+Varek hits Bone Hound for 3
+Lys (blood magic) hits Bone Hound for 6
+Bone Hound falls!
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Ash Crow hits Ash Cultist for 2
+Ash Cultist burns for 1
+Ash Cultist hesitates
+--- Round 6 ---
+>> STATE R6  heroes: Varek 9/28hp [attack 3] chg 4/4, Lys 8/20hp [fire 2] chg 1/5, Aldric 19/22hp [heal 3] chg 6/6 | enemies: Ash Cultist 6/13hp (Shield 3) | fate 2
+[TACTICIAN] uses last_rite (incoming 0, party missing 34 HP)
+* Aldric uses Last Rite!
+All allies heal 3
+Aldric's faith is paid in blood (-3 HP)
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 3
+Varek hits Ash Cultist for 3
+Lys (blood magic) hits Ash Cultist for 6
+Ash Cultist falls!
+Lys pays 2 HP in blood
+VICTORY!
+[TACTICIAN] carves: Varek: BLOOD 6 -> BLOOD 7
+Carved: Varek: BLOOD 6 -> BLOOD 7
+[TACTICIAN] moves 1 -> tile 19 (chest). Options: ["shop", "chest"]
+You pry open a rotten chest: +18 gold.
+[TACTICIAN] carves: Lys: FIRE 2 -> BLOOD 7
+Carved: Lys: FIRE 2 -> BLOOD 7
+[TACTICIAN] moves 4 -> tile 21 (shop). Options: ["shop", "elite"]
+[TACTICIAN] buys tonic (gold 122)
+Bought Bitter Tonic
+[TACTICIAN] buys carving (gold 102)
+Bought Bone Carver
+[TACTICIAN] carves: Varek: SHIELD 3 -> SHIELD 4
+Carved: Varek: SHIELD 3 -> SHIELD 4
+[TACTICIAN] buys weapon (gold 67)
+Bought Weapon Rack
+[TACTICIAN] equips Oathkeeper on Aldric (gain 8.0)
+Aldric takes up Oathkeeper.
+[TACTICIAN] buys fate_shard (gold 27)
+Bought Fate Shard
+[TACTICIAN] moves 6 -> tile 27 (fight). Options: ["event", "fight"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 20/28hp [attack 2] chg 0/4, Lys 17/20hp [fire 3] chg 0/5, Aldric 18/18hp [guard 5] chg 0/6 | enemies: Ghoul 18/18hp (Attack 5 -> Aldric), Ghoul 18/18hp (Hesitates), Ash Cultist 13/13hp (Shield 3) | fate 5
+[TACTICIAN] ends turn with: Varek blood 7, Lys fire 3, Aldric guard 5
+Varek (blood magic) hits Ghoul for 7
+Varek pays 2 HP in blood
+Lys hits Ghoul for 3
+Ghoul is burning (2)
+Aldric guards the party (+5 shield all)
+Ash Crow hits Ghoul for 1
+Ghoul burns for 2
+Ghoul hits Brother Aldric for 0 (5 blocked)
+Ghoul hesitates
+Ash Cultist shields itself (3)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 18/28hp [shield 4] chg 1/4, Lys 17/20hp [fire 3] chg 1/5, Aldric 18/18hp [heal 5] chg 1/6 | enemies: Ghoul 5/18hp (Shield 2), Ghoul 18/18hp (Attack 3 -> Varek), Ash Cultist 13/13hp shield 3 (Attack 3 -> Varek) | fate 5
+[TACTICIAN] ends turn with: Varek shield 4, Lys fire 3, Aldric heal 5
+Varek raises a shield (4)
+Lys hits Ghoul for 3
+Ghoul is burning (3)
+Aldric heals Varek for 5
+Ash Crow hits Ghoul for 2
+Ghoul falls!
+Ghoul hits Varek the Oathbroken for 0 (3 blocked)
+Ash Cultist hits Varek the Oathbroken for 2 (1 blocked)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 21/28hp [blood 7] chg 2/4, Lys 17/20hp [fire 3] chg 2/5, Aldric 18/18hp [heal 3] chg 2/6 | enemies: Ghoul 18/18hp (Hesitates), Ash Cultist 13/13hp (Hesitates) | fate 5
+[TACTICIAN] ends turn with: Varek blood 7, Lys fire 3, Aldric heal 3
+Varek (blood magic) hits Ash Cultist for 7
+Varek pays 2 HP in blood
+Lys hits Ash Cultist for 3
+Ash Cultist is burning (2)
+Aldric heals Varek for 3
+Ash Crow hits Ash Cultist for 1
+Ash Cultist burns for 2
+Ash Cultist is reduced to ash!
+Ghoul hesitates
+--- Round 4 ---
+>> STATE R4  heroes: Varek 22/28hp [guard 2] chg 3/4, Lys 17/20hp [shield 2] chg 3/5, Aldric 18/18hp [attack 3] chg 3/6 | enemies: Ghoul 18/18hp (Attack 3 -> Aldric) | fate 5
+* Fate twists Aldric's die to HEAL 5 (-4 Fate)
+[TACTICIAN] spends Fate to twist Aldric's die to heal 5
+[TACTICIAN] ends turn with: Varek guard 2, Lys blood 6, Aldric heal 5
+Varek guards the party (+2 shield all)
+Lys (blood magic) hits Ghoul for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 5
+Ash Crow hits Ghoul for 2
+Ghoul hits Brother Aldric for 1 (2 blocked)
+--- Round 5 ---
+>> STATE R5  heroes: Varek 22/28hp [blood 7] chg 4/4, Lys 20/20hp [blood 7] chg 4/5, Aldric 17/18hp [guard 5] chg 4/6 | enemies: Ghoul 10/18hp (Attack 5 -> Lys) | fate 1
+[TACTICIAN] ends turn with: Varek blood 7, Lys blood 7, Aldric guard 5
+Combo: pair of BLOOD - +1 each
+The combo feeds your Fate +1 Fate
+Varek (blood magic) hits Ghoul for 8
+Varek pays 2 HP in blood
+Lys (blood magic) hits Ghoul for 8
+Ghoul falls!
+Lys pays 2 HP in blood
+VICTORY!
+[TACTICIAN] carves: Lys: FIRE 3 -> FIRE 4
+Carved: Lys: FIRE 3 -> FIRE 4
+[TACTICIAN] moves 2 -> tile 29 (event). Options: ["rest", "event"]
+[TACTICIAN] event 'The Bleeding Altar': picks "Feed it (one hero loses 6 HP). Carve a die."
+Varek loses 6 HP.
+[TACTICIAN] carves: Aldric: ATTACK 3 -> ATTACK 4
+Carved: Aldric: ATTACK 3 -> ATTACK 4
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+[TACTICIAN] moves 4 -> tile 30 (rest). Options: ["rest", "rest"]
+[TACTICIAN] rests: carve (party HP 74%)
+[TACTICIAN] carves: Lys: FIRE 3 -> ATTACK 4
+Carved: Lys: FIRE 3 -> ATTACK 4
+[TACTICIAN] moves 4 -> tile 34 (event). Options: ["rest", "event"]
+[TACTICIAN] event 'Cracked Shrine of Fate': picks "Pray (all heroes lose 2 max HP). Carve a die."
+Varek's max HP is now 26. Lys's max HP is now 18. Aldric's max HP is now 16.
+[TACTICIAN] carves: Varek: ATTACK 2 -> SHIELD 3
+Carved: Varek: ATTACK 2 -> SHIELD 3
+[TACTICIAN] moves 3 -> tile 37 (elite). Options: ["event", "elite"]
+== Elite fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 14/26hp [attack 3] chg 0/4, Lys 18/18hp [fire 4] chg 0/5, Aldric 16/16hp [guard 5] chg 0/6 | enemies: Bone Colossus 52/52hp (Hesitates) | fate 3
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 4, Aldric heal 3
+Varek hits Bone Colossus for 3
+Lys hits Bone Colossus for 4
+Bone Colossus is burning (2)
+Aldric heals Varek for 3
+Bone Colossus burns for 2
+Bone Colossus hesitates
+--- Round 2 ---
+>> STATE R2  heroes: Varek 17/26hp [shield 3] chg 1/4, Lys 18/18hp [fire 4] chg 1/5, Aldric 16/16hp [heal 3] chg 1/6 | enemies: Bone Colossus 43/52hp (Shield 8) | fate 3
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 4, Aldric heal 3
+Varek hits Bone Colossus for 3
+Lys hits Bone Colossus for 4
+Bone Colossus is burning (3)
+Aldric heals Varek for 3
+Ash Crow hits Bone Colossus for 2
+Bone Colossus burns for 3
+Bone Colossus shields itself (8)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 20/26hp [shield 4] chg 2/4, Lys 18/18hp [blood 6] chg 2/5, Aldric 16/16hp [heal 5] chg 2/6 | enemies: Bone Colossus 31/52hp shield 8 (Hesitates) | fate 3
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 5
+Varek hits Bone Colossus for 0 (3 blocked)
+Lys (blood magic) hits Bone Colossus for 1 (5 blocked)
+Lys pays 2 HP in blood
+Aldric heals Varek for 5
+Ash Crow hits Bone Colossus for 1
+Bone Colossus burns for 2
+Bone Colossus hesitates
+--- Round 4 ---
+>> STATE R4  heroes: Varek 25/26hp [shield 4] chg 3/4, Lys 16/18hp [blood 6] chg 3/5, Aldric 16/16hp [attack 3] chg 3/6 | enemies: Bone Colossus 27/52hp (Shield 8) | fate 3
+[TACTICIAN] ends turn with: Varek blood 7, Lys blood 6, Aldric attack 3
+Combo: pair of BLOOD - +1 each
+The combo feeds your Fate +1 Fate
+Varek (blood magic) hits Bone Colossus for 8
+Varek pays 2 HP in blood
+Lys (blood magic) hits Bone Colossus for 7
+Lys pays 2 HP in blood
+Aldric hits Bone Colossus for 3
+Ash Crow hits Bone Colossus for 1
+Bone Colossus burns for 1
+Bone Colossus shields itself (8)
+--- Round 5 ---
+>> STATE R5  heroes: Varek 23/26hp [shield 4] chg 4/4, Lys 14/18hp [shield 2] chg 5/5, Aldric 16/16hp [attack 3] chg 4/6 | enemies: Bone Colossus 7/52hp shield 8 (Shield 8) | fate 4
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 7, Aldric attack 4
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate +1 Fate
+Varek hits Bone Colossus for 0 (4 blocked)
+Lys (blood magic) hits Bone Colossus for 3 (4 blocked)
+Lys pays 2 HP in blood
+Aldric hits Bone Colossus for 5
+Bone Colossus falls!
+VICTORY!
+[TACTICIAN] equips Executioner's Axe on Lys (gain 2.0)
+Lys takes up Executioner's Axe.
+[TACTICIAN] carves: Varek: SHIELD 3 -> SHIELD 4
+Carved: Varek: SHIELD 3 -> SHIELD 4
+[TACTICIAN] moves 1 -> tile 38 (event). Options: ["rest", "event"]
+[TACTICIAN] event 'The Wounded Knight': picks "Grant him mercy. Carve a die."
+You move on.
+[TACTICIAN] carves: Varek: ATTACK 3 -> BLOOD 5
+Carved: Varek: ATTACK 3 -> BLOOD 5
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+[TACTICIAN] moves 1 -> tile 39 (fight). Options: ["rest", "fight"]
+== Fight ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 26/26hp [blood 7] chg 0/4, Lys 18/18hp [attack 8] chg 0/5, Aldric 16/16hp [attack 3] chg 0/6 | enemies: Ghoul 20/20hp (Attack 6 -> Lys), Weeping Nun 20/20hp (Attack 4 -> Varek), Ash Cultist 15/15hp (Attack 5 -> Varek) | fate 5
+[TACTICIAN] ends turn with: Varek blood 7, Lys attack 8, Aldric guard 5
+Varek (blood magic) hits Ash Cultist for 7
+Varek pays 2 HP in blood
+Lys hits Ash Cultist for 8
+Ash Cultist falls!
+Aldric guards the party (+5 shield all)
+Ash Crow hits Ghoul for 2
+Ghoul hits Lys the Hollow for 1 (5 blocked)
+Weeping Nun hits Varek the Oathbroken for 0 (4 blocked)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 24/26hp [blood 5] chg 1/4, Lys 17/18hp [fire 4] chg 1/5, Aldric 16/16hp [heal 5] chg 1/6 | enemies: Ghoul 18/20hp (Attack 4 -> Varek), Weeping Nun 20/20hp (Attack 4 -> Varek) | fate 5
+* Fate twists Varek's die to BLOOD 7 (-4 Fate)
+[TACTICIAN] spends Fate to twist Varek's die to blood 7
+[TACTICIAN] ends turn with: Varek blood 7, Lys fire 4, Aldric attack 4
+Varek (blood magic) hits Ghoul for 7
+Varek pays 2 HP in blood
+Lys hits Ghoul for 4
+Ghoul is burning (2)
+Aldric hits Ghoul for 4
+Ash Crow hits Ghoul for 1
+Ghoul burns for 2
+Ghoul is reduced to ash!
+Weeping Nun hits Varek the Oathbroken for 4
+--- Round 3 ---
+>> STATE R3  heroes: Varek 18/26hp [shield 4] chg 2/4, Lys 17/18hp [attack 8] chg 2/5, Aldric 16/16hp [attack 3] chg 2/6 | enemies: Weeping Nun 20/20hp (Heal 4) | fate 1
+[TACTICIAN] ends turn with: Varek shield 4, Lys attack 8, Aldric attack 4
+Combo: pair of ATTACK - +1 each
+The combo feeds your Fate +1 Fate
+Varek raises a shield (4)
+Lys hits Weeping Nun for 9
+Aldric hits Weeping Nun for 5
+Ash Crow hits Weeping Nun for 1
+Weeping Nun heals Weeping Nun for 4
+--- Round 4 ---
+>> STATE R4  heroes: Varek 18/26hp [shield 4] chg 3/4, Lys 17/18hp [blood 7] chg 4/5, Aldric 16/16hp [attack 3] chg 4/6 | enemies: Weeping Nun 9/20hp (Attack 4 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek shield 4, Lys blood 7, Aldric heal 5
+Varek raises a shield (4)
+Lys (blood magic) hits Weeping Nun for 7
+Lys pays 2 HP in blood
+Aldric heals Varek for 5
+Ash Crow hits Weeping Nun for 1
+Weeping Nun hits Brother Aldric for 4
+--- Round 5 ---
+>> STATE R5  heroes: Varek 23/26hp [shield 4] chg 4/4, Lys 15/18hp [attack 8] chg 5/5, Aldric 12/16hp [attack 4] chg 5/6 | enemies: Weeping Nun 1/20hp (Sweep 3 -> ALL) | fate 2
+[TACTICIAN] uses hollow_flame (incoming 9, party missing 10 HP)
+* Lys uses Hollow Flame!
+Lys hits Weeping Nun for 4
+Weeping Nun falls!
+The flame feeds on Lys (-3 HP)
+VICTORY!
+[TACTICIAN] carves: Lys: FIRE 4 -> FIRE 5
+Carved: Lys: FIRE 4 -> FIRE 5
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+[TACTICIAN] moves 2 -> tile 41 (rest). Options: ["rest", "rest"]
+The last campfire warms you (+30% HP).
+[TACTICIAN] rests: carve (party HP 98%)
+[TACTICIAN] carves: Varek: SHIELD 4 -> SHIELD 5
+Carved: Varek: SHIELD 4 -> SHIELD 5
+[TACTICIAN] moves 1 -> tile 42 (boss). Options: ["boss", "boss"]
+== BOSS ==
+Ash Crow caws: +2 Fate
+--- Round 1 ---
+>> STATE R1  heroes: Varek 26/26hp [shield 4] chg 0/4, Lys 17/18hp [blank 0] chg 0/5, Aldric 16/16hp [attack 3] chg 0/6 | enemies: The Rotting Bishop 66/66hp (Attack 6 -> Lys) | fate 3
+[TACTICIAN] ends turn with: Varek shield 4, Lys fire 5, Aldric attack 6
+Varek raises a shield (4)
+Lys hits The Rotting Bishop for 5
+The Rotting Bishop is burning (2)
+Aldric hits The Rotting Bishop for 6
+The Rotting Bishop burns for 2
+The Rotting Bishop hits Lys the Hollow for 6
+--- Round 2 ---
+>> STATE R2  heroes: Varek 26/26hp [shield 5] chg 1/4, Lys 11/18hp [fire 5] chg 1/5, Aldric 16/16hp [attack 4] chg 1/6 | enemies: The Rotting Bishop 53/66hp (Sweep 6 -> ALL) | fate 3
+[TACTICIAN] ends turn with: Varek shield 5, Lys fire 5, Aldric heal 3
+Varek raises a shield (5)
+Lys hits The Rotting Bishop for 5
+The Rotting Bishop is burning (3)
+Aldric heals Lys for 3
+Ash Crow hits The Rotting Bishop for 2
+The Rotting Bishop burns for 3
+The Rotting Bishop sweeps the whole party!
+The Rotting Bishop hits Varek the Oathbroken for 1 (5 blocked)
+The Rotting Bishop hits Lys the Hollow for 6
+The Rotting Bishop hits Brother Aldric for 6
+--- Round 3 ---
+>> STATE R3  heroes: Varek 25/26hp [shield 5] chg 2/4, Lys 8/18hp [blood 6] chg 2/5, Aldric 10/16hp [heal 3] chg 2/6 | enemies: The Rotting Bishop 43/66hp (Attack 6 -> Lys) | fate 3
+[TACTICIAN] ends turn with: Varek guard 2, Lys blood 6, Aldric guard 5
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+3 shield all)
+Lys (blood magic) hits The Rotting Bishop for 6
+Lys pays 2 HP in blood
+Aldric guards the party (+6 shield all)
+Ash Crow hits The Rotting Bishop for 1
+The Rotting Bishop burns for 2
+The Rotting Bishop hits Lys the Hollow for 0 (6 blocked)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 25/26hp [shield 4] chg 4/4, Lys 6/18hp [blood 7] chg 3/5, Aldric 10/16hp [attack 6] chg 4/6 | enemies: The Rotting Bishop 34/66hp (Sweep 5 -> ALL) | fate 4
+[TACTICIAN] uses broken_oath (incoming 15, party missing 19 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+* Fate twists Lys's die to ATTACK 8 (-4 Fate)
+[TACTICIAN] spends Fate to twist Lys's die to attack 8
+[TACTICIAN] ends turn with: Varek guard 2, Lys attack 8, Aldric guard 5
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+3 shield all)
+Lys hits The Rotting Bishop for 8
+!! The Rotting Bishop tears off his vestments. Something underneath was never human.
+Aldric guards the party (+6 shield all)
+Ash Crow hits The Rotting Bishop for 1
+The Rotting Bishop burns for 1
+The Rotting Bishop sweeps the whole party!
+The Rotting Bishop hits Varek the Oathbroken for 0 (5 blocked)
+The Rotting Bishop hits Lys the Hollow for 0 (5 blocked)
+The Rotting Bishop hits Brother Aldric for 0 (5 blocked)
+--- Round 5 ---
+>> STATE R5  heroes: Varek 23/26hp [shield 5] chg 2/4, Lys 6/18hp [fire 5] chg 4/5, Aldric 10/16hp [attack 6] chg 6/6 | enemies: The Rotting Bishop 24/66hp (Sweep 7 -> ALL) | fate 1
+[TACTICIAN] uses last_rite (incoming 21, party missing 21 HP)
+* Aldric uses Last Rite!
+All allies heal 3
+Aldric's faith is paid in blood (-3 HP)
+[TACTICIAN] ends turn with: Varek shield 5, Lys fire 5, Aldric heal 3
+Varek raises a shield (5)
+Lys hits The Rotting Bishop for 5
+The Rotting Bishop is burning (2)
+Aldric heals Lys for 3
+The Rotting Bishop burns for 2
+The Rotting Bishop sweeps the whole party!
+The Rotting Bishop hits Varek the Oathbroken for 2 (5 blocked)
+The Rotting Bishop hits Lys the Hollow for 7
+The Rotting Bishop hits Brother Aldric for 7
+--- Round 6 ---
+>> STATE R6  heroes: Varek 24/26hp [shield 5] chg 3/4, Lys 5/18hp [attack 8] chg 5/5, Aldric 3/16hp [heal 5] chg 1/6 | enemies: The Rotting Bishop 17/66hp (Attack 9 -> Aldric) | fate 1
+[TACTICIAN] ends turn with: Varek shield 5, Lys attack 8, Aldric heal 5
+Varek raises a shield (5)
+Lys hits The Rotting Bishop for 8
+Aldric heals Aldric for 5
+The Rotting Bishop burns for 1
+The Rotting Bishop hits Brother Aldric for 9
+Brother Aldric falls!
+--- Round 7 ---
+>> STATE R7  heroes: Varek 24/26hp [guard 2] chg 4/4, Lys 5/18hp [blood 7] chg 5/5, Aldric DEAD | enemies: The Rotting Bishop 8/66hp (Attack 9 -> Varek) | fate 1
+[TACTICIAN] ends turn with: Varek shield 4, Lys attack 8
+Varek raises a shield (4)
+Lys hits The Rotting Bishop for 8
+The Rotting Bishop falls!
+!! The Bishop collapses into rot and candle wax. Somewhere, a bell stops ringing.
+VICTORY!
+
+RESULT: VICTORY at tile 42/42

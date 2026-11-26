@@ -9,6 +9,12 @@ const RATE := 22050
 const VOLUME_DB := -6.0
 
 static var _cache := {}
+static var muted := false
+
+
+static func set_muted(value: bool) -> void:
+	muted = value
+	AudioServer.set_bus_mute(0, value)
 static var _music_player: AudioStreamPlayer
 
 

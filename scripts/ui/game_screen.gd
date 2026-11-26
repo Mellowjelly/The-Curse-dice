@@ -202,11 +202,15 @@ func _on_run_changed() -> void:
 	_move_token()
 	_refresh_party()
 	_refresh_actions()
+	if run.phase in ["event", "shop", "rest", "loot", "reward"] and not run.tile_snapshot.is_empty() and run.event_result == "":
+		Profile.save_run_data(run.tile_snapshot)
 	_refresh_modal()
 
 
 func _enter_combat() -> void:
 	_in_combat = true
+	if not run.tile_snapshot.is_empty():
+		Profile.save_run_data(run.tile_snapshot)  # closing the app mid-fight restarts this fight
 	_modal.hide()
 	_map_root.hide()
 	_combat_view.show()

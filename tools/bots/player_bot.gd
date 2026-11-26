@@ -194,6 +194,19 @@ func face_score(c: Combat, hero_index: int, face: Dictionary) -> float:
 func _handle_dice(c: Combat) -> void:
 	match style:
 		"newbie":
+			# The guided tip ("FATE IS FULL - twist a die!") teaches even a newbie this one move.
+			if c.fate >= Combat.MAX_FATE:
+				for i in c.heroes.size():
+					var hh: Dictionary = c.heroes[i]
+					if Combat.is_alive(hh) and Combat.current_face(hh)["type"] == "blank":
+						var best := 0
+						for fi in hh["faces"].size():
+							if Combat._face_power(hh["faces"][fi]) > Combat._face_power(hh["faces"][best]):
+								best = fi
+						if c.fate_twist(i, best):
+							stats["fate_rerolls"] += 1
+							note("follows the tip and twists %s's blank die" % Combat.short_name(hh))
+						break
 			# Rerolls once if anyone shows a blank, otherwise doesn't bother.
 			if c.heroes.any(func(h): return Combat.is_alive(h) and Combat.current_face(h)["type"] == "blank"):
 				for i in c.heroes.size():

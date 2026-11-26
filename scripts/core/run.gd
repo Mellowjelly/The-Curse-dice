@@ -50,6 +50,7 @@ var pet_offers: Array = []
 var weapon_offers: Array = []
 var _loot_then := "map"       # "carve" | "map" | "shop"
 var _seen_events: Array = []
+var tile_snapshot: Dictionary = {}  # saved while a tile (fight/event/shop...) is in progress
 var upgrades := {}            # town building levels (see data/town.json)
 var _start_queue: Array = []  # steps after choosing a pet: "loot", "carve"
 
@@ -183,6 +184,9 @@ func choose_move(option_index: int) -> void:
 		return
 	pos = destination(move_options[option_index])
 	move_options = []
+	# Snapshot BEFORE entering the tile: reloading re-enters the same tile with the same dice.
+	tile_snapshot = to_dict()
+	tile_snapshot["pending_enter"] = true
 	var tile: Dictionary = board[pos]
 	tile["visited"] = true
 	stats["tiles"][tile["type"]] = stats["tiles"].get(tile["type"], 0) + 1
@@ -223,7 +227,7 @@ func _enter_tile(tile: Dictionary) -> void:
 		"rest":
 			if tile.get("gate", false) and pos == board.size() - 2:
 				# The Last Campfire always heals before you choose (v0.5 critique: it was a trap).
-				var pct: int = region["rest_heal_percent"]
+				var pct := rest_percent()
 				for h in heroes:
 					h["hp"] = min(h["max_hp"], max(h["hp"], 0) + max(1, h["max_hp"] * pct / 100))
 				_log("The last campfire warms you (+%d%% HP)." % pct)
@@ -250,18 +254,37 @@ func _start_fight(kind: String, tier: String) -> void:
 ## Enemies get tougher further down the road (region1.json "scaling").
 func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 	var sc: Dictionary = region.get("scaling", {}).get(kind if kind in ["elite", "boss"] else tier, {})
-	var curse := int(upgrades.get("curse", 0))
+	var curse := curse_level()
 	if sc.is_empty() and curse == 0:
 		return def
 	var d := def.duplicate(true)
-	# Curse levels (opt-in difficulty): +12% enemy HP per level, +1 damage from level 2.
-	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.0 + 0.12 * curse)))
-	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 else 0)
+	# Curse rules (see CURSE_RULES): I hungry dead, II sharpened bones, IV the Bishop wakes early.
+	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.15 if curse >= 1 else 1.0)))
+	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 and kind == "elite" else 0)
+	if curse >= 4 and d.has("phase2"):
+		d["phase2"]["at"] = 0.7
 	for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:
 		for f in faces:
 			if f["type"] in ["attack", "sweep"]:
 				f["value"] = int(f["value"]) + bonus
 	return d
+
+
+## Opt-in difficulty rules. Each level adds one rule on top of the previous ones.
+const CURSE_RULES := [
+	"I. The Hungry Dead: enemies have +15% HP.",
+	"II. Sharpened Bones: enemy attacks deal +1 damage.",
+	"III. Cold Fires: camps heal 10% less, the fallen rise with 25% HP.",
+	"IV. The Bishop Wakes: elites hit +1 harder, the Bishop enrages at 70% HP.",
+]
+
+
+func curse_level() -> int:
+	return int(upgrades.get("curse", 0))
+
+
+func rest_percent() -> int:
+	return int(region["rest_heal_percent"]) - (10 if curse_level() >= 3 else 0)
 
 
 func _on_battle_ended(victory: bool) -> void:
@@ -278,7 +301,7 @@ func _on_battle_ended(victory: bool) -> void:
 		return
 	stats["elites" if combat_kind == "elite" else "fights"] += 1
 	# The fallen crawl back with a little HP.
-	var pct: int = region["revive_after_fight_percent"]
+	var pct: int = 25 if curse_level() >= 3 else int(region["revive_after_fight_percent"])
 	for h in heroes:
 		if not Combat.is_alive(h):
 			h["hp"] = max(1, h["max_hp"] * pct / 100)
@@ -647,7 +670,7 @@ func skip_loot() -> void:
 func rest_heal() -> void:
 	if phase != "rest":
 		return
-	var pct: int = region["rest_heal_percent"]
+	var pct := rest_percent()
 	for h in heroes:
 		var amount: int = max(1, h["max_hp"] * pct / 100)
 		h["hp"] = min(h["max_hp"], max(h["hp"], 0) + amount)
@@ -685,9 +708,11 @@ func _log(text: String) -> void:
 
 # ---------------------------------------------------------------- save / load (only on the map)
 
+const SAVE_VERSION := 2  # v1 saves (0.5-0.6) load fine: they simply have no pending tile.
+
 func to_dict() -> Dictionary:
 	return {
-		"version": 1, "rng_seed": rng.seed, "rng_state": rng.state, "combat_rng_state": combat.rng.state,
+		"version": SAVE_VERSION, "rng_seed": rng.seed, "rng_state": rng.state, "combat_rng_state": combat.rng.state,
 		"board": board, "pos": pos, "gold": gold, "heroes": heroes, "fate": combat.fate, "pet": combat.pet,
 		"twists": combat.twists, "stats": stats, "seen_events": _seen_events, "upgrades": upgrades,
 		"move_options": move_options,
@@ -713,4 +738,8 @@ static func from_dict(d: Dictionary) -> RefCounted:
 	r._start_queue = []
 	r.pet_offers = []
 	r.phase = "map"
+	if d.get("pending_enter", false):
+		# The save was made when stepping onto this tile: enter it again (same RNG, same outcome).
+		var tile: Dictionary = r.board[r.pos]
+		r._enter_tile(tile)
 	return r

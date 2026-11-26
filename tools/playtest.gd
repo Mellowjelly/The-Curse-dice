@@ -209,6 +209,7 @@ func _campaign(style: String) -> Array[String]:
 	var first_win_n := 0
 	var embers_total := 0.0
 	var levels_total := 0.0
+	var curse_total := 0.0
 	for cmp in CAMPAIGNS:
 		var path := "user://bot_campaign.save"
 		if FileAccess.file_exists(path):
@@ -216,13 +217,15 @@ func _campaign(style: String) -> Array[String]:
 		var prof := Profile.new(path)
 		var first := -1
 		for i in CAMPAIGN_RUNS:
-			var r := play_run(style, 90000 + cmp * 100 + i, [], prof.levels.duplicate())
+			var r := play_run(style, 90000 + cmp * 100 + i, [], prof.run_options())
 			var res := prof.record_run(r["run"])
 			embers_total += res["embers"]
 			if r["won"]:
 				wins_at[i] += 1
 				if first < 0:
 					first = i + 1
+			if r["won"] and prof.curse < prof.max_curse() and style != "newbie":
+				prof.set_curse(prof.curse + 1)  # experienced bots climb the Curse ladder
 			# Spend embers in this style's order.
 			for id in BUY_ORDER[style]:
 				if prof.can_upgrade(id):
@@ -234,10 +237,11 @@ func _campaign(style: String) -> Array[String]:
 			first_win_n += 1
 		for k in prof.levels:
 			levels_total += prof.levels[k]
+		curse_total += prof.curse
 	var curve: Array[String] = []
 	for i in CAMPAIGN_RUNS:
 		curve.append("%d%%" % int(100.0 * wins_at[i] / CAMPAIGNS))
 	return ["- **Campaign (%d profiles x %d runs, buying town upgrades):** win rate by run #: %s" % [CAMPAIGNS, CAMPAIGN_RUNS, " ".join(curve)],
-		"- Campaign: first win on run #%.1f on average (%d/%d profiles ever won); %.0f embers per run; %.1f building levels after %d runs" % [
-			_avg(first_win_total, first_win_n), first_win_n, CAMPAIGNS, embers_total / (CAMPAIGNS * CAMPAIGN_RUNS), levels_total / CAMPAIGNS, CAMPAIGN_RUNS],
+		"- Campaign: first win on run #%.1f on average (%d/%d profiles ever won); %.0f embers per run; %.1f building levels and Curse %.1f after %d runs" % [
+			_avg(first_win_total, first_win_n), first_win_n, CAMPAIGNS, embers_total / (CAMPAIGNS * CAMPAIGN_RUNS), levels_total / CAMPAIGNS, curse_total / CAMPAIGNS, CAMPAIGN_RUNS],
 		""]

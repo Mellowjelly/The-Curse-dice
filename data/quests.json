@@ -2,7 +2,7 @@
 	{ "id": "first_steps", "name": "First Steps", "desc": "Reach tile 15 of the Hollow Road.", "stat": "best_tile", "goal": 15, "reward": 15 },
 	{ "id": "last_campfire", "name": "The Last Campfire", "desc": "Reach the campfire before the Chapel.", "stat": "best_tile", "goal": 41, "reward": 25 },
 	{ "id": "ghoul_hunter", "name": "Ghoul Hunter", "desc": "Destroy 25 Ghouls (all runs).", "stat": "kills_ghoul", "goal": 25, "reward": 20 },
-	{ "id": "rat_catcher", "name": "Rat Catcher", "desc": "Destroy 40 Plague Rats (all runs).", "stat": "kills_plague_rat", "goal": 40, "reward": 20 },
+	{ "id": "rat_catcher", "name": "Rat Catcher", "desc": "Destroy 20 Plague Rats (all runs).", "stat": "kills_plague_rat", "goal": 20, "reward": 20 },
 	{ "id": "elite_slayer", "name": "Elite Slayer", "desc": "Win 3 elite fights in a single run.", "stat": "run_elites", "goal": 3, "reward": 30 },
 	{ "id": "dice_sculptor", "name": "Dice Sculptor", "desc": "Carve 8 dice in a single run.", "stat": "run_carves", "goal": 8, "reward": 30 },
 	{ "id": "twist_of_fate", "name": "Twist of Fate", "desc": "Use Fate Twist 3 times (all runs). Fill your Fate to 4, then click a face under a die.", "stat": "fate_twists", "goal": 3, "reward": 25 },

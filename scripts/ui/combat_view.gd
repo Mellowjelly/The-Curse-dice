@@ -28,6 +28,7 @@ var _overlay_text: Label
 var _overlay_btn: Button
 var _banner: Label
 var _pet_label: Label
+var _pulse: Tween
 var _victory := false
 
 # Animation state
@@ -98,7 +99,7 @@ func _build_ui() -> void:
 	_fate = UI.label("", 18, UI.GOLD)
 	top.add_child(_fate)
 
-	field.add_child(UI.label("ENEMIES  (click Target to choose who your attacks hit)", 13, UI.DIM))
+	field.add_child(UI.label("ENEMIES  (tap Target to choose who your attacks hit)", 13, UI.DIM))
 	_monster_row = HBoxContainer.new()
 	_monster_row.add_theme_constant_override("separation", 12)
 	_monster_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -110,7 +111,7 @@ func _build_ui() -> void:
 
 	var party_head := HBoxContainer.new()
 	field.add_child(party_head)
-	var party_lbl := UI.label("YOUR PARTY  (click a die to lock / unlock it)", 13, UI.DIM)
+	var party_lbl := UI.label("YOUR PARTY  (tap a die to lock / unlock it)", 13, UI.DIM)
 	party_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	party_head.add_child(party_lbl)
 	_pet_label = UI.label("", 15, Color("#b39ddb"))
@@ -132,7 +133,7 @@ func _build_ui() -> void:
 		buttons.add_child(b)
 
 	var log_panel := UI.panel()
-	log_panel.custom_minimum_size = Vector2(300, 0)
+	log_panel.custom_minimum_size = Vector2(230, 0)
 	root.add_child(log_panel)
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = true
@@ -151,6 +152,7 @@ func _build_ui() -> void:
 	_banner.position = Vector2(140, 300)
 	_banner.size = Vector2(1000, 120)
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner.add_theme_stylebox_override("normal", UI.box(Color(0.03, 0.02, 0.05, 0.92), UI.BLOOD, 2, 8, 16))
 	_banner.modulate.a = 0.0
 	add_child(_banner)
 
@@ -240,6 +242,7 @@ func _process(delta: float) -> void:
 			var b: Button = _die_buttons[i]
 			if is_instance_valid(b):
 				b.text = UI.face_short(f)
+				b.icon = UI.face_icon(f["type"])
 				(b.get_theme_stylebox("normal") as StyleBoxFlat).bg_color = UI.FACE_COLORS[f["type"]]
 		if _rolling <= 0.0:
 			_refresh()
@@ -249,6 +252,7 @@ func _process(delta: float) -> void:
 
 func _spawn_numbers() -> void:
 	var delay := 0.0
+	var per_unit := {}
 	for item in _pending_numbers:
 		var key := _uid(item[0])
 		if key == "":
@@ -266,7 +270,10 @@ func _spawn_numbers() -> void:
 		l.add_theme_constant_override("shadow_offset_y", 2)
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(l)
-		var start := row.global_position + Vector2(slot_w * (slot + 0.5) - 20 + _anim_rng.randf_range(-30, 30), 40)
+		var nth: int = per_unit.get(key, 0)
+		per_unit[key] = nth + 1
+		# Several hits on one unit fan out side by side instead of overlapping.
+		var start := row.global_position + Vector2(slot_w * (slot + 0.5) - 30 + nth * 46, 40 - nth * 6)
 		l.global_position = start
 		l.modulate.a = 0.0
 		var tw := create_tween()
@@ -320,6 +327,15 @@ func _refresh() -> void:
 		elif combos[t] >= 2:
 			parts.append("PAIR %s  +1 each" % UI.FACE_NAMES[t])
 	_combo.text = ("COMBO: " + "   ".join(parts)) if not parts.is_empty() else " "
+	if combat.fate >= Combat.MAX_FATE and not combat.finished and parts.is_empty():
+		_combo.text = "FATE IS FULL - tap a face under a die to TWIST it!"
+		if _pulse == null or not _pulse.is_valid():
+			_pulse = _combo.create_tween().set_loops()
+			_pulse.tween_property(_combo, "modulate:a", 0.4, 0.5)
+			_pulse.tween_property(_combo, "modulate:a", 1.0, 0.5)
+	elif _pulse != null and _pulse.is_valid():
+		_pulse.kill()
+		_combo.modulate.a = 1.0
 
 	_cards.clear()
 	_die_buttons.clear()
@@ -399,6 +415,9 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 		if value != int(face["value"]):
 			face_text += "  (base %d)" % int(face["value"])
 	die.text = face_text + ("\nLOCKED" if h["locked"] else "")
+	die.icon = UI.face_icon(face["type"])
+	die.expand_icon = true
+	die.add_theme_constant_override("icon_max_width", 40 if not twisting else 32)
 	var style := StyleBoxFlat.new()
 	style.bg_color = UI.FACE_COLORS[face["type"]]
 	style.set_corner_radius_all(6)
@@ -412,19 +431,15 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	box.add_child(die)
 	if combat.fate >= Combat.FATE_TWIST_COST and not combat.finished:
 		# Fate Twist: click any face to set the die to it.
-		var tl := UI.label("Fate Twist (-%d): click a face to set this die" % Combat.FATE_TWIST_COST, 12, UI.GOLD)
-		if combat.fate >= Combat.MAX_FATE:
-			tl.text = "FATE IS FULL - twist a die! (-%d)" % Combat.FATE_TWIST_COST
-			var tw := tl.create_tween().set_loops()
-			tw.tween_property(tl, "modulate:a", 0.35, 0.5)
-			tw.tween_property(tl, "modulate:a", 1.0, 0.5)
-		box.add_child(tl)
+		box.add_child(UI.label("Twist (-%d Fate): tap a face" % Combat.FATE_TWIST_COST, 12, UI.GOLD))
 		var grid := GridContainer.new()
 		grid.columns = 3
 		for fi in h["faces"].size():
 			var f: Dictionary = h["faces"][fi]
-			var fb := UI.button(UI.face_short(f), func(): combat.fate_twist(index, fi), 11)
+			var fb := UI.button(UI.face_short(f).replace("BLANK", "-"), func(): combat.fate_twist(index, fi), 12)
 			fb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			fb.custom_minimum_size = Vector2(0, 32)
+			fb.icon = UI.face_icon(f["type"])
 			fb.add_theme_stylebox_override("normal", UI.box(UI.FACE_COLORS[f["type"]].darkened(0.2), UI.GOLD, 1, 3, 2))
 			grid.add_child(fb)
 		box.add_child(grid)

@@ -110,6 +110,16 @@ static func hp_bar(hp: int, max_hp: int, height: float = 20) -> ProgressBar:
 	return bar
 
 
+static var _icons := {}
+
+## 16x16 pixel icon for a face type (assets/icons/face_<type>.png), or null.
+static func face_icon(face_type: String) -> Texture2D:
+	if not _icons.has(face_type):
+		var path := "res://assets/icons/face_%s.png" % face_type
+		_icons[face_type] = load(path) if ResourceLoader.exists(path) else null
+	return _icons[face_type]
+
+
 static func face_short(f: Dictionary) -> String:
 	return FACE_NAMES[f["type"]] + ("" if f["type"] == "blank" else str(int(f["value"])))
 

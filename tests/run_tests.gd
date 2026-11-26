@@ -39,6 +39,7 @@ func _init() -> void:
 	test_summon_roll()
 	test_party_and_new_skills()
 	test_gates_stop_movement()
+	test_tile_snapshot_reload()
 	print("\n%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -445,3 +446,24 @@ func test_gates_stop_movement() -> void:
 	var plain := Run.new(41)
 	var g: Dictionary = plain.monster_defs["ghoul"]
 	check(cursed.scaled_monster(g, "fight", "early")["hp"] > plain.scaled_monster(g, "fight", "early")["hp"], "Curse makes enemies tougher")
+
+
+func test_tile_snapshot_reload() -> void:
+	var run := Run.new(50)
+	run.choose_pet(0)
+	run.roll_move()
+	run.choose_move(0)
+	var snap := run.tile_snapshot
+	check(snap.get("pending_enter", false), "stepping on a tile takes a snapshot")
+	var again: Run = Run.from_dict(snap)
+	check(again.pos == run.pos and again.phase == run.phase, "reloading re-enters the same tile (%s)" % run.phase)
+	if run.phase == "combat":
+		var a: Array = run.combat.monsters.map(func(m): return m["id"])
+		var b: Array = again.combat.monsters.map(func(m): return m["id"])
+		check(a == b, "the same enemies appear after reloading")
+	var old := run.to_dict()
+	old["version"] = 1
+	old.erase("pending_enter")
+	check(Run.from_dict(old).phase == "map", "version-1 saves still load")
+	var cursed := Run.new(51, {"curse": 3})
+	check(cursed.rest_percent() == 20, "Curse III makes camps heal less")

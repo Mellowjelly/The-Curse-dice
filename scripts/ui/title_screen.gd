@@ -86,10 +86,16 @@ func _build() -> void:
 
 	box.add_child(_menu_button("Play", _on_new_game))
 	box.add_child(_menu_button("How to Play", func(): _help.show()))
+	var Sfx = load("res://scripts/ui/sfx.gd")
+	var sound_btn := _menu_button("Sound: " + ("OFF" if Sfx.muted else "ON"), func(): pass)
+	sound_btn.pressed.connect(func():
+		Sfx.set_muted(not Sfx.muted)
+		sound_btn.text = "Sound: " + ("OFF" if Sfx.muted else "ON"))
+	box.add_child(sound_btn)
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
 
-	var version := _label("Prototype 0.6", 14, COL_DIM)
+	var version := _label("Version 1.0", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
 

@@ -131,7 +131,7 @@ func _refresh() -> void:
 
 func _refresh_party() -> void:
 	_clear(_party_box)
-	_party_box.add_child(UI.label("Choose 3 heroes (%d/3). Click to add or remove." % profile.party.size(), 15, UI.DIM))
+	_party_box.add_child(UI.label("Choose 3 heroes (%d/3). Tap to add or remove." % profile.party.size(), 15, UI.DIM))
 	var grid := GridContainer.new()
 	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 8)
@@ -159,7 +159,11 @@ func _refresh_party() -> void:
 	var plus := UI.button(" + ", func(): profile.set_curse(profile.curse + 1); _refresh())
 	plus.disabled = profile.curse >= profile.max_curse()
 	row.add_child(plus)
-	row.add_child(UI.label("  Each level: enemies +12% HP (+1 damage at 2 and 4), +25% Soul Embers. Beat a level to unlock the next.", 13, UI.DIM))
+	row.add_child(UI.label("  +25% Soul Embers per level. Beat a level to unlock the next.", 13, UI.DIM))
+	var Run = load("res://scripts/core/run.gd")
+	for i in Run.CURSE_RULES.size():
+		var active: bool = i < profile.curse
+		_party_box.add_child(UI.label(("  [active] " if active else "  ") + Run.CURSE_RULES[i], 13, UI.BLOOD if active else UI.DIM))
 
 
 func _toggle_party(id: String) -> void:

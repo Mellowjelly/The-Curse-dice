@@ -133,12 +133,12 @@
 		"text": "A smiling man in a coat of finger bones. \"I buy what you won't miss. A little life, for a lot of gold.\"",
 		"options": [
 			{
-				"label": "Sell life (a hero loses 5 max HP) for 50 gold.",
+				"label": "Sell life (a hero loses 3 max HP) for 50 gold.",
 				"effects": [
 					{
 						"op": "max_hp",
 						"who": "healthiest",
-						"value": -5
+						"value": -3
 					},
 					{
 						"op": "gold",
