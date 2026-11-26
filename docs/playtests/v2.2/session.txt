@@ -11,3 +11,474 @@ accept tobin
 accept marla
 accept pip
 road
+# Black cat: extra reroll each round sounds strong
+pick 1
+roll
+# two dice, pick one. Shop with 0 gold is useless; rest counts for Marla
+move 1
+# full HP so carve
+rest carve
+# replace a blank, more consistent
+pick 0
+roll
+# need gold, fight it
+move 0
+# lock Varek attack, reroll others hoping for fire
+lock 0
+reroll
+reroll
+reroll
+end
+# two attacks = combo, try for a third attack from Lys
+lock 0
+lock 2
+reroll
+reroll
+end
+end
+# Cleave? new face, replaces a blank - take it
+pick 0
+roll
+move 0
+# gold 35 from chest. Weapon - give to Aldric, his die is mostly heals
+equip_loot 0 2
+roll
+# equip gave no feedback on which faces changed. Fight for gold first
+move 0
+lock 1
+reroll
+lock 2
+reroll
+reroll
+# spend 2 fate for extra reroll on Varek
+fate_reroll
+reroll
+end
+# TRIPLE ATTACK wiped them in one round - felt great
+pick 0
+roll
+# event for Pip's stories
+move 0
+# nearly full HP, take Fate
+pick 1
+pick 0
+roll
+move 0
+# fate already 5/5, ringing would waste it
+pick 1
+pick 0
+roll
+# fight for gold + rats for Tobin
+move 0
+reroll
+# twist Lys to blood 6
+twist 1 3
+lock 1
+reroll
+# ARGH: twist auto-locked the die, my 'lock 1' UNLOCKED it, and reroll threw away my 4-fate blood 6. lock is a toggle.
+lock 0
+lock 1
+reroll
+end
+lock 1
+reroll
+lock 2
+reroll
+end
+# Varek skill ready, curious
+skill 0
+end
+# odd reward: ATTACK 3 -> GUARD 2 is a sidegrade. take cleave 3
+pick 2
+roll
+move 0
+# carving to kill Aldric's blank, then tonic for Lys
+buy carving
+# (stale 'Victory! +9 gold' line shown in shop carving)
+pick 0
+buy tonic
+leave
+roll
+move 0
+# not sure which faces a weapon overwrites - afraid to lose my carvings. skip
+skip
+roll
+move 0
+target 1
+lock 0
+reroll
+# twist Aldric to attack (stays locked this time, I won't touch it)
+twist 2 4
+reroll
+reroll
+end
+lock 0
+lock 1
+reroll
+end
+lock 2
+reroll
+reroll
+lock 1
+reroll
+end
+# building an attack-combo team
+pick 0
+roll
+# Lys at 5hp, dodge the elite into the shop
+move 0
+buy tonic
+buy tonic
+leave
+roll
+# 2nd tonic silently did nothing (no message). Try reroll_move to land on rest
+reroll_move
+move 0
+lock 0
+lock 1
+reroll
+reroll
+end
+lock 0
+twist 1 0
+reroll
+reroll
+reroll
+end
+skill 0
+end
+lock 2
+reroll
+reroll
+end
+pick 2
+roll
+move 0
+rest heal
+roll
+move 1
+# greedy
+pick 0
+# the fingers twitched. of course. +25 gold and an ambush - nice flavour
+lock 1
+target 1
+reroll
+lock 0
+reroll
+twist 2 4
+end
+end
+pick 0
+roll
+move 0
+# weapons seem to overwrite the last 2 faces. Varek loses shield4/guard2 for attack8/blank - worth it
+equip_loot 0 0
+roll
+# 6 steps from 37 says rest(41)? movement seems to stop before boss. Take the event for Pip
+move 1
+pick 0
+pick 0
+roll
+move 1
+rest carve
+# again stale chest text on a rest carve
+pick 2
+roll
+move 0
+# BOSS. 66hp. go for triple attack
+lock 0
+reroll
+lock 1
+reroll
+reroll
+end
+# natural triple with the axe's attack8! end immediately
+end
+skill 0
+twist 0 4
+lock 2
+reroll
+end
+# Bishop down in 3 rounds. Felt powerful, maybe too easy
+status
+talk tobin
+claim tobin
+claim marla
+claim pip
+# claimed from Pip even though he is 'away' - fine but odd
+talk hesk
+talk marla
+status
+accept hesk
+accept marla
+talk tobin
+accept tobin
+summon heroes
+status
+# summon cost 3 grave dice, no rarity/info shown. Tobin quest instantly DONE (retroactive)
+claim tobin
+summon heroes
+summon pets
+# buildings have no description - guessing. smithy sounds useful for crafting
+build smithy
+build chapel
+status
+# 'Built smithy.' - but what does it DO? no hint
+talk tobin
+explore
+look
+# goal: iron hatchet = 6 grave iron + 4 ashwood
+goto 19 46
+gather
+gather
+goto 18 42
+gather
+goto 19 40
+gather
+goto 21 39
+gather
+goto 21 41
+gather
+look
+# enough for hatchet. Grab more iron for the alpha fang blade
+goto 18 38
+gather
+goto 19 37
+gather
+goto 20 36
+gather
+look
+# wolf pelts for wolfhide coat + alpha blade
+goto 28 31
+fight
+# world fights use base dice - all my road carvings are gone (makes sense, roguelite)
+reroll
+lock 0
+reroll
+end
+end
+look
+goto 27 27
+# oops, wandered into Elderglade T2
+target 1
+lock 0
+reroll
+lock 1
+reroll
+end
+lock 1
+reroll
+reroll
+end
+twist 1 4
+reroll
+reroll
+end
+# try Lys's skill
+skill 1
+look
+goto 29 25
+gather
+look
+# ghoul for Hesk's quest
+fight
+reroll
+target 1
+lock 0
+reroll
+end
+# 'Varek hits for 2 (super effective!)' - a 2-attack, no combo, still 2? super effective did nothing?
+lock 1
+lock 2
+reroll
+reroll
+end
+# Lys at 3hp. world fights with base dice are rough
+lock 0
+lock 1
+reroll
+end
+reroll
+lock 0
+lock 1
+reroll
+end
+lock 1
+lock 2
+reroll
+reroll
+end
+# try Aldric's skill
+skill 2
+# Last Rite: +3 all, -3 Aldric. 6 charges for that feels weak
+skill 1
+end
+# 6-round slog for 8 embers and nothing else. Lys at 7hp - go home to heal and craft
+home
+status
+craft iron_hatchet
+status
+# 'Crafted item #1' - no stats, no faces shown. equipping blind
+equip aldric weapon 1
+status
+# star dust 14 - what for? try upgrading Lys
+upgrade hero lys
+status
+# upgrade silently cost 40 embers + 2 dust and didn't say what 2 stars does
+explore
+# Lys 22 max now (+2 HP per star?). full hp - go for the Ashen Alpha boss
+goto 26 45
+# hatchet = attack4 + attack3 on Aldric (shown only in combat)
+lock 1
+reroll
+lock 0
+reroll
+end
+lock 0
+reroll
+end
+lock 2
+twist 1 4
+reroll
+reroll
+end
+skill 0
+skill 1
+lock 0
+lock 2
+reroll
+reroll
+end
+skill 2
+lock 1
+reroll
+end
+end
+# ALPHA FANG! boss fight was a good 6-round tense fight. home to craft the SSR blade
+home
+craft alpha_fang_blade
+status
+# 59 embers, need 60. ONE ember short. (and I spent 40 on Lys star.) sell something
+sell boar_hide 1
+craft alpha_fang_blade
+equip varek weapon 2
+grind ember_shard 1
+status
+# 'grind ember_shard 1' -> 'Cannot.' no reason given
+explore
+goto 20 56
+# alpha blade = attack7 + cleave3 (replaced Varek's shield4 & guard2)
+lock 0
+reroll
+reroll
+end
+# nice: heal at full HP becomes a shield ('prayer wards')
+end
+# off to the Marshes of Veyl
+goto 40 76
+lock 0
+lock 1
+reroll
+end
+end
+goto 40 76
+# WHOA - goto walked me straight into the Bog Mother BOSS (92hp) with no warning and no flee option
+reroll
+reroll
+end
+lock 0
+reroll
+end
+twist 2 1
+reroll
+end
+# Lys hanging on. keep shield+heal, Varek attack 7
+end
+lock 2
+reroll
+reroll
+end
+# sweep 6 incoming, Lys 5 and Aldric 6. desperate
+skill 2
+lock 0
+lock 1
+reroll
+end
+lock 1
+lock 2
+reroll
+end
+# Lys and Aldric fell. Varek alone, 9hp vs 25hp boss
+skill 0
+reroll
+reroll
+end
+reroll
+end
+# can't survive this one either way. swing.
+end
+# lost to Bog Mother with 11hp left on her. So close.
+look
+status
+# defeat just sends me back to the gate at half hp, bag kept. forgiving. Lesson: country 'centre' = boss lair
+home
+explore
+goto 34 64
+look
+lock 0
+lock 2
+reroll
+reroll
+end
+twist 0 4
+reroll
+reroll
+end
+# 17 damage triple-attack overkill on a 5hp snake - wasted, wish target was per-die
+end
+look
+# gather copper & bogwood for copper spear / serpent vest
+goto 35 60
+gather
+goto 33 63
+gather
+goto 34 64
+gather
+goto 32 68
+gather
+goto 34 69
+gather
+look
+goto 36 66
+gather
+goto 37 68
+gather
+goto 38 68
+gather
+goto 35 62
+lock 0
+lock 2
+reroll
+reroll
+end
+twist 1 4
+end
+end
+home
+status
+talk hesk
+talk marla
+talk pip
+# BUG?: Hesk 0/8 ghouls though I killed 2 ghouls on the isle; Marla 0/4 twists though I twisted ~5 times on the isle. World fights don't count?!
+# Also time has been 'dusk' forever. try wait
+wait
+status
+# night = +40% embers, +1 grave die. Road journey #2 at night. Try new hero Vael instead of Lys
+party varek vael aldric
+road
+# max HP +1 each - maybe the chapel? nice but no one told me
+pick 0
+roll
+# a free starting weapon (smithy perk?). give to Vael blind - I can't see her faces outside combat
+equip_loot 0 1
+roll
