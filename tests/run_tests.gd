@@ -58,6 +58,7 @@ func _init() -> void:
 	test_v35_trip_save()
 	test_v35_thai_layout()
 	test_v35_road_bonus()
+	test_v35_villagers()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -545,7 +546,7 @@ func test_villager_requests() -> void:
 	var p := _fresh_profile("test_villagers")
 	check(p.villagers.size() == 4, "4 villagers live in Ashfall")
 	for v in p.villagers:
-		check(v["requests"].size() == 4, "%s has a chain of 4 requests (3 + 1 Isle delivery)" % v["id"])
+		check(v["requests"].size() == (5 if v["id"] == "marla" else 4), "%s has a chain of 4 requests (3 + 1 Isle delivery; Marla +1 for Wren)" % v["id"])
 		for r in v["requests"]:
 			if r["reward"]["kind"] in ["hero", "pet", "relic"]:
 				check(not p.item_def(r["reward"]["kind"], r["reward"]["id"]).is_empty(), "reward exists: " + r["reward"]["id"])
@@ -1045,7 +1046,7 @@ func test_v33_changes() -> void:
 	p.npc_done = m["npc_done"]
 	p.npc_active = m["npc_active"]
 	check(p.npc_request("tobin")["id"] == "tobin_harvest", "the active request is still the one shown")
-	check(p.npc_request("marla").is_empty(), "a finished chain stays finished")
+	check(p.npc_request("marla").get("id", "") == "marla_bell", "a finished old chain only offers the request added in 3.5")
 	var r := Run.new(333)
 	r.combat.fate = 4
 	r.phase = "shop"
@@ -1178,6 +1179,63 @@ func test_v34_isle_sharpening() -> void:
 	check(faces.size() == w.sharpen_offers.size() and w.sharpen_offers.size() >= 2, "offers never repeat a face (%d offers)" % w.sharpen_offers.size())
 	w.finish_fight(e, false, rng)
 	check(w.sharpen_offers.is_empty(), "a lost fight leaves no sharpening")
+
+
+## 3.5: villager rewards you already own become another item of the same kind; Hesk asks 5 ghouls;
+## Wren is a free story hero from Marla.
+func test_v35_villagers() -> void:
+	var p := _fresh_profile("test_v35_villagers")
+	var hesk: Dictionary = p.npc_request("hesk")
+	check(hesk["id"] == "hesk_ghouls" and int(hesk["goal"]["amount"]) == 5, "Hesk asks for 5 ghouls")
+	# Wren: Marla's 5th request, a Wick-Mother kill.
+	p.mark_requests_done("marla", ["marla_camps", "marla_hides", "marla_twist", "marla_bishop"])
+	var bell := p.npc_request("marla")
+	check(bell["id"] == "marla_bell" and bell["reward"]["kind"] == "hero" and bell["reward"]["id"] == "wren", "Marla's last request gives Wren")
+	check(not GameData.load_heroes().filter(func(h): return h["id"] == "wren")[0].get("starter", false), "Wren is not a starter")
+	p.time_of_day = 0  # Dawn: Marla is out
+	check(p.request_reward("marla")["id"] == "wren" and not p.request_reward("marla").has("instead_of"), "the reward shown is Wren")
+	p.accept_request("marla")
+	p.stats["kills_wick_mother"] = p.stat("kills_wick_mother") + 1
+	var r := p.claim_request("marla")
+	check(r.get("new", false) and r["id"] == "wren" and p.owns("hero", "wren"), "putting out the candles brings Wren (no gacha needed)")
+	# Owned rewards are swapped before you accept, the same way every time.
+	var q := _fresh_profile("test_v35_swap")
+	q.mark_requests_done("marla", ["marla_camps", "marla_hides", "marla_twist"])
+	q.owned_heroes.append("vael")
+	var shown := q.request_reward("marla")
+	check(shown["kind"] == "hero" and shown["id"] != "vael" and not q.owns("hero", shown["id"]), "an owned hero reward becomes an unowned hero (%s)" % shown["id"])
+	check(shown["instead_of"] == "vael", "the swap says what it replaces")
+	check(shown["id"] == "mordecai", "same grade first, data order: Vael (SSR) -> Mordecai (SSR)")
+	check(q.request_reward("marla") == shown, "the swap is deterministic")
+	q.time_of_day = 0
+	q.accept_request("marla")
+	check(q.npc_active["marla"]["reward"] == shown, "the reward shown is the one promised on accept")
+	# If you get the promised item another way before claiming, the next unowned one is given.
+	q.owned_heroes.append("mordecai")
+	var now := q.request_reward("marla")
+	check(now["id"] == "osric", "a promised item you got meanwhile moves on to the next (%s)" % now["id"])
+	q.stats["kills_rotting_bishop"] = q.stat("kills_rotting_bishop") + 1
+	var got := q.claim_request("marla")
+	check(got.get("new", false) and got["id"] == "osric", "the claim gives the swapped item")
+	# Own every hero: Star Dust, as before.
+	var all := _fresh_profile("test_v35_all")
+	for h in GameData.load_heroes():
+		if not all.owns("hero", h["id"]):
+			all.owned_heroes.append(h["id"])
+	check(all.resolve_reward({"kind": "hero", "id": "vael"}) == {"kind": "hero", "id": "vael"}, "owning everything keeps the Star Dust fallback")
+	check(all.grant({"kind": "hero", "id": "vael"})["kind"] == "dust", "the fallback still turns into Star Dust")
+	# Pets and relics swap within their own kind.
+	var pr := _fresh_profile("test_v35_pets")
+	pr.owned_pets.append("ember_salamander")
+	var pet := pr.resolve_reward({"kind": "pet", "id": "ember_salamander"})
+	check(pet["kind"] == "pet" and not pr.owns("pet", pet["id"]), "an owned pet reward becomes another pet")
+	pr.unlocked_weapons.append("plague_lance")
+	var relic := pr.resolve_reward({"kind": "relic", "id": "plague_lance"})
+	check(relic["kind"] == "relic" and not pr.owns("relic", relic["id"]), "an owned relic reward becomes another relic")
+	# A 3.4 save with an accepted request (no stored reward) still works.
+	var old := _fresh_profile("test_v35_old")
+	old.npc_active["tobin"] = {"base": 0, "run_best": 0, "req": "tobin_rats"}
+	check(old.request_reward("tobin")["kind"] == "dust", "an old accepted request shows its reward")
 
 
 ## 3.5: the first road-boss kill of each day pays +40 Soul Embers and +1 Grave Die.

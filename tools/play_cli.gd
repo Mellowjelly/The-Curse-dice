@@ -238,10 +238,10 @@ func _talk(vid: String) -> void:
 	elif profile.is_request_done(vid):
 		say("  Request '%s' is DONE - claim it." % req["title"])
 	elif profile.is_request_active(vid):
-		say("  Working on '%s': %d/%d%s" % [req["title"], profile.request_progress(vid), int(req["goal"]["amount"]),
-			" (counts %s in Storage, handed over on claim)" % req["goal"]["material"] if req["goal"]["scope"] == "deliver" else ""])
+		say("  Working on '%s': %d/%d%s  -> reward %s" % [req["title"], profile.request_progress(vid), int(req["goal"]["amount"]),
+			" (counts %s in Storage, handed over on claim)" % req["goal"]["material"] if req["goal"]["scope"] == "deliver" else "", _reward_text(profile.request_reward(vid))])
 	else:
-		say("  Asks: %s  -> reward %s" % [req["ask"], _reward_text(req["reward"])])
+		say("  Asks: %s  -> reward %s" % [req["ask"], _reward_text(profile.request_reward(vid))])
 
 
 # ---------------------------------------------------------------- the Hollow Road
@@ -580,4 +580,4 @@ func _reward_text(r: Dictionary) -> String:
 	var id: String = r.get("id", "")
 	if profile.owns(r["kind"], id):
 		return "%d Star Dust (you already have %s)" % [profile.duplicate_dust(r["kind"], id), id]
-	return "%s %s" % [r["kind"], id]
+	return "%s %s%s" % [r["kind"], id, (" (instead of %s, which you already have)" % r["instead_of"]) if r.has("instead_of") else ""]

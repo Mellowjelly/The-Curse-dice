@@ -618,7 +618,6 @@
 	"Keep your voice down. Things listen at night.": "เบาเสียงหน่อย ตอนกลางคืนมีสิ่งที่คอยฟังอยู่",
 	"The gate stays shut after dark. Unless you have business.": "ประตูปิดหลังมืดค่ำ เว้นแต่เจ้ามีธุระ",
 	"Thin the Ghouls": "ลดจำนวนกูล",
-	"Ghouls scratch at the gate every night. Destroy eight of them.": "กูลมาข่วนประตูทุกคืน ทำลายพวกมัน 8 ตัว",
 	"The scratching stopped. For now. Here, the watch's pay. Do not spend it on drink.": "เสียงข่วนหยุดแล้ว อย่างน้อยก็ตอนนี้ นี่ ค่าจ้างของหน่วยยาม อย่าเอาไปซื้อเหล้าล่ะ",
 	"The Grave Knight": "อัศวินหลุมศพ",
 	"A knight in rusted armour leads the dead. He was one of mine, once. Put him down.": "อัศวินในชุดเกราะขึ้นสนิมนำทัพคนตาย ครั้งหนึ่งเขาเคยเป็นคนของข้า ช่วยให้เขาได้พักเถอะ",
@@ -830,5 +829,10 @@
 	"You pick up the trail where you left it.": "คุณออกเดินต่อจากจุดที่ทิ้งไว้",
 	"The road remembers today's first fallen boss: +%d Soul Embers, +%d Grave Die (included above).": "ถนนจดจำบอสตัวแรกที่ล้มในวันนี้: เถ้าวิญญาณ +%d, เต๋าหลุมศพ +%d (รวมอยู่ในยอดด้านบนแล้ว)",
 	"Today's first road boss pays +%d Soul Embers, +%d Grave Die.": "บอสถนนตัวแรกของวันนี้ให้เถ้าวิญญาณ +%d และเต๋าหลุมศพ +%d",
-	"Today's road-boss bonus is taken. It returns at Dawn.": "รับโบนัสบอสถนนของวันนี้ไปแล้ว จะกลับมาอีกตอนรุ่งเช้า"
+	"Today's road-boss bonus is taken. It returns at Dawn.": "รับโบนัสบอสถนนของวันนี้ไปแล้ว จะกลับมาอีกตอนรุ่งเช้า",
+	"Ghouls scratch at the gate every night. Destroy five of them.": "กูลมาข่วนประตูทุกคืน ทำลายพวกมัน 5 ตัว",
+	"The Silent Bell": "ระฆังที่เงียบงัน",
+	"The bell has not rung since the candles came. The Wick-Mother takes our dead before we can bury them, and the bell-ringer will not climb her tower for an empty grave. Put out the Wick-Mother's candles.": "ระฆังไม่เคยดังอีกเลยตั้งแต่เทียนพวกนั้นมา แม่ไส้เทียนเอาศพของเราไปก่อนที่เราจะได้ฝัง และคนตีระฆังก็ไม่ยอมปีนหอเพื่อหลุมศพที่ว่างเปล่า ไปดับเทียนของแม่ไส้เทียนเสีย",
+	"Listen. The bell. Wren came down from her tower to see who brought the dead home. She asked to walk with you. I told her the price is hers to pay, and she only smiled.": "ฟังสิ เสียงระฆัง Wren ลงมาจากหอเพื่อดูว่าใครพาคนตายกลับบ้าน นางขอเดินทางไปกับท่าน ข้าบอกนางว่าราคานั้นนางต้องจ่ายเอง นางได้แต่ยิ้ม",
+	"(you already have %s, so this is offered instead)": "(ท่านมี %s อยู่แล้ว จึงได้สิ่งนี้แทน)"
 }

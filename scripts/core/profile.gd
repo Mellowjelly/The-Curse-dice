@@ -474,9 +474,41 @@ func accept_request(id: String) -> bool:
 	if req.is_empty() or npc_active.has(id):
 		return false
 	var goal_stat: String = req["goal"].get("stat", "")
-	npc_active[id] = {"base": stat(goal_stat), "run_best": 0, "req": req["id"]}
+	npc_active[id] = {"base": stat(goal_stat), "run_best": 0, "req": req["id"], "reward": resolve_reward(req["reward"])}
 	save()
 	return true
+
+
+## 3.5: what this villager's current request will really give (shown before you accept).
+## The reward chosen when you accepted stays, unless you have since got that item another way.
+func request_reward(id: String) -> Dictionary:
+	var req := npc_request(id)
+	if req.is_empty():
+		return {}
+	var kept: Dictionary = npc_active.get(id, {}).get("reward", {})
+	if not kept.is_empty() and not (String(kept["kind"]) in ["hero", "pet", "relic"] and owns(kept["kind"], kept["id"])):
+		return kept
+	return resolve_reward(req["reward"])
+
+
+## 3.5: an item reward you already own becomes another item of the same kind you do not own yet
+## (same grade first, then data order: always the same choice). Only if you own them all is it Star Dust (see grant).
+func resolve_reward(r: Dictionary) -> Dictionary:
+	var kind := String(r["kind"])
+	if not kind in ["hero", "pet", "relic"] or not owns(kind, r["id"]):
+		return r
+	var pool: Array
+	match kind:
+		"hero": pool = GameData.load_heroes()
+		"pet": pool = GameData.load_pets()
+		_: pool = GameData.load_weapons().filter(func(w): return w.get("locked", false))
+	var grade: String = item_def(kind, r["id"]).get("grade", "SR")
+	var free: Array = pool.filter(func(x): return not owns(kind, x["id"]))
+	if free.is_empty():
+		return r
+	var same: Array = free.filter(func(x): return x.get("grade", "SR") == grade)
+	var pick: Dictionary = same[0] if not same.is_empty() else free[0]
+	return {"kind": kind, "id": pick["id"], "instead_of": r["id"]}
 
 
 ## Hands over the reward. Returns a result like summon_roll's, or {} if not finished.
@@ -484,6 +516,7 @@ func claim_request(id: String) -> Dictionary:
 	if not is_request_done(id) or not npc_is_out(id):
 		return {}
 	var req := npc_request(id)
+	var reward := request_reward(id)
 	var g: Dictionary = req["goal"]
 	if g["scope"] == "deliver":  # hand the materials over
 		var mat: String = g["material"]
@@ -494,7 +527,7 @@ func claim_request(id: String) -> Dictionary:
 	if not npc_done.has(id):
 		npc_done[id] = []
 	npc_done[id].append(req["id"])
-	var result := grant(req["reward"])
+	var result := grant(reward)
 	save()
 	return result
 

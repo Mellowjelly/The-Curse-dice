@@ -705,12 +705,13 @@ func _render_dialog() -> void:
 		box.add_child(UI.wrap_label("\"%s\"" % tr(v["greeting"][randi() % v["greeting"].size()]), 14, UI.TEXT, 460))
 		box.add_child(UI.label("%s:  %d / %d" % [tr(req["title"]), profile.request_progress(_dialog_npc), int(req["goal"]["amount"])], 15, UI.GOLD))
 		box.add_child(UI.wrap_label(tr(req["ask"]), 12, UI.DIM, 460))
+		box.add_child(_reward_line(profile.request_reward(_dialog_npc)))
 		if req["goal"]["scope"] == "deliver":
 			box.add_child(UI.label(tr("Counts what is in your Storage. Handed over when you claim."), 12, UI.DIM))
 	else:
 		box.add_child(UI.wrap_label("\"%s\"" % tr(req["ask"]), 14, UI.TEXT, 460))
 		box.add_child(UI.label(tr("Request: ") + tr(req["title"]), 15, UI.GOLD))
-		box.add_child(_reward_line(req["reward"]))
+		box.add_child(_reward_line(profile.request_reward(_dialog_npc)))
 		buttons.add_child(_dialog_button(tr("I will help"), func(): profile.accept_request(_dialog_npc); Sfx.play(self, "fate"); _refresh()))
 	var bye := UI.button(tr("Goodbye"), func(): _dialog.hide(); _refresh(), 14)
 	bye.custom_minimum_size = Vector2(110, 40)
@@ -732,7 +733,10 @@ func _reward_line(r: Dictionary) -> Control:
 		var grade: String = d.get("grade", "SR")
 		if profile.owns(kind, r["id"]):
 			return UI.label(tr("Reward: %d Star Dust (you already have %s)") % [profile.duplicate_dust(kind, r["id"]), tr(d.get("name", r["id"]))], 15, Color("#d8c8f0"))
-		return UI.label(tr("Reward: [%s] %s (%s)") % [grade, tr(d.get("name", r["id"])), {"hero": tr("hero"), "pet": tr("companion"), "relic": tr("relic weapon")}[kind]], 15, UI.grade_color(grade))
+		var line := tr("Reward: [%s] %s (%s)") % [grade, tr(d.get("name", r["id"])), {"hero": tr("hero"), "pet": tr("companion"), "relic": tr("relic weapon")}[kind]]
+		if r.has("instead_of"):  # 3.5: the promised item is already yours, so the villager offers another
+			line += "\n" + tr("(you already have %s, so this is offered instead)") % tr(profile.item_def(kind, r["instead_of"]).get("name", r["instead_of"]))
+		return UI.wrap_label(line, 15, UI.grade_color(grade), 460)
 	var names := {"dust": tr("Star Dust"), "dice": tr("Grave Dice"), "embers": tr("Soul Embers")}
 	return UI.label(tr("Reward: %d %s") % [int(r["amount"]), names[kind]], 15, Color("#d8c8f0"))
 

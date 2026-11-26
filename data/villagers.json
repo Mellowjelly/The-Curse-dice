@@ -150,6 +150,21 @@
 					"kind": "hero",
 					"id": "vael"
 				}
+			},
+			{
+				"id": "marla_bell",
+				"title": "The Silent Bell",
+				"ask": "The bell has not rung since the candles came. The Wick-Mother takes our dead before we can bury them, and the bell-ringer will not climb her tower for an empty grave. Put out the Wick-Mother's candles.",
+				"done": "Listen. The bell. Wren came down from her tower to see who brought the dead home. She asked to walk with you. I told her the price is hers to pay, and she only smiled.",
+				"goal": {
+					"stat": "kills_wick_mother",
+					"amount": 1,
+					"scope": "total"
+				},
+				"reward": {
+					"kind": "hero",
+					"id": "wren"
+				}
 			}
 		]
 	},
@@ -246,11 +261,11 @@
 			{
 				"id": "hesk_ghouls",
 				"title": "Thin the Ghouls",
-				"ask": "Ghouls scratch at the gate every night. Destroy eight of them.",
+				"ask": "Ghouls scratch at the gate every night. Destroy five of them.",
 				"done": "The scratching stopped. For now. Here, the watch's pay. Do not spend it on drink.",
 				"goal": {
 					"stat": "kills_ghoul",
-					"amount": 8,
+					"amount": 5,
 					"scope": "total"
 				},
 				"reward": {
