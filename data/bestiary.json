@@ -1,0 +1,42 @@
+{
+	"milestones": {
+		"common": [
+			{ "kills": 10, "reward": { "kind": "dust", "amount": 2 } },
+			{ "kills": 30, "reward": { "kind": "dust", "amount": 4 } },
+			{ "kills": 75, "reward": { "kind": "dice", "amount": 1 } }
+		],
+		"elite": [
+			{ "kills": 3, "reward": { "kind": "dust", "amount": 3 } },
+			{ "kills": 12, "reward": { "kind": "dice", "amount": 1 } }
+		],
+		"boss": [
+			{ "kills": 1, "reward": { "kind": "dust", "amount": 4 } },
+			{ "kills": 5, "reward": { "kind": "dice", "amount": 1 } }
+		]
+	},
+	"lore": {
+		"ghoul": "It still wears its burial ring. It does not remember whose hand it was.",
+		"cultist": "The Ash Cult prays to rot. Their hymns are mostly coughing.",
+		"bone_hound": "Hounds of the old kennels, rebuilt by someone who never saw a dog.",
+		"rotting_bishop": "He blessed the town once. Now his candles burn with grave-fat and his sermons never end.",
+		"plague_rat": "One rat is a nuisance. The cart full of them is a funeral.",
+		"weeping_nun": "Her tears are holy water gone black. She weeps for you, too.",
+		"grave_knight": "He kept his oath past death. Nobody told him the king is dust.",
+		"bone_colossus": "A hundred graves, stacked into one walking grudge.",
+		"dire_wolf": "Ash in its fur, hunger in its eyes. The packs grew bold when the dice broke.",
+		"wild_boar": "Tusks like plough-blades. Marla wants its hide for blankets.",
+		"marsh_serpent": "It sleeps under the bells of drowned chapels and wakes when they ring.",
+		"giant_spider": "Its silk is strong enough to hold a man. It has tested this.",
+		"cave_bear": "Old as the forest. It does not hate you. It simply does not move aside.",
+		"frost_wolf": "Its breath freezes the snow mid-fall. Its howl freezes the rest.",
+		"sand_crab": "It wears the helmets of drowned sailors as a shell.",
+		"lava_lizard": "It basks in fire the way a cat basks in sun, and bites the same way.",
+		"bone_vulture": "It waits. In the Bonewastes, waiting always pays.",
+		"ashen_alpha": "The first wolf to taste the curse. The pack still follows its scent.",
+		"bog_mother": "She mothers every drowned thing in Veyl. She wants to mother you.",
+		"thornback": "The forest's last guardian, grown over with briars and grief.",
+		"tidecrusher": "The tide brings it back every year, a little bigger, a little angrier.",
+		"pale_matriarch": "Queen of the frost packs. Her fur is white because it has never been touched.",
+		"cinder_drake": "The cult calls it the mountain's child. It calls the cult breakfast."
+	}
+}

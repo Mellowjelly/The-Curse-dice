@@ -58,6 +58,21 @@
 					"kind": "relic",
 					"id": "plague_lance"
 				}
+			},
+			{
+				"id": "tobin_iron",
+				"title": "Iron for the Ploughs",
+				"ask": "The ploughs broke on the bones in the field. Bring me 6 Grave Iron from Ashfall Vale on the Cursed Isle and I will mend them.",
+				"done": "Good iron. Cold, but good. The field will turn again. Take these, I found them under the last furrow.",
+				"goal": {
+					"scope": "deliver",
+					"material": "grave_iron",
+					"amount": 6
+				},
+				"reward": {
+					"kind": "dice",
+					"amount": 2
+				}
 			}
 		]
 	},
@@ -120,6 +135,21 @@
 					"kind": "hero",
 					"id": "vael"
 				}
+			},
+			{
+				"id": "marla_hides",
+				"title": "Hides for Winter",
+				"ask": "Winter comes and the orphans sleep on stone. Bring me 3 Boar Hides from the Isle. I will sew them blankets.",
+				"done": "Warm. They will be warm. My husband would have liked you. Take the dust from his old shrine.",
+				"goal": {
+					"scope": "deliver",
+					"material": "boar_hide",
+					"amount": 3
+				},
+				"reward": {
+					"kind": "dust",
+					"amount": 6
+				}
 			}
 		]
 	},
@@ -181,6 +211,21 @@
 					"kind": "hero",
 					"id": "mordecai"
 				}
+			},
+			{
+				"id": "pip_shard",
+				"title": "A Shard That Glows",
+				"ask": "Hesk says there are stones on the Isle that glow like a fire that never goes out. Bring me one Ember Shard? Please?",
+				"done": "It is warm! It is still warm! You can have my savings. I was saving them for something important. This is important.",
+				"goal": {
+					"scope": "deliver",
+					"material": "ember_shard",
+					"amount": 1
+				},
+				"reward": {
+					"kind": "embers",
+					"amount": 60
+				}
 			}
 		]
 	},
@@ -241,6 +286,21 @@
 				"reward": {
 					"kind": "hero",
 					"id": "rook"
+				}
+			},
+			{
+				"id": "hesk_copper",
+				"title": "Copper for the Watch",
+				"ask": "The watch has no bells left to ring. Bring 8 Bog Copper from the Marshes of Veyl and the smith can cast one.",
+				"done": "Hear that? No. You will, when the dead come. That is the point. Here, payment from the watch purse.",
+				"goal": {
+					"scope": "deliver",
+					"material": "bog_copper",
+					"amount": 8
+				},
+				"reward": {
+					"kind": "dice",
+					"amount": 2
 				}
 			}
 		]

@@ -579,6 +579,54 @@ func _refresh_quests() -> void:
 		var line := "%s %s  (%d/%d)  +%d Embers" % ["[done]" if done else "-", q["name"], profile.quest_progress(q), int(q["goal"]), int(q["reward"])]
 		_quests.add_child(UI.label(line, 15, UI.GREEN if done else UI.TEXT))
 		_quests.add_child(UI.wrap_label("     " + q["desc"], 12, UI.DIM, 540))
+	_refresh_bestiary()
+
+
+# ---------------------------------------------------------------- the Bestiary (v3.1): a page per monster killed
+
+func _refresh_bestiary() -> void:
+	var entries: Array = profile.bestiary_entries()
+	var known := entries.filter(func(e): return e["known"]).size()
+	var ready := entries.filter(func(e): return e["claimable"]).size()
+	_tabs.set_tab_title(_quests.get_parent().get_index(), "Quests (%d!)" % ready if ready > 0 else "Quests")
+	_quests.add_child(UI.label("Bestiary  (%d / %d pages)" % [known, entries.size()], 18, UI.GOLD))
+	_quests.add_child(UI.wrap_label("Every monster you defeat, on the road or the Isle, fills a page. Kill milestones pay Star Dust and Grave Dice.", 12, UI.DIM, 540))
+	var US = load("res://scripts/ui/unit_sprite.gd")
+	for e in entries:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var pic := TextureRect.new()
+		pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		pic.stretch_mode = TextureRect.STRETCH_SCALE
+		pic.custom_minimum_size = Vector2(40, 40)
+		pic.texture = US.portrait(e["id"])
+		pic.modulate = Color.WHITE if e["known"] else Color(0, 0, 0, 0.8)
+		row.add_child(pic)
+		var info := VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if e["known"]:
+			var rank: String = "" if e["rank"] == "common" else "  [%s]" % String(e["rank"]).to_upper()
+			info.add_child(UI.label("%s%s   x%d" % [e["name"], rank, int(e["kills"])], 15, UI.TEXT))
+			info.add_child(UI.wrap_label(e["lore"], 12, UI.DIM, 330))
+		else:
+			info.add_child(UI.label("???", 15, UI.DIM))
+			info.add_child(UI.label("Not yet met.", 12, UI.DIM))
+		if int(e["next_kills"]) > 0:
+			var r: Dictionary = e["next_reward"]
+			var names := {"dust": "Star Dust", "dice": "Grave Dice", "embers": "Soul Embers"}
+			info.add_child(UI.label("Next: %d kills (%d/%d) -> %d %s" % [int(e["next_kills"]), min(int(e["kills"]), int(e["next_kills"])), int(e["next_kills"]), int(r.get("amount", 0)), names.get(r["kind"], r["kind"])], 12, UI.GREEN if e["claimable"] else UI.DIM))
+		row.add_child(info)
+		if e["claimable"]:
+			var id: String = e["id"]
+			var btn := UI.button("Claim", func():
+				var res := profile.claim_bestiary(id)
+				if not res.is_empty():
+					Sfx.play(self, "fate")
+					_toast("Bestiary: " + res["text"])
+				_refresh(), 13)
+			btn.custom_minimum_size = Vector2(90, 40)
+			row.add_child(btn)
+		_quests.add_child(row)
 
 
 # ---------------------------------------------------------------- villagers: talking
@@ -643,6 +691,8 @@ func _render_dialog() -> void:
 		box.add_child(UI.wrap_label("\"%s\"" % v["greeting"][randi() % v["greeting"].size()], 14, UI.TEXT, 460))
 		box.add_child(UI.label("%s:  %d / %d" % [req["title"], profile.request_progress(_dialog_npc), int(req["goal"]["amount"])], 15, UI.GOLD))
 		box.add_child(UI.wrap_label(req["ask"], 12, UI.DIM, 460))
+		if req["goal"]["scope"] == "deliver":
+			box.add_child(UI.label("Counts what is in your Storage. Handed over when you claim.", 12, UI.DIM))
 	else:
 		box.add_child(UI.wrap_label("\"%s\"" % req["ask"], 14, UI.TEXT, 460))
 		box.add_child(UI.label("Request: " + req["title"], 15, UI.GOLD))
@@ -832,8 +882,8 @@ func _refresh_forge() -> void:
 	_forge.add_child(UI.wrap_label("The Gravesmith turns ore, wood and hides into gear. A crafted weapon becomes the hero's dice faces 5-6; armour adds max HP and a shield at the start of every fight. Gear works on the road and on the Cursed Isle.", 13, UI.DIM, 540))
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 6)
-	for slot in ["weapon", "armor", "armory"]:
-		var label: String = {"weapon": "Weapons", "armor": "Armour", "armory": "Armory (%d)" % profile.gear.size()}[slot]
+	for slot in ["weapon", "armor", "treat", "armory"]:
+		var label: String = {"weapon": "Weapons", "armor": "Armour", "treat": "Treats", "armory": "Armory (%d)" % profile.gear.size()}[slot]
 		var b := UI.choice_button(label, func(): _forge_slot = slot; _refresh_forge(), UI.GOLD if slot == _forge_slot else UI.BORDER)
 		b.autowrap_mode = TextServer.AUTOWRAP_OFF
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -855,10 +905,14 @@ func _refresh_forge() -> void:
 		var effect := ""
 		if r["slot"] == "weapon":
 			effect = "faces: " + "  ".join(r["faces"].map(UI.face_short))
+		elif r["slot"] == "treat":
+			effect = "companion's blank face -> " + UI.face_short(r["face"])
 		else:
 			effect = "+%d max HP, +%d shield each fight" % [int(r["hp"]), int(r["shield"])]
 		head.add_child(UI.label(effect, 13, UI.TEXT))
 		box.add_child(head)
+		if r["slot"] == "treat":
+			box.add_child(UI.wrap_label(r.get("desc", "") + " (Fills the companion's blank d4 face for good; a 5-star companion gets +1 on its weakest face.)", 12, UI.DIM, 540))
 		if r["slot"] == "weapon":
 			var now: Array[String] = []
 			for hid in profile.party:
@@ -894,10 +948,25 @@ func _refresh_armory() -> void:
 		var r := profile.recipe(g["recipe"])
 		var owner := profile.gear_owner(uid)
 		var row := VBoxContainer.new()
-		row.add_child(UI.label("[%s] %s  -  %s" % [r["grade"], r["name"], ("worn by " + owner.capitalize()) if owner != "" else "in the chest"], 14,
+		var where: String = "in the chest"
+		if owner.begins_with("pet:"):
+			where = "fed to " + String(profile.item_def("pet", owner.substr(4)).get("name", owner))
+		elif owner != "":
+			where = "worn by " + owner.capitalize()
+		row.add_child(UI.label("[%s] %s  -  %s" % [r["grade"], r["name"], where], 14,
 			UI.grade_color(r["grade"])))
-		var btns := HBoxContainer.new()
-		btns.add_theme_constant_override("separation", 6)
+		var btns := HFlowContainer.new()
+		btns.add_theme_constant_override("h_separation", 6)
+		if r["slot"] == "treat":
+			for pid in profile.owned_pets:
+				var pet_name: String = profile.item_def("pet", pid).get("name", pid)
+				var fb := UI.button(("Fed: " if owner == "pet:" + pid else "Feed ") + pet_name, func(): if profile.feed_treat(pid, uid): Sfx.play(self, "fate"); _toast("%s will remember the taste." % pet_name); _refresh(), 12)
+				fb.disabled = owner == "pet:" + pid
+				fb.custom_minimum_size = Vector2(130, 30)
+				btns.add_child(fb)
+			row.add_child(btns)
+			_forge.add_child(row)
+			continue
 		for hid in heroes:
 			var b := UI.button(("On " if owner == hid else "Give ") + String(hid).capitalize(), func(): profile.equip_gear(hid, r["slot"], uid); Sfx.play(self, "click"); _refresh(), 12)
 			b.disabled = owner == hid

@@ -160,6 +160,7 @@ func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dicti
 		if p["id"] == pet_id:
 			pet = p.duplicate(true)
 			Run.apply_pet_stars(pet, int(stars.get("pet:" + pet_id, 1)))
+			Run.apply_pet_treat(pet, gear.get("pet:" + pet_id, {}).get("treat", {}))
 			pet["face"] = 0
 
 

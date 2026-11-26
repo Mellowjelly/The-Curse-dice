@@ -27,7 +27,8 @@ const HELP := """COMMANDS
  anywhere: help | status
  TOWN: party <hero> <hero> <hero> | wait | build <building> | summon heroes|relics|pets
        talk <villager> | accept <villager> | claim <villager> | upgrade hero|pet|relic <id>
-       recipes | craft <recipe> | equip <hero> <weapon|armor> <uid> | sell <material> <n> | grind <material> <n>
+       bestiary | trophy <monster> (claim a Bestiary kill milestone)
+       recipes | craft <recipe> | equip <hero> <weapon|armor> <uid> | feed <pet> <treat uid> | sell <material> <n> | grind <material> <n>
        road (start a Hollow Road journey) | explore (go out to the Cursed Isle)
  ROAD (map): roll | move 0|1 | reroll_move | pick <n> (pet/carving/event option/close event) | skip
        equip_loot <weapon#> <hero#> | buy <item> | leave | rest heal|carve
@@ -107,7 +108,7 @@ func _combat() -> Combat:
 # ---------------------------------------------------------------- town
 
 func _town_cmd(c: String, p: PackedStringArray) -> void:
-	var gate := {"summon": "summon", "recipes": "forge", "craft": "forge", "equip": "forge", "sell": "storage", "grind": "storage", "explore": "isle"}
+	var gate := {"summon": "summon", "recipes": "forge", "craft": "forge", "equip": "forge", "feed": "forge", "sell": "storage", "grind": "storage", "explore": "isle"}
 	if gate.has(c) and not profile.feature_unlocked(gate[c]):
 		say("Locked. " + profile.unlock_hint(gate[c]))
 		return
@@ -140,6 +141,18 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 		"claim":
 			var r := profile.claim_request(p[1] if p.size() > 1 else "")
 			say(("Reward: " + r["text"]) if not r.is_empty() else "Not finished yet.")
+		"bestiary":
+			var unknown := 0
+			for e in profile.bestiary_entries():
+				if not e["known"]:
+					unknown += 1
+					continue
+				var nxt: String = "all milestones claimed" if int(e["next_kills"]) < 0 else "next %d kills -> %s%s" % [int(e["next_kills"]), str(e["next_reward"]), "  (CLAIM: trophy %s)" % e["id"] if e["claimable"] else ""]
+				say("  %s [%s] x%d - %s  | %s" % [e["name"], e["rank"], int(e["kills"]), nxt, e["lore"]])
+			say("  ...and %d pages not yet met." % unknown)
+		"trophy":
+			var tr := profile.claim_bestiary(p[1] if p.size() > 1 else "")
+			say(("Bestiary milestone: " + tr["text"]) if not tr.is_empty() else "No milestone ready for that monster.")
 		"upgrade":
 			if p.size() > 2 and profile.upgrade_star(p[1], p[2]):
 				say("%s %s is now %d stars." % [p[1], p[2], profile.star(p[1], p[2])])
@@ -152,10 +165,19 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 			var uid := profile.craft(p[1] if p.size() > 1 else "")
 			if uid >= 0:
 				var r := profile.recipe(p[1])
-				var eff: String = ("faces " + str(r["faces"].map(func(f): return "%s%d" % [f["type"], f["value"]])) + " (replaces die faces 5-6)") if r["slot"] == "weapon" else "+%d max HP, +%d shield each fight" % [int(r["hp"]), int(r["shield"])]
-				say("Crafted item #%d: [%s] %s - %s. Equip with: equip <hero> %s %d" % [uid, r["grade"], r["name"], eff, r["slot"], uid])
+				var eff: String
+				if r["slot"] == "weapon":
+					eff = "faces " + str(r["faces"].map(func(f): return "%s%d" % [f["type"], f["value"]])) + " (replaces die faces 5-6)"
+				elif r["slot"] == "treat":
+					eff = "companion's blank face becomes %s%d" % [r["face"]["type"], int(r["face"]["value"])]
+				else:
+					eff = "+%d max HP, +%d shield each fight" % [int(r["hp"]), int(r["shield"])]
+				var how: String = ("feed <pet> %d" % uid) if r["slot"] == "treat" else ("equip <hero> %s %d" % [r["slot"], uid])
+				say("Crafted item #%d: [%s] %s - %s. Use with: %s" % [uid, r["grade"], r["name"], eff, how])
 			else:
 				say("Missing materials or embers.")
+		"feed":
+			say("Fed." if p.size() > 2 and profile.feed_treat(p[1], int(p[2])) else "Cannot feed that (need an owned pet and a crafted treat uid).")
 		"equip":
 			if p.size() > 3:
 				profile.equip_gear(p[1], p[2], int(p[3]))
@@ -204,7 +226,8 @@ func _talk(vid: String) -> void:
 	elif profile.is_request_done(vid):
 		say("  Request '%s' is DONE - claim it." % req["title"])
 	elif profile.is_request_active(vid):
-		say("  Working on '%s': %d/%d" % [req["title"], profile.request_progress(vid), int(req["goal"]["amount"])])
+		say("  Working on '%s': %d/%d%s" % [req["title"], profile.request_progress(vid), int(req["goal"]["amount"]),
+			" (counts %s in Storage, handed over on claim)" % req["goal"]["material"] if req["goal"]["scope"] == "deliver" else ""])
 	else:
 		say("  Asks: %s  -> reward %s" % [req["ask"], str(req["reward"])])
 

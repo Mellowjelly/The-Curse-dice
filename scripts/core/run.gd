@@ -336,6 +336,25 @@ static func apply_pet_stars(p: Dictionary, star: int) -> void:
 	p["star"] = star
 
 
+## Companion treat (v3.1, crafted at the Forge): fills the pet's blank d4 face with the treat's face.
+## A pet with no blank left (5 stars) gets +1 on its weakest face instead, so a treat is never wasted.
+static func apply_pet_treat(p: Dictionary, treat: Dictionary) -> void:
+	if treat.is_empty() or not treat.has("face"):
+		return
+	var faces: Array = p["faces"]
+	for i in faces.size():
+		if faces[i]["type"] == "blank":
+			faces[i] = (treat["face"] as Dictionary).duplicate()
+			p["treat"] = treat["name"]
+			return
+	var low := 0
+	for i in faces.size():
+		if int(faces[i]["value"]) < int(faces[low]["value"]):
+			low = i
+	faces[low] = {"type": faces[low]["type"], "value": int(faces[low]["value"]) + 1}
+	p["treat"] = treat["name"]
+
+
 ## Relic stars: alternate +1 between the two weapon faces.
 static func apply_relic_stars(w: Dictionary, star: int) -> Dictionary:
 	for k in range(star - 1):
@@ -367,6 +386,8 @@ func gear_scaling() -> float:
 	var bonus := 0.0
 	for hero in upgrades.get("gear", {}):
 		for slot in upgrades["gear"][hero]:
+			if slot == "treat":
+				continue  # companion treats are small; the road does not answer them
 			bonus += 0.12 if upgrades["gear"][hero][slot].get("grade", "SR") == "SSR" else 0.06
 	return 1.0 + min(bonus, 0.3)
 
@@ -675,6 +696,7 @@ func choose_pet(index: int) -> void:
 		return
 	var p: Dictionary = pet_offers[index].duplicate(true)
 	apply_pet_stars(p, star_of("pet", p["id"]))
+	apply_pet_treat(p, upgrades.get("gear", {}).get("pet:" + String(p["id"]), {}).get("treat", {}))
 	p["face"] = 0
 	combat.pet = p
 	_log("%s follows you." % p["name"])

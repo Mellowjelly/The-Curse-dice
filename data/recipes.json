@@ -342,5 +342,69 @@
 		"embers": 130,
 		"hp": 18,
 		"shield": 4
+	},
+	{
+		"id": "boar_jerky",
+		"name": "Smoked Boar Jerky",
+		"slot": "treat",
+		"grade": "SR",
+		"materials": {
+			"boar_hide": 2,
+			"ashwood": 3
+		},
+		"embers": 10,
+		"face": {
+			"type": "attack",
+			"value": 2
+		},
+		"desc": "Smoke-black and tough as a boot. A companion that has tasted it bites harder."
+	},
+	{
+		"id": "silk_wrapped_bone",
+		"name": "Silk-Wrapped Bone",
+		"slot": "treat",
+		"grade": "SR",
+		"materials": {
+			"spider_silk": 2,
+			"bogwood": 3
+		},
+		"embers": 15,
+		"face": {
+			"type": "shield",
+			"value": 2
+		},
+		"desc": "It guards this bone with its life. And now with yours."
+	},
+	{
+		"id": "amber_honeycake",
+		"name": "Amber Honeycake",
+		"slot": "treat",
+		"grade": "SR",
+		"materials": {
+			"amberheart": 2,
+			"elderwood": 3
+		},
+		"embers": 15,
+		"face": {
+			"type": "heal",
+			"value": 2
+		},
+		"desc": "Sweet as a summer nobody remembers. It shares the warmth."
+	},
+	{
+		"id": "ember_biscuit",
+		"name": "Ember Biscuit",
+		"slot": "treat",
+		"grade": "SR",
+		"materials": {
+			"ember_shard": 1,
+			"ashwood": 4
+		},
+		"embers": 20,
+		"face": {
+			"type": "fire",
+			"value": 2
+		},
+		"desc": "Baked over a shard that never cools. Its breath smells of cinders after."
 	}
 ]

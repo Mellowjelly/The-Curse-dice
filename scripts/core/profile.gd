@@ -30,6 +30,8 @@ var world_state := {}             # saved open-world session (see world.gd to_di
 var gear: Array = []              # crafted items: { "uid": int, "recipe": id }
 var equipped := {}                # hero id -> { "weapon": uid, "armor": uid }
 var next_uid := 1
+var bestiary_claimed := {}        # monster id -> how many Bestiary milestones are claimed (v3.1)
+var bestiary: Dictionary          # data/bestiary.json
 var star_rules: Dictionary
 var curse := 0                    # chosen Curse level (opt-in difficulty, unlocked by wins)
 const MAX_CURSE := 4
@@ -46,6 +48,7 @@ func _init(save_path: String = DEFAULT_PATH) -> void:
 	summon = GameData.load_json("res://data/summon.json")
 	villagers = GameData.load_json("res://data/villagers.json")
 	star_rules = GameData.load_json("res://data/stars.json")
+	bestiary = GameData.load_json("res://data/bestiary.json")
 	for h in GameData.load_heroes():
 		if h.get("starter", false):
 			owned_heroes.append(h["id"])
@@ -90,6 +93,7 @@ func load_profile() -> void:
 	gear = d.get("gear", [])
 	equipped = d.get("equipped", {})
 	next_uid = d.get("next_uid", 1)
+	bestiary_claimed = d.get("bestiary_claimed", {})
 
 
 func save() -> void:
@@ -99,7 +103,8 @@ func save() -> void:
 		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
 		"star_dust": star_dust, "stars": stars, "npc_step": npc_step, "npc_active": npc_active,
-		"materials": materials, "world_state": world_state, "gear": gear, "equipped": equipped, "next_uid": next_uid})
+		"materials": materials, "world_state": world_state, "gear": gear, "equipped": equipped, "next_uid": next_uid,
+		"bestiary_claimed": bestiary_claimed})
 
 
 # ---------------------------------------------------------------- town
@@ -339,7 +344,9 @@ func request_progress(id: String) -> int:
 		return 0
 	var g: Dictionary = req["goal"]
 	var value: int
-	if g["scope"] == "run":
+	if g["scope"] == "deliver":
+		value = int(materials.get(g["material"], 0))  # what is in storage right now
+	elif g["scope"] == "run":
 		value = int(npc_active[id].get("run_best", 0))
 	elif g["stat"] == "best_tile":
 		value = stat("best_tile")
@@ -357,7 +364,8 @@ func accept_request(id: String) -> bool:
 	var req := npc_request(id)
 	if req.is_empty() or npc_active.has(id):
 		return false
-	npc_active[id] = {"base": stat(req["goal"]["stat"]), "run_best": 0}
+	var goal_stat: String = req["goal"].get("stat", "")
+	npc_active[id] = {"base": stat(goal_stat), "run_best": 0}
 	save()
 	return true
 
@@ -367,6 +375,12 @@ func claim_request(id: String) -> Dictionary:
 	if not is_request_done(id) or not npc_is_out(id):
 		return {}
 	var req := npc_request(id)
+	var g: Dictionary = req["goal"]
+	if g["scope"] == "deliver":  # hand the materials over
+		var mat: String = g["material"]
+		materials[mat] = int(materials.get(mat, 0)) - int(g["amount"])
+		if materials[mat] <= 0:
+			materials.erase(mat)
 	npc_active.erase(id)
 	npc_step[id] = int(npc_step.get(id, 0)) + 1
 	var result := grant(req["reward"])
@@ -405,6 +419,53 @@ func item_def(kind: String, id: String) -> Dictionary:
 	for x in list:
 		if x["id"] == id:
 			return x
+	return {}
+
+
+# ---------------------------------------------------------------- the Bestiary (v3.1)
+# Every monster you have killed (road or Isle) gets a page with a line of lore and its kill count.
+# Kill milestones pay small rewards (Star Dust, then a Grave Die), so hunting on the Isle has a goal.
+
+## "boss", "elite" or "common": which milestone ladder a monster uses.
+static func bestiary_rank(def: Dictionary) -> String:
+	if def.get("boss", false):
+		return "boss"
+	return "elite" if def.get("elite", false) else "common"
+
+
+## One page per monster, in monsters.json order:
+## { id, name, element, rank, kills, known, lore, next_kills (-1 = all claimed), next_reward, claimable }
+func bestiary_entries() -> Array:
+	var out: Array = []
+	var monsters := GameData.load_monsters()
+	for id in monsters:
+		var def: Dictionary = monsters[id]
+		var rank := bestiary_rank(def)
+		var ladder: Array = bestiary["milestones"][rank]
+		var claimed := int(bestiary_claimed.get(id, 0))
+		var kills := stat("kills_" + id)
+		var e := {"id": id, "name": def["name"], "element": def.get("element", ""), "rank": rank, "kills": kills,
+			"known": kills > 0, "lore": bestiary["lore"].get(id, ""), "next_kills": -1, "next_reward": {}, "claimable": false}
+		if claimed < ladder.size():
+			e["next_kills"] = int(ladder[claimed]["kills"])
+			e["next_reward"] = ladder[claimed]["reward"]
+			e["claimable"] = kills >= e["next_kills"]
+		out.append(e)
+	return out
+
+
+func bestiary_claimable_count() -> int:
+	return bestiary_entries().filter(func(e): return e["claimable"]).size()
+
+
+## Claims the next kill milestone of a monster. Returns a grant() result, or {} if not reached.
+func claim_bestiary(id: String) -> Dictionary:
+	for e in bestiary_entries():
+		if e["id"] == id and e["claimable"]:
+			bestiary_claimed[id] = int(bestiary_claimed.get(id, 0)) + 1
+			var result := grant(e["next_reward"])
+			save()
+			return result
 	return {}
 
 
@@ -564,6 +625,22 @@ func equip_gear(hero_id: String, slot: String, uid: int) -> void:
 	else:
 		equipped[hero_id][slot] = uid
 	save()
+
+
+## Feeds a crafted treat to a companion (v3.1). Stored like gear under the key "pet:<id>", slot "treat".
+func feed_treat(pet_id: String, uid: int) -> bool:
+	var g := gear_item(uid)
+	if g.is_empty() or recipe(g["recipe"]).get("slot", "") != "treat" or not pet_id in owned_pets:
+		return false
+	equip_gear("pet:" + pet_id, "treat", uid)
+	return true
+
+
+## The treat a companion has been given, or {}.
+func pet_treat(pet_id: String) -> Dictionary:
+	var uid := int(equipped.get("pet:" + pet_id, {}).get("treat", -1))
+	var g := gear_item(uid)
+	return {} if g.is_empty() else recipe(g["recipe"])
 
 
 ## What each hero's gear does, for runs and the open world:

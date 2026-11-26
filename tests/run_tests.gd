@@ -50,6 +50,9 @@ func _init() -> void:
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
+	test_v31_delivery_requests()
+	test_v31_bestiary()
+	test_v31_pet_treats()
 	print("\n%d checks, %d failed" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -535,7 +538,7 @@ func test_villager_requests() -> void:
 	var p := _fresh_profile("test_villagers")
 	check(p.villagers.size() == 4, "4 villagers live in Ashfall")
 	for v in p.villagers:
-		check(v["requests"].size() == 3, "%s has a chain of 3 requests" % v["id"])
+		check(v["requests"].size() == 4, "%s has a chain of 4 requests (3 + 1 Isle delivery)" % v["id"])
 		for r in v["requests"]:
 			if r["reward"]["kind"] in ["hero", "pet", "relic"]:
 				check(not p.item_def(r["reward"]["kind"], r["reward"]["id"]).is_empty(), "reward exists: " + r["reward"]["id"])
@@ -793,3 +796,114 @@ func test_v30_changes() -> void:
 	np.stats["runs"] = 1
 	check(np.feature_unlocked("isle") and np.feature_unlocked("summon"), "one journey opens the Isle and the Summon tab")
 	check(geared.scaled_monster(g, "fight", "early")["hp"] > plain.scaled_monster(g, "fight", "early")["hp"], "the road answers crafted gear")
+
+
+func test_v31_delivery_requests() -> void:
+	var p := _fresh_profile("test_v31_deliver")
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	for v in p.villagers:
+		var last: Dictionary = v["requests"][v["requests"].size() - 1]
+		check(last["goal"]["scope"] == "deliver", "%s's last request asks for Isle materials" % v["id"])
+		check(w.material_value(last["goal"]["material"]) > 0, "%s asks for a real material: %s" % [v["id"], last["goal"]["material"]])
+	p.npc_step["tobin"] = 3
+	check(p.npc_request("tobin")["id"] == "tobin_iron", "Tobin's 4th request wants Grave Iron")
+	p.materials["grave_iron"] = 2
+	check(p.accept_request("tobin") and p.request_progress("tobin") == 2, "delivery progress counts what is in Storage")
+	check(not p.is_request_done("tobin") and p.claim_request("tobin").is_empty(), "not enough iron yet")
+	p.materials["grave_iron"] = 9
+	check(p.is_request_done("tobin"), "enough iron finishes the delivery")
+	p.time_of_day = 1
+	var dice := p.grave_dice
+	var r := p.claim_request("tobin")
+	check(r["kind"] == "dice" and p.grave_dice == dice + 2, "Tobin pays 2 Grave Dice")
+	check(int(p.materials.get("grave_iron", 0)) == 3, "claiming hands the 6 iron over")
+	check(p.npc_request("tobin").is_empty(), "Tobin's chain is finished")
+	# An exact amount leaves no empty entry behind, and old saves (step 3) simply see the new request.
+	p.npc_step["pip"] = 3
+	p.materials["ember_shard"] = 1
+	p.accept_request("pip")
+	p.claim_request("pip")
+	check(not p.materials.has("ember_shard"), "an emptied material leaves Storage")
+	p.save()
+	var again := Profile.new(p.path)
+	again.load_profile()
+	check(int(again.npc_step.get("pip", 0)) == 4, "delivery progress is saved")
+
+
+func test_v31_bestiary() -> void:
+	var p := _fresh_profile("test_v31_bestiary")
+	var entries: Array = p.bestiary_entries()
+	check(entries.size() == GameData.load_monsters().size(), "every monster has a Bestiary page")
+	for e in entries:
+		check(e["lore"] != "", "%s has a line of lore" % e["id"])
+		check(not e["known"] and not e["claimable"], "%s starts unknown" % e["id"])
+	check(p.bestiary_claimable_count() == 0, "nothing to claim at first")
+	p.stats["kills_ghoul"] = 12
+	p.stats["kills_rotting_bishop"] = 1
+	check(p.bestiary_claimable_count() == 2, "12 ghouls and one Bishop reach a milestone")
+	var dust := p.star_dust
+	var r := p.claim_bestiary("ghoul")
+	check(r["kind"] == "dust" and p.star_dust == dust + 2, "the first ghoul milestone pays 2 Star Dust")
+	check(p.claim_bestiary("ghoul").is_empty(), "the next ghoul milestone needs 30 kills")
+	var g: Dictionary = p.bestiary_entries().filter(func(e): return e["id"] == "ghoul")[0]
+	check(int(g["next_kills"]) == 30 and g["known"], "the ghoul page shows the next goal")
+	check(not p.claim_bestiary("rotting_bishop").is_empty(), "a boss pays on its first kill")
+	check(p.claim_bestiary("nobody").is_empty(), "unknown monsters pay nothing")
+	# Isle kills count too.
+	p.record_world_fight(["dire_wolf"], true, 0)
+	check(p.bestiary_entries().filter(func(e): return e["id"] == "dire_wolf")[0]["known"], "Isle kills fill pages")
+	# Saved, and old saves without the field load with nothing claimed.
+	var again := Profile.new(p.path)
+	again.load_profile()
+	check(int(again.bestiary_claimed.get("ghoul", 0)) == 1, "claimed milestones are saved")
+	var old := _fresh_profile("test_v31_old_save")
+	var f := FileAccess.open(old.path, FileAccess.WRITE)
+	f.store_var({"version": 2, "embers": 5, "stats": {"kills_ghoul": 40}})
+	f = null
+	old.load_profile()
+	check(old.bestiary_claimed.is_empty() and old.bestiary_claimable_count() == 1, "an old save loads into the Bestiary")
+	old.claim_bestiary("ghoul")
+	check(old.claim_bestiary("ghoul")["kind"] == "dust", "40 old kills reach the second ghoul milestone too")
+
+
+func test_v31_pet_treats() -> void:
+	var p := _fresh_profile("test_v31_treats")
+	var treats: Array = p.recipes().filter(func(r): return r["slot"] == "treat")
+	check(treats.size() >= 4, "the Forge offers companion treats")
+	for t in treats:
+		check(t["face"]["type"] in GameData.FACE_TYPES and t["face"]["type"] != "blank", "treat %s gives a real face" % t["id"])
+	p.embers = 100
+	p.materials = {"boar_hide": 2, "ashwood": 3}
+	var uid := p.craft("boar_jerky")
+	check(uid >= 0 and p.materials.is_empty(), "jerky is crafted from boar hide and ashwood")
+	check(not p.feed_treat("ember_salamander", uid), "you cannot feed a companion you do not own")
+	check(p.feed_treat("grave_pup", uid) and p.pet_treat("grave_pup")["id"] == "boar_jerky", "the Grave Pup eats the jerky")
+	check(p.gear_owner(uid) == "pet:grave_pup", "the Armory knows who ate it")
+	check(p.feed_treat("black_cat", uid) and p.pet_treat("grave_pup").is_empty(), "feeding it to another pet moves it")
+	p.feed_treat("grave_pup", uid)
+	var helmet_uid := -1
+	p.materials = {"grave_iron": 6, "ashwood": 4}
+	helmet_uid = p.craft("iron_hatchet")
+	check(not p.feed_treat("grave_pup", helmet_uid), "a weapon is not a treat")
+	# The road: the chosen pet's blank face becomes ATK 2, and the road does not get harder for it.
+	var run := Run.new(140, p.run_options())
+	run.phase = "pet"
+	run.pet_offers = [GameData.load_pets().filter(func(x): return x["id"] == "grave_pup")[0]]
+	run.choose_pet(0)
+	var faces: Array = run.combat.pet["faces"]
+	check(not faces.any(func(f): return f["type"] == "blank") and run.combat.pet.get("treat", "") == "Smoked Boar Jerky", "the fed pup has no blank face on the road")
+	check(abs(run.gear_scaling() - 1.0) < 0.001, "treats do not scale road enemies")
+	# The Isle uses the same rule.
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	w.setup_party(["varek", "lys", "aldric"], {}, "grave_pup", p.gear_bonuses())
+	check(not w.pet["faces"].any(func(f): return f["type"] == "blank"), "the fed pup has no blank face on the Isle")
+	# A 5-star pet has no blank: the treat raises its weakest face instead.
+	var pet := {"faces": [{"type": "attack", "value": 3}, {"type": "attack", "value": 1}, {"type": "attack", "value": 2}, {"type": "attack", "value": 2}]}
+	Run.apply_pet_treat(pet, treats[0])
+	check(int(pet["faces"][1]["value"]) == 2, "a 5-star pet gets +1 on its weakest face")
+	# Saved like other gear.
+	var again := Profile.new(p.path)
+	again.load_profile()
+	check(again.pet_treat("grave_pup")["id"] == "boar_jerky", "treats are saved")
