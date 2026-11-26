@@ -3,6 +3,7 @@
 > **v1.1:** placeholder pixel sprites for all 6 heroes, 7 monsters and the boss (normal + enraged) are now drawn in code by
 > `tools/make_sprites.py` → `assets/sprites/<id>.png` (3 frames side by side: idle A, idle B, attack; 32x32, boss 48x48).
 > To use real art, replace a PNG with the same layout (3 square frames in a row, facing right). The game picks it up automatically.
+> **v1.2:** battle backgrounds, the world map and map tile icons: `tools/make_backgrounds.py` → `assets/backgrounds/`, `assets/icons/tile_*.png` (replace with real art of the same size: 320x180).
 > Die-face icons: `tools/make_icons.py` → `assets/icons/`.
 
 Status: `todo` → `generated` → `cleaned` (fixed in Aseprite) → `in game`

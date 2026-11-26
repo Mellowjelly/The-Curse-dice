@@ -2,7 +2,7 @@ extends RefCounted
 ## Shared palette and widget helpers so every screen looks like one game.
 
 const BG := Color("#0e0b12")
-const PANEL := Color("#1c1622")
+const PANEL := Color(0.11, 0.086, 0.133, 0.88)  # slightly see-through so scenery shows
 const PANEL_DARK := Color("#15101a")
 const BORDER := Color("#3a2f45")
 const TEXT := Color("#d8cfc4")

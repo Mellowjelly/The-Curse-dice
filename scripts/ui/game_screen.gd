@@ -16,9 +16,10 @@ const TOWN_SCENE := "res://scenes/town.tscn"
 
 const TITLE_SCENE := "res://scenes/title.tscn"
 const COLS := 10
-const TILE_SIZE := Vector2(96, 62)
-const TILE_GAP := Vector2(14, 18)
-const BOARD_ORIGIN := Vector2(40, 96)
+const NODE := 52                     # diameter of a tile node on the world map
+const COL_STEP := 112.0
+const ROW_STEP := 80.0
+const BOARD_ORIGIN := Vector2(76, 120)  # centre of tile 0
 
 var run: Run
 var profile: Profile
@@ -34,7 +35,7 @@ var _party_box: HBoxContainer
 var _action_box: HBoxContainer
 var _modal: Control
 var _modal_box: VBoxContainer
-var _token: Panel
+var _token: Control
 
 
 func _ready() -> void:
@@ -75,8 +76,17 @@ func _build_map() -> void:
 	var bg := ColorRect.new()
 	bg.color = UI.BG
 	_map_root.add_child(UI.full_rect(bg))
+	var map_art := TextureRect.new()
+	map_art.texture = load("res://assets/backgrounds/map.png")
+	map_art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	map_art.stretch_mode = TextureRect.STRETCH_SCALE
+	map_art.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_map_root.add_child(map_art)
 
 	_header = UI.label("", 26, UI.TEXT)
+	_header.add_theme_color_override("font_shadow_color", Color.BLACK)
+	_header.add_theme_constant_override("shadow_offset_x", 2)
+	_header.add_theme_constant_override("shadow_offset_y", 2)
 	_header.position = Vector2(40, 22)
 	_map_root.add_child(_header)
 	_stats = UI.label("", 20, UI.GOLD)
@@ -124,37 +134,66 @@ func _build_map() -> void:
 	_modal.hide()
 
 
+## Centre of tile i on the world map: a snaking road with a gentle wobble so it feels hand-drawn.
 func _tile_pos(i: int) -> Vector2:
-	# Snake layout: left->right, then right->left on the next row.
 	var row := i / COLS
 	var col := i % COLS
 	if row % 2 == 1:
 		col = COLS - 1 - col
-	return BOARD_ORIGIN + Vector2(col * (TILE_SIZE.x + TILE_GAP.x), row * (TILE_SIZE.y + TILE_GAP.y))
+	var wobble := Vector2(sin(i * 1.7) * 6.0, sin(i * 2.3 + 1.0) * 7.0)
+	return BOARD_ORIGIN + Vector2(col * COL_STEP, row * ROW_STEP) + wobble
 
 
 func _draw_board() -> void:
 	for c in _board_layer.get_children():
 		c.queue_free()
+	# The road: a dark edge with a dusty centre line through every tile.
+	var pts := PackedVector2Array()
+	for i in run.board.size():
+		pts.append(_tile_pos(i))
+	for layer in [[18.0, Color("#140e0c")], [11.0, Color("#5c4630")], [3.0, Color("#7a6044")]]:
+		var road := Line2D.new()
+		road.points = pts
+		road.width = layer[0]
+		road.default_color = layer[1]
+		road.joint_mode = Line2D.LINE_JOINT_ROUND
+		road.begin_cap_mode = Line2D.LINE_CAP_ROUND
+		road.end_cap_mode = Line2D.LINE_CAP_ROUND
+		_board_layer.add_child(road)
 	for i in run.board.size():
 		var t: Dictionary = run.board[i]
-		var tile := Panel.new()
-		tile.position = _tile_pos(i)
-		tile.size = TILE_SIZE
-		tile.name = "Tile%d" % i
-		var lbl := UI.label(UI.TILE_LABELS.get(t["type"], t["type"]), 16)
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		tile.add_child(UI.full_rect(lbl))
-		var num := UI.label(str(i), 11, UI.DIM)
-		num.position = Vector2(5, 2)
-		tile.add_child(num)
-		_board_layer.add_child(tile)
-	_token = Panel.new()
-	_token.size = Vector2(22, 22)
-	_token.add_theme_stylebox_override("panel", UI.box(UI.GOLD, Color.BLACK, 2, 11, 0))
+		var node := Panel.new()
+		node.name = "Tile%d" % i
+		node.size = Vector2(NODE, NODE)
+		node.position = _tile_pos(i) - node.size / 2
+		node.tooltip_text = UI.TILE_LABELS.get(t["type"], t["type"])
+		var icon := TextureRect.new()
+		icon.texture = load("res://assets/icons/tile_%s.png" % t["type"]) if ResourceLoader.exists("res://assets/icons/tile_%s.png" % t["type"]) else null
+		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		icon.stretch_mode = TextureRect.STRETCH_SCALE
+		icon.size = Vector2(32, 32)
+		icon.position = Vector2((NODE - 32) / 2.0, (NODE - 32) / 2.0)
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		node.add_child(icon)
+		_board_layer.add_child(node)
+		if t["type"] in ["shop", "rest", "boss", "elite"] or t.get("gate", false):
+			var lbl := UI.label(UI.TILE_LABELS.get(t["type"], t["type"]), 11, UI.TEXT)
+			lbl.add_theme_color_override("font_shadow_color", Color.BLACK)
+			lbl.add_theme_constant_override("shadow_offset_y", 1)
+			lbl.position = _tile_pos(i) + Vector2(-NODE / 2.0, NODE / 2.0 - 4)
+			lbl.size = Vector2(NODE, 14)
+			lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_board_layer.add_child(lbl)
+	# The party leader walks the road.
+	var leader: String = run.heroes[0]["id"]
+	_token = UnitSprite.create(leader, 64, false)
 	_board_layer.add_child(_token)
-	_token.position = _tile_pos(0) + Vector2(TILE_SIZE.x - 28, TILE_SIZE.y - 28)
+	_token.position = _token_pos(0)
+
+
+func _token_pos(i: int) -> Vector2:
+	return _tile_pos(i) + Vector2(-32, -62)
 
 
 func _style_tiles() -> void:
@@ -167,16 +206,52 @@ func _style_tiles() -> void:
 			continue
 		var t: Dictionary = run.board[i]
 		var color: Color = UI.TILE_COLORS.get(t["type"], UI.PANEL)
+		var border := Color("#0e0b12")
+		var width := 2
+		if t.get("gate", false):
+			border = Color("#a3541c")
 		if i < run.pos:
-			color = color.darkened(0.6)
-		var border := UI.GOLD if targets.has(i) else (Color.WHITE if i == run.pos else Color("#000000"))
-		tile.add_theme_stylebox_override("panel", UI.box(color, border, 3 if targets.has(i) or i == run.pos else 1, 6, 0))
+			color = color.darkened(0.65)
+			tile.modulate = Color(0.7, 0.7, 0.7)
+		else:
+			tile.modulate = Color.WHITE
+		if i == run.pos:
+			border = Color.WHITE
+			width = 3
+		if targets.has(i):
+			border = UI.GOLD
+			width = 4
+		tile.add_theme_stylebox_override("panel", UI.box(color, border, width, NODE / 2, 0))
+		# Destination tiles pulse so the choice is obvious.
+		if targets.has(i) and not tile.has_meta("pulsing"):
+			tile.set_meta("pulsing", true)
+			tile.pivot_offset = tile.size / 2
+			var tw := tile.create_tween().set_loops()
+			tw.tween_property(tile, "scale", Vector2(1.15, 1.15), 0.4)
+			tw.tween_property(tile, "scale", Vector2.ONE, 0.4)
+			tile.set_meta("tween", tw)
+		elif not targets.has(i) and tile.has_meta("pulsing"):
+			tile.remove_meta("pulsing")
+			var old_tw: Tween = tile.get_meta("tween")
+			if old_tw != null and old_tw.is_valid():
+				old_tw.kill()
+			tile.scale = Vector2.ONE
 
 
 func _move_token() -> void:
-	var dest := _tile_pos(run.pos) + Vector2(TILE_SIZE.x - 28, TILE_SIZE.y - 28)
+	var dest := _token_pos(run.pos)
+	if _token.position.distance_to(dest) < 1.0:
+		return
+	# Hop from tile to tile along the road.
+	var start_i := 0
+	for i in run.board.size():
+		if _token_pos(i).distance_to(_token.position) < 2.0:
+			start_i = i
 	var tw := create_tween()
-	tw.tween_property(_token, "position", dest, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	for i in range(start_i + 1, run.pos + 1):
+		var p := _token_pos(i)
+		tw.tween_property(_token, "position", p + Vector2(0, -10), 0.09).set_trans(Tween.TRANS_QUAD)
+		tw.tween_property(_token, "position", p, 0.07)
 
 
 # ---------------------------------------------------------------- refresh
@@ -216,7 +291,8 @@ func _enter_combat() -> void:
 	_map_root.hide()
 	_combat_view.show()
 	var names := {"fight": "Fight", "elite": "ELITE", "boss": "BOSS: The Chapel of Rot"}
-	_combat_view.bind(run.combat, names.get(run.combat_kind, "Fight"))
+	var scene := "battle_boss" if run.combat_kind == "boss" else "battle_" + run.tier_at(run.pos)
+	_combat_view.bind(run.combat, names.get(run.combat_kind, "Fight"), scene)
 
 
 func _on_combat_finished(_victory: bool) -> void:

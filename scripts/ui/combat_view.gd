@@ -33,6 +33,8 @@ var _overlay_text: Label
 var _overlay_btn: Button
 var _banner: Label
 var _pet_label: Label
+var _bg_art: TextureRect
+var _particles: CPUParticles2D
 var _pulse: Tween
 var _victory := false
 
@@ -53,7 +55,8 @@ func _ready() -> void:
 
 
 ## Attach a combat. Call before (or right after) start_battle.
-func bind(c: Combat, fight_title: String) -> void:
+func bind(c: Combat, fight_title: String, background: String = "battle_early") -> void:
+	_set_background(background)
 	if combat != null:
 		for pair in [[combat.log_added, _on_log], [combat.state_changed, _refresh],
 				[combat.battle_ended, _on_battle_ended], [combat.damaged, _on_damaged],
@@ -88,6 +91,17 @@ func _build_ui() -> void:
 	var bg := ColorRect.new()
 	bg.color = UI.BG
 	add_child(UI.full_rect(bg))
+	_bg_art = TextureRect.new()
+	_bg_art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_bg_art.stretch_mode = TextureRect.STRETCH_SCALE
+	_bg_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(UI.full_rect(_bg_art))
+	var shade := ColorRect.new()
+	shade.color = Color(0.03, 0.02, 0.05, 0.35)  # keeps text readable over the scenery
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(UI.full_rect(shade))
+	_particles = CPUParticles2D.new()
+	add_child(_particles)
 
 	var margin := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
@@ -185,6 +199,48 @@ func _build_ui() -> void:
 	_overlay_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(_overlay_btn)
 	_overlay.hide()
+
+
+## Battle scenery: battle_early (dead forest), battle_mid (graveyard), battle_late (burning ruins), battle_boss (chapel).
+func _set_background(id: String) -> void:
+	var path := "res://assets/backgrounds/%s.png" % id
+	_bg_art.texture = load(path) if ResourceLoader.exists(path) else null
+	var p := _particles
+	p.emitting = false
+	p.position = Vector2(640, 740)
+	p.amount = 40
+	p.lifetime = 10.0
+	p.preprocess = 10.0
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.emission_rect_extents = Vector2(700, 10)
+	p.direction = Vector2(0, -1)
+	p.spread = 20.0
+	p.gravity = Vector2.ZERO
+	var fade := Gradient.new()
+	match id:
+		"battle_late", "battle_boss":
+			# rising embers
+			p.initial_velocity_min = 30.0
+			p.initial_velocity_max = 80.0
+			p.scale_amount_min = 2.0
+			p.scale_amount_max = 4.0
+			fade.set_color(0, Color(1.0, 0.5, 0.1, 0.9))
+			fade.set_color(1, Color(0.6, 0.1, 0.05, 0.0))
+		_:
+			# slow drifting fog motes
+			p.position = Vector2(-40, 430)
+			p.emission_rect_extents = Vector2(10, 180)
+			p.direction = Vector2(1, 0)
+			p.initial_velocity_min = 12.0
+			p.initial_velocity_max = 30.0
+			p.scale_amount_min = 6.0
+			p.scale_amount_max = 14.0
+			p.lifetime = 40.0
+			p.preprocess = 40.0
+			fade.set_color(0, Color(0.7, 0.7, 0.8, 0.10))
+			fade.set_color(1, Color(0.7, 0.7, 0.8, 0.0))
+	p.color_ramp = fade
+	p.emitting = true
 
 
 # ---------------------------------------------------------------- events
@@ -391,7 +447,7 @@ func _sprite_row(key: String, u: Dictionary, info: Control, is_hero: bool) -> Co
 	var sp = _sprites.get(key)
 	if sp == null:
 		var id: String = u["id"] + ("_enraged" if u.get("phased", false) and ResourceLoader.exists("res://assets/sprites/%s_enraged.png" % u["id"]) else "")
-		var px := HERO_SPRITE if is_hero else (144 if u.get("boss", false) else MONSTER_SPRITE)
+		var px := HERO_SPRITE if is_hero else MONSTER_SPRITE
 		sp = UnitSprite.create(id, px, not is_hero)
 		_sprites[key] = sp
 		if not Combat.is_alive(u):
@@ -468,7 +524,7 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	var value := Combat.effective_value(face, combos)
 	var die := Button.new()
 	var twisting := combat.fate >= Combat.FATE_TWIST_COST and not combat.finished
-	die.custom_minimum_size = Vector2(0, 48 if twisting else 70)
+	die.custom_minimum_size = Vector2(0, 46 if twisting else 60)
 	die.add_theme_font_size_override("font_size", 20 if twisting else 22)
 	var face_text: String = UI.FACE_NAMES[face["type"]]
 	if face["type"] != "blank":
@@ -505,7 +561,7 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 			grid.add_child(fb)
 		box.add_child(grid)
 	else:
-		var faces := UI.wrap_label("Faces: " + " | ".join(h["faces"].map(UI.face_short)), 12, UI.DIM, 120)
+		var faces := UI.wrap_label("Faces: " + " | ".join(h["faces"].map(UI.face_short)), 12, UI.DIM, 250)
 		box.add_child(faces)
 	if not h["skill"].is_empty():
 		box.add_child(_skill_button(h, index))
@@ -524,7 +580,7 @@ func _skill_button(h: Dictionary, index: int) -> Control:
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.add_theme_font_size_override("font_size", 12)
 	b.disabled = not is_ready
-	b.custom_minimum_size = Vector2(120, 0)
+	b.custom_minimum_size = Vector2(250, 0)
 	b.pressed.connect(func(): combat.use_skill(index))
 	var style := UI.box(Color("#4a3a12") if is_ready else Color("#221c28"), UI.GOLD if is_ready else UI.BORDER, 2 if is_ready else 1, 4, 6)
 	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
