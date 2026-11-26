@@ -4,6 +4,7 @@
 		"name": "Ash Crow",
 		"passive": "fate_start",
 		"desc": "Its d4 pecks enemies. Passive: starts every fight with +2 Fate.",
+		"passive_text": "starts every fight with +2 Fate.",
 		"faces": [
 			{
 				"type": "attack",
@@ -30,6 +31,7 @@
 		"name": "Grave Pup",
 		"passive": "first_strike",
 		"desc": "Its d4 bites enemies. Passive: bites a random enemy for 3 when a fight starts.",
+		"passive_text": "bites a random enemy for 3 when a fight starts.",
 		"faces": [
 			{
 				"type": "attack",
@@ -56,6 +58,7 @@
 		"name": "Candle Moth",
 		"passive": "mend",
 		"desc": "Its d4 heals, shields or burns. Passive: after every won fight, all heroes heal 1.",
+		"passive_text": "after every won fight, all heroes heal 1.",
 		"faces": [
 			{
 				"type": "heal",
@@ -82,6 +85,7 @@
 		"name": "Black Cat",
 		"passive": "lucky",
 		"desc": "Its d4 scratches or shields. Passive: +1 reroll every round (3 instead of 2).",
+		"passive_text": "+1 reroll every round (3 instead of 2).",
 		"faces": [
 			{
 				"type": "attack",
@@ -109,6 +113,7 @@
 		"passive": "burn_aura",
 		"starter": false,
 		"desc": "Its d4 spits sparks. Passive: every enemy starts each fight burning (1).",
+		"passive_text": "every enemy starts each fight burning (1).",
 		"faces": [
 			{
 				"type": "fire",
@@ -135,6 +140,7 @@
 		"passive": "ward",
 		"starter": false,
 		"desc": "Its d4 shields or heals. Passive: every hero starts each fight with 3 shield.",
+		"passive_text": "every hero starts each fight with 3 shield.",
 		"faces": [
 			{
 				"type": "shield",
@@ -161,6 +167,7 @@
 		"passive": "greedy",
 		"starter": false,
 		"desc": "Its d4 nibbles enemies. Passive: +50% gold from fights and chests.",
+		"passive_text": "+50% gold from fights and chests.",
 		"faces": [
 			{
 				"type": "attack",

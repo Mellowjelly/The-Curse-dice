@@ -56,11 +56,14 @@ var round_number := 0
 var finished := false
 var pet: Dictionary = {}  # optional companion: { id, name, faces (d4), face, passive }
 var bonus_fate_start := 0  # from the town's Fortune Teller
+var start_log: Array[String] = []  # 3.5: log lines from the start of the fight (pet passives, round 1)
+var _starting := false
 var twists := 0            # Fate Twists used (for quests)
 
 # Pet passive numbers.
 const PET_FIRST_STRIKE := 3
 const PET_WARD := 3
+const PET_FATE_START := 2  # Ash Crow: +2 Fate when a fight starts
 const PET_MEND := 1  # Candle Moth: heal all heroes after a won fight (applied by run.gd)
 
 
@@ -128,8 +131,11 @@ func start_battle(hero_units: Array, monster_defs: Array) -> void:
 	target_index = 0
 	if bonus_fate_start > 0:
 		fate = min(MAX_FATE, fate + bonus_fate_start)
+	start_log = []
+	_starting = true  # 3.5: lines logged while the fight starts are kept, so a screen bound later can show them
 	_apply_pet_battle_start()
 	_start_round()
+	_starting = false
 
 
 func toggle_lock(hero_index: int) -> void:
@@ -537,8 +543,7 @@ func _apply_pet_battle_start() -> void:
 		return
 	match pet["passive"]:
 		"fate_start":
-			fate = min(MAX_FATE, fate + 2)
-			_log(tr("%s caws: +2 Fate") % tr(pet["name"]))
+			gain_fate(PET_FATE_START, tr("%s caws:") % tr(pet["name"]))  # 3.5: overflow becomes a free reroll, like all Fate
 		"first_strike":
 			var i := _random_alive_index(monsters)
 			if i >= 0:
@@ -769,4 +774,6 @@ func _finish(victory: bool) -> void:
 
 
 func _log(text: String) -> void:
+	if _starting:
+		start_log.append(text)
 	log_added.emit(text)

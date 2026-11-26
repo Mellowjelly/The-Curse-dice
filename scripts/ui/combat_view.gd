@@ -94,9 +94,11 @@ func bind(c: Combat, fight_title: String, background: String = "battle_early", t
 		ps.position = Vector2(0, -8)
 		_pet_slot.add_child(ps)
 	_log.append_text("\n[color=#c9a227][b]== %s ==[/b][/color]\n" % fight_title)
-	_on_log(tr("--- Round %d ---") % combat.round_number)
-	if not combat.pet.is_empty() and combat.pet["passive"] in ["first_strike", "fate_start"]:
-		_on_log(tr("%s is ready.") % tr(combat.pet["name"]))
+	# 3.5: replay what happened as the fight started (Ash Crow's Fate, Grave Pup's bite, round 1).
+	for line in combat.start_log:
+		_on_log(line)
+	if combat.start_log.is_empty():
+		_on_log(tr("--- Round %d ---") % combat.round_number)
 	_refresh()
 
 

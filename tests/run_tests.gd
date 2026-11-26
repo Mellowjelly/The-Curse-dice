@@ -59,6 +59,7 @@ func _init() -> void:
 	test_v35_thai_layout()
 	test_v35_road_bonus()
 	test_v35_villagers()
+	test_v35_pet_clarity()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1179,6 +1180,35 @@ func test_v34_isle_sharpening() -> void:
 	check(faces.size() == w.sharpen_offers.size() and w.sharpen_offers.size() >= 2, "offers never repeat a face (%d offers)" % w.sharpen_offers.size())
 	w.finish_fight(e, false, rng)
 	check(w.sharpen_offers.is_empty(), "a lost fight leaves no sharpening")
+
+
+## 3.5: pets show their die and passive on two lines; Ash Crow's +2 Fate is logged at the start of a fight.
+func test_v35_pet_clarity() -> void:
+	var th: Dictionary = GameData.load_json("res://data/lang_th.json")
+	var UI = load("res://scripts/ui/ui_kit.gd")
+	for p in GameData.load_pets():
+		check(String(p.get("passive_text", "")) != "" and th.has(p["passive_text"]), "%s has a passive line with Thai" % p["id"])
+		var lines: PackedStringArray = UI.pet_lines(p).split("\n")
+		check(lines.size() == 2 and lines[0].begins_with("Die (d4): ") and lines[1].begins_with("Passive: "), "%s card: die line + passive line" % p["id"])
+	var crow: Dictionary = GameData.load_pets().filter(func(p): return p["id"] == "ash_crow")[0]
+	check(UI.pet_lines(crow) == "Die (d4): ATK1 / ATK2 / ATK2 / -\nPassive: starts every fight with +2 Fate.", "Ash Crow card reads clearly: %s" % UI.pet_lines(crow))
+	var c := Combat.new(35)
+	c.pet = crow.duplicate(true)
+	c.pet["face"] = 0
+	c.start_battle(_heroes(), [_monster("ghoul")])
+	check(c.fate == 2, "Ash Crow gives +2 Fate")
+	check(c.start_log.any(func(l): return l.contains("Ash Crow caws:") and l.contains("+2 Fate")), "the crow's Fate is logged at the start: %s" % str(c.start_log))
+	check(c.start_log.any(func(l): return l.contains("Round 1")), "the start log keeps round 1 for the screen")
+	var log_after: Array[String] = []
+	c.log_added.connect(func(t): log_after.append(t))
+	c.end_turn()
+	check(c.start_log.size() > 0 and not c.start_log.any(func(l): return l in log_after), "later lines do not go to the start log")
+	var c2 := Combat.new(36)
+	c2.pet = crow.duplicate(true)
+	c2.pet["face"] = 0
+	c2.bonus_fate_start = 4
+	c2.start_battle(_heroes(), [_monster("ghoul")])
+	check(c2.fate == Combat.MAX_FATE and c2.start_log.any(func(l): return l.contains("overflows")), "the crow's Fate beyond 5 becomes a free reroll")
 
 
 ## 3.5: villager rewards you already own become another item of the same kind; Hesk asks 5 ghouls;

@@ -188,6 +188,13 @@ static func face_short(f: Dictionary) -> String:
 	return face_name(f["type"]) + ("" if f["type"] == "blank" else str(int(f["value"])))
 
 
+## 3.5: a pet's two clear lines: what its d4 rolls, and what its passive does.
+static func pet_lines(p: Dictionary) -> String:
+	var faces: Array = p["faces"].map(func(f): return "-" if f["type"] == "blank" else face_short(f))
+	return TranslationServer.translate("Die (d4): %s") % " / ".join(faces) + "\n" + \
+		TranslationServer.translate("Passive: %s") % TranslationServer.translate(p.get("passive_text", p.get("desc", "")))
+
+
 static func full_rect(c: Control) -> Control:
 	c.set_anchors_preset(Control.PRESET_FULL_RECT)
 	return c

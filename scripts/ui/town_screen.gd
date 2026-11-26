@@ -444,7 +444,8 @@ func _refresh_party() -> void:
 		if owned:
 			text = "[%s] %s  %s\n%s" % [h.get("grade", "SR"), UI.stars_text(profile.star("hero", id)), String(h.get("element", "")).capitalize(), text]
 		var b := UI.choice_button(text, func(): _toggle_party(id), UI.GOLD if chosen else UI.grade_color(h.get("grade", "SR")) if owned else UI.BORDER, owned)
-		b.custom_minimum_size = Vector2(276, 140)
+		# 3.5: grow with long (Thai) text; Godot 4.3 buttons do not do it themselves.
+		b.custom_minimum_size = Vector2(276, max(140.0, UI.wrapped_height(text, 14, 176 if owned else 240) + 28))
 		if owned:
 			b.icon = load("res://scripts/ui/unit_sprite.gd").portrait(id)
 			b.expand_icon = true
@@ -781,6 +782,8 @@ func _refresh_collection() -> void:
 			if owned:
 				var st := profile.star(kind, id)
 				info.add_child(UI.label("[%s] %s   %s" % [grade, tr(d["name"]), UI.stars_text(st)], 15, UI.grade_color(grade)))
+				if kind == "pet":
+					info.add_child(UI.wrap_label(UI.pet_lines(d), 12, UI.TEXT, 330))
 				var nxt := st + 1
 				var desc: Array = profile.star_rules["desc"][kind]
 				info.add_child(UI.wrap_label((tr("Next star: ") + tr(desc[st])) if nxt <= 5 else tr("Fully upgraded."), 12, UI.DIM, 330))

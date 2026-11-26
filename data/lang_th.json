@@ -834,5 +834,15 @@
 	"The Silent Bell": "ระฆังที่เงียบงัน",
 	"The bell has not rung since the candles came. The Wick-Mother takes our dead before we can bury them, and the bell-ringer will not climb her tower for an empty grave. Put out the Wick-Mother's candles.": "ระฆังไม่เคยดังอีกเลยตั้งแต่เทียนพวกนั้นมา แม่ไส้เทียนเอาศพของเราไปก่อนที่เราจะได้ฝัง และคนตีระฆังก็ไม่ยอมปีนหอเพื่อหลุมศพที่ว่างเปล่า ไปดับเทียนของแม่ไส้เทียนเสีย",
 	"Listen. The bell. Wren came down from her tower to see who brought the dead home. She asked to walk with you. I told her the price is hers to pay, and she only smiled.": "ฟังสิ เสียงระฆัง Wren ลงมาจากหอเพื่อดูว่าใครพาคนตายกลับบ้าน นางขอเดินทางไปกับท่าน ข้าบอกนางว่าราคานั้นนางต้องจ่ายเอง นางได้แต่ยิ้ม",
-	"(you already have %s, so this is offered instead)": "(ท่านมี %s อยู่แล้ว จึงได้สิ่งนี้แทน)"
+	"(you already have %s, so this is offered instead)": "(ท่านมี %s อยู่แล้ว จึงได้สิ่งนี้แทน)",
+	"starts every fight with +2 Fate.": "เริ่มทุกไฟต์ด้วย +2 ชะตา",
+	"bites a random enemy for 3 when a fight starts.": "ตอนเริ่มไฟต์กัดศัตรูสุ่ม 1 ตัว 3 ดาเมจ",
+	"after every won fight, all heroes heal 1.": "ชนะไฟต์แล้วฮีโร่ทุกคนฮีล 1",
+	"+1 reroll every round (3 instead of 2).": "ทอยใหม่ +1 ทุกรอบ (3 แทน 2)",
+	"every enemy starts each fight burning (1).": "ศัตรูทุกตัวเริ่มไฟต์โดยติดไหม้ (1)",
+	"every hero starts each fight with 3 shield.": "ฮีโร่ทุกคนเริ่มไฟต์ด้วยโล่ 3",
+	"+50% gold from fights and chests.": "ทองจากไฟต์และหีบ +50%",
+	"Die (d4): %s": "เต๋า (d4): %s",
+	"Passive: %s": "ติดตัว: %s",
+	"%s caws:": "%s ร้องกา:"
 }
