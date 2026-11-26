@@ -259,5 +259,10 @@
 	"Earth": "ดิน",
 	"Water": "น้ำ",
 	"Light": "แสง",
-	"Dark": "มืด"
+	"Dark": "มืด",
+	"Skip tutorial": "ข้ามการสอน",
+	"Tutorial 1/4: Tap a die to LOCK it. Locked dice keep their face when you reroll.": "สอนเล่น 1/4: แตะลูกเต๋าเพื่อ ล็อก ลูกที่ล็อกจะไม่เปลี่ยนหน้าตอนทอยใหม่",
+	"Tutorial 2/4: Press REROLL. Every unlocked die rolls again. You have 2 rerolls each round.": "สอนเล่น 2/4: กด ทอยใหม่ ลูกที่ไม่ได้ล็อกจะทอยอีกครั้ง ทอยใหม่ได้ 2 ครั้งต่อรอบ",
+	"Tutorial 3/4: Two dice with the same face make a COMBO. Read each enemy's Intent, tap Target on who to hit, then press END TURN.": "สอนเล่น 3/4: เต๋าหน้าเดียวกัน 2 ลูกเป็น คอมโบ อ่าน เจตนา ของศัตรู แตะ เป้า ที่จะตี แล้วกด จบเทิร์น",
+	"Tutorial 4/4: Fate is full enough to TWIST: tap a face under a die to turn that die to it. Blank faces and combos refill Fate.": "สอนเล่น 4/4: ชะตาพอสำหรับ บิด แล้ว: แตะหน้าใต้ลูกเต๋าเพื่อเปลี่ยนเต๋าเป็นหน้านั้น หน้าว่างและคอมโบช่วยเติมชะตา"
 }

@@ -6,6 +6,7 @@ extends Control
 signal finished(victory: bool)
 
 const Combat = preload("res://scripts/core/combat.gd")
+const Settings = preload("res://scripts/ui/settings.gd")
 const UI = preload("res://scripts/ui/ui_kit.gd")
 const Sfx = preload("res://scripts/ui/sfx.gd")
 const UnitSprite = preload("res://scripts/ui/unit_sprite.gd")
@@ -29,6 +30,10 @@ var _reroll_btn: Button
 var _fate_btn: Button
 var _end_btn: Button
 var _flee_btn: Button
+var _tut_panel: PanelContainer
+var _tut_label: Label
+var _tut_target: Control
+var _tut_tween: Tween
 var _overlay: Control
 var _overlay_text: Label
 var _overlay_btn: Button
@@ -191,6 +196,8 @@ func _build_ui() -> void:
 	_log.add_theme_font_size_override("bold_font_size", 13)
 	_log.add_theme_color_override("default_color", UI.TEXT)
 	log_panel.add_child(_log)
+
+	_build_tutorial()
 
 	_banner = UI.label("", 30, UI.BLOOD)
 	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -420,6 +427,7 @@ func _uid(unit: Dictionary) -> String:
 func _refresh() -> void:
 	if combat == null or _title == null:
 		return
+	_update_tutorial()
 	if combat.round_number != _last_round:
 		if _last_round != -1 or combat.round_number == 1:
 			_start_roll_anim()
@@ -629,3 +637,85 @@ func _skill_button(h: Dictionary, index: int) -> Control:
 	b.add_theme_color_override("font_hover_color", Color.WHITE)
 	b.add_theme_color_override("font_disabled_color", UI.DIM)
 	return b
+
+
+# ---------------------------------------------------------------- first-fight tutorial
+# Steps: 0 lock a die -> 1 reroll -> 2 read intent and end turn -> 3 (waits for 4 Fate) twist -> done.
+# Progress lives in Settings (settings.cfg), so it shows once per device and can be skipped.
+
+func _build_tutorial() -> void:
+	_tut_panel = UI.panel(UI.GOLD, 2)
+	_tut_panel.position = Vector2(150, 296)
+	_tut_panel.custom_minimum_size = Vector2(720, 0)
+	_tut_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	_tut_panel.add_child(row)
+	_tut_label = UI.label("", 15, UI.TEXT)
+	_tut_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_tut_label.custom_minimum_size = Vector2(560, 0)
+	_tut_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_tut_label)
+	var skip := UI.button(tr("Skip tutorial"), func(): Settings.set_tutorial_step(Settings.TUTORIAL_DONE); _update_tutorial(), 12)
+	skip.custom_minimum_size = Vector2(120, 36)
+	row.add_child(skip)
+	add_child(_tut_panel)
+	_tut_panel.hide()
+
+
+func _update_tutorial() -> void:
+	if _tut_panel == null:
+		return
+	var step := Settings.tutorial_step
+	if step >= Settings.TUTORIAL_DONE or combat == null or combat.finished:
+		_show_tutorial("", null)
+		return
+	# Advance when the player has done what the current step asks.
+	if step == 0 and combat.heroes.any(func(h): return h["locked"]):
+		step = 1
+	elif step == 1 and combat.rerolls_left < Combat.REROLLS_PER_TURN:
+		step = 2
+	elif step == 2 and combat.round_number >= 2:
+		step = 3
+	elif step == 4 and combat.twists > 0:
+		step = Settings.TUTORIAL_DONE
+	if step == 3 and combat.fate >= Combat.FATE_TWIST_COST:
+		step = 4
+	if step != Settings.tutorial_step:
+		Settings.set_tutorial_step(step)
+	match step:
+		0:
+			_show_tutorial(tr("Tutorial 1/4: Tap a die to LOCK it. Locked dice keep their face when you reroll."), _hero_row)
+		1:
+			_show_tutorial(tr("Tutorial 2/4: Press REROLL. Every unlocked die rolls again. You have 2 rerolls each round."), _reroll_btn)
+		2:
+			_show_tutorial(tr("Tutorial 3/4: Two dice with the same face make a COMBO. Read each enemy's Intent, tap Target on who to hit, then press END TURN."), _end_btn)
+		4:
+			_show_tutorial(tr("Tutorial 4/4: Fate is full enough to TWIST: tap a face under a die to turn that die to it. Blank faces and combos refill Fate."), _hero_row)
+		_:
+			_show_tutorial("", null)
+
+
+func _show_tutorial(text: String, target: Control) -> void:
+	if text == "":
+		_tut_panel.hide()
+		_set_tut_target(null)
+		return
+	_tut_label.text = text
+	_tut_panel.show()
+	_set_tut_target(target)
+
+
+## The control the current step is about gently pulses, so the eye finds it.
+func _set_tut_target(target: Control) -> void:
+	if target == _tut_target:
+		return
+	if _tut_tween != null and _tut_tween.is_valid():
+		_tut_tween.kill()
+	if _tut_target != null and is_instance_valid(_tut_target):
+		_tut_target.modulate = Color.WHITE
+	_tut_target = target
+	if target != null:
+		_tut_tween = target.create_tween().set_loops()
+		_tut_tween.tween_property(target, "modulate", Color(1.35, 1.25, 0.8), 0.6)
+		_tut_tween.tween_property(target, "modulate", Color.WHITE, 0.6)

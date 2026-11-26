@@ -94,7 +94,7 @@ func _build() -> void:
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button(tr("Quit"), func(): get_tree().quit()))
 
-	var version := _label("Version 3.1", 14, COL_DIM)
+	var version := _label("Version 3.2", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
 

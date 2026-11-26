@@ -12,6 +12,8 @@ const THAI_FONT := "res://assets/fonts/NotoSansThai-Regular.woff2"
 static var language := "en"
 static var music := 0.8      # 0..1
 static var sound := 0.8      # 0..1
+static var tutorial_step := 0  # first-fight tutorial progress (TUTORIAL_DONE = finished or skipped)
+const TUTORIAL_DONE := 99
 static var _ready := false
 
 
@@ -21,6 +23,7 @@ static func load_settings() -> void:
 		language = str(cfg.get_value("game", "language", "en"))
 		music = float(cfg.get_value("audio", "music", 0.8))
 		sound = float(cfg.get_value("audio", "sound", 0.8))
+		tutorial_step = int(cfg.get_value("game", "tutorial_step", 0))
 	if not LANGUAGES.has(language):
 		language = "en"
 
@@ -30,6 +33,7 @@ static func save_settings() -> void:
 	cfg.set_value("game", "language", language)
 	cfg.set_value("audio", "music", music)
 	cfg.set_value("audio", "sound", sound)
+	cfg.set_value("game", "tutorial_step", tutorial_step)
 	cfg.save(PATH)
 
 
@@ -110,3 +114,8 @@ static func _load_translations() -> void:
 				continue  # "_comment" and similar notes for translators
 			t.add_message(key, str(data[key]))
 		TranslationServer.add_translation(t)
+
+
+static func set_tutorial_step(step: int) -> void:
+	tutorial_step = step
+	save_settings()
