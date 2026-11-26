@@ -1,0 +1,55 @@
+[
+	{
+		"id": "ghoul",
+		"name": "Ghoul",
+		"hp": 12,
+		"faces": [
+			{ "type": "attack", "value": 2 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "shield", "value": 2 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "cultist",
+		"name": "Ash Cultist",
+		"hp": 10,
+		"faces": [
+			{ "type": "attack", "value": 2 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "heal", "value": 3 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "bone_hound",
+		"name": "Bone Hound",
+		"hp": 11,
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 6 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "rotting_bishop",
+		"name": "The Rotting Bishop",
+		"hp": 70,
+		"boss": true,
+		"faces": [
+			{ "type": "attack", "value": 6 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "sweep", "value": 5 },
+			{ "type": "shield", "value": 6 },
+			{ "type": "heal", "value": 5 }
+		]
+	}
+]
