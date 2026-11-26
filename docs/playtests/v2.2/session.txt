@@ -482,3 +482,222 @@ roll
 # a free starting weapon (smithy perk?). give to Vael blind - I can't see her faces outside combat
 equip_loot 0 1
 roll
+move 0
+# crafted weapons DO carry into the road. Vael: plague doctor, fire/heal
+reroll
+end
+reroll
+lock 0
+reroll
+reroll
+# my mistake - forgot to lock Aldric's attack
+end
+reroll
+lock 1
+reroll
+lock 2
+reroll
+end
+end
+# try Vael's Miasma
+skill 1
+end
+pick 0
+roll
+move 0
+roll
+move 1
+roll
+skip
+roll
+# rest then aim for elites (Tobin wants 2 in one journey)
+move 1
+rest carve
+pick 0
+roll
+move 0
+twist 0 4
+lock 2
+reroll
+reroll
+reroll
+end
+# Vael (water) eats 11 from the earth Colossus - element wheel matters a lot and it's never explained
+lock 0
+reroll
+lock 2
+reroll
+reroll
+fate_reroll
+reroll
+end
+lock 1
+reroll
+end
+skill 0
+lock 0
+lock 2
+reroll
+reroll
+reroll
+end
+# elite down. the win healed me a bit. skip the commons
+skip
+roll
+pick 2
+roll
+move 1
+buy tonic
+buy carving
+pick 2
+leave
+roll
+move 1
+pick 0
+pick 1
+roll
+move 0
+# gamble - it's a dice game after all
+pick 0
+# won the gamble (and fate capped at 5, lost 1)
+pick 2
+roll
+# 28+5 = 33 (shop) but it says 'rest'? testing
+move 0
+# aha: campfires stop you when you pass them. never told, but makes sense
+rest carve
+pick 1
+roll
+move 1
+lock 0
+twist 2 4
+reroll
+# Vael has no attack face, so no triple-attack with her. Lys was better for my combo build
+reroll
+end
+end
+target 2
+lock 1
+lock 2
+reroll
+end
+lock 0
+lock 1
+reroll
+reroll
+end
+end
+pick 1
+roll
+move 0
+rest heal
+roll
+# arrived at the fire already mostly healed (18->26?) - should have carved instead. unclear why
+move 1
+twist 0 4
+reroll
+lock 2
+reroll
+reroll
+end
+reroll
+lock 0
+lock 2
+reroll
+reroll
+end
+lock 0
+lock 2
+reroll
+end
+skill 0
+skill 1
+lock 0
+reroll
+# reroll changed NEITHER unlocked die (fire2 / guard1 both same). happens a lot - suspicious
+reroll
+end
+skill 2
+twist 0 4
+lock 2
+reroll
+end
+end
+# 2nd Bishop kill. Only +58 embers vs 187 first time (first-time quest bonuses?). night bonus felt small
+status
+talk hesk
+talk marla
+claim marla
+talk pip
+accept pip
+craft copper_spear
+summon heroes
+summon heroes
+# Mordecai the Gambler! great flavor line
+equip lys weapon 3
+party varek lys mordecai
+explore
+goto 31 48
+# Mordecai: blood8, attack6 - glass cannon. spear on Lys = attack5 + cleave2
+end
+# explore Elderglade - avoiding its centre this time
+goto 36 28
+look
+# amber staff needs spider silk - hunt the spiders
+goto 39 28
+lock 0
+reroll
+lock 2
+reroll
+end
+reroll
+reroll
+end
+goto 39 24
+gather
+goto 41 25
+gather
+goto 42 24
+gather
+look
+# ore I just mined at (42,24) still listed - can I mine again?
+gather
+# try the Thornback boss with the glass-cannon team
+goto 44 20
+lock 0
+lock 2
+reroll
+reroll
+end
+reroll
+reroll
+# greed punished: rerolled a pair away into blank/blank
+end
+# Mordecai's skill Loaded Dice ready
+skill 2
+twist 1 3
+reroll
+reroll
+end
+skill 0
+lock 1
+lock 2
+reroll
+reroll
+end
+# all-in: sweep 6 kills everyone next. need 35 dmg NOW
+skill 1
+skill 2
+twist 1 3
+reroll
+reroll
+end
+# Thornback wins with 8hp left. 2nd boss loss by a hair. no healer = mistake
+home
+craft amber_staff
+status
+# never got enough grave dice for the pet/relic banners (3 each)
+equip vael weapon 4
+upgrade hero varek
+upgrade pet ash_crow
+status
