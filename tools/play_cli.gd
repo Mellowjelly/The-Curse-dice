@@ -143,8 +143,14 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 			else:
 				say("Request accepted: " + profile.npc_request(vid).get("title", "") if profile.accept_request(vid) else "Nothing to accept.")
 		"claim":
-			var r := profile.claim_request(p[1] if p.size() > 1 else "")
-			say(("Reward: " + r["text"]) if not r.is_empty() else "Not finished yet.")
+			var vid := p[1] if p.size() > 1 else ""
+			var r := profile.claim_request(vid)
+			if not r.is_empty():
+				say("Reward: " + r["text"])
+			elif profile.is_request_done(vid) and not profile.npc_is_out(vid):
+				say("%s is not in town right now (out at: %s). Wait until then to claim." % [vid, ", ".join(profile.npc(vid).get("times", []))])
+			else:
+				say("Not finished yet.")
 		"bestiary":
 			var unknown := 0
 			for e in profile.bestiary_entries():
@@ -233,7 +239,7 @@ func _talk(vid: String) -> void:
 		say("  Working on '%s': %d/%d%s" % [req["title"], profile.request_progress(vid), int(req["goal"]["amount"]),
 			" (counts %s in Storage, handed over on claim)" % req["goal"]["material"] if req["goal"]["scope"] == "deliver" else ""])
 	else:
-		say("  Asks: %s  -> reward %s" % [req["ask"], str(req["reward"])])
+		say("  Asks: %s  -> reward %s" % [req["ask"], _reward_text(req["reward"])])
 
 
 # ---------------------------------------------------------------- the Hollow Road
@@ -262,7 +268,13 @@ func _road_cmd(c: String, p: PackedStringArray) -> void:
 			elif run.phase == "loot":
 				run.skip_loot()
 		"equip_loot":
-			run.equip(n, int(p[2]) if p.size() > 2 else 0)
+			var hi := int(p[2]) if p.size() > 2 else 0
+			if n >= 0 and n < run.weapon_offers.size() and hi >= 0 and hi < run.heroes.size():
+				var w: Dictionary = run.weapon_offers[n]
+				var hf: Array = run.heroes[hi]["faces"]
+				say("%s takes %s: faces 5-6 %s %s -> %s" % [Combat.short_name(run.heroes[hi]), w["name"], _face(hf[4]), _face(hf[5]),
+					" ".join(w["faces"].map(_face))])
+			run.equip(n, hi)
 		"buy":
 			var item := p[1] if p.size() > 1 else ""
 			if not run.can_buy(item):
@@ -517,7 +529,8 @@ func _status() -> String:
 	s.append("  materials %s" % str(profile.materials))
 	var b: Array[String] = []
 	for bd in profile.town["buildings"]:
-		b.append("%s lv%d (next %d)" % [bd["id"], profile.level(bd["id"]), profile.next_cost(bd["id"])])
+		var nc := profile.next_cost(bd["id"])
+		b.append("%s lv%d (%s)" % [bd["id"], profile.level(bd["id"]), ("next %d" % nc) if nc >= 0 else "max"])
 	s.append("  buildings: " + ", ".join(b))
 	var v: Array[String] = []
 	for vd in profile.villagers:
@@ -528,3 +541,21 @@ func _status() -> String:
 	s.append("  villagers: " + ", ".join(v))
 	s.append("  -> road | explore | talk <villager> | summon <banner> | recipes | help")
 	return "\n".join(s)
+
+
+func _face(f: Dictionary) -> String:
+	return "%s%d" % [String(f["type"]).to_upper(), int(f["value"])] if f["type"] != "blank" else "BLANK"
+
+
+func _reward_text(r: Dictionary) -> String:
+	match String(r["kind"]):
+		"dust":
+			return "%d Star Dust" % int(r["amount"])
+		"dice":
+			return "%d Grave Dice" % int(r["amount"])
+		"embers":
+			return "%d Soul Embers" % int(r["amount"])
+	var id: String = r.get("id", "")
+	var owned: bool = (r["kind"] == "hero" and id in profile.owned_heroes) or (r["kind"] == "pet" and id in profile.owned_pets) \
+		or (r["kind"] == "relic" and id in profile.unlocked_weapons)
+	return "%s %s%s" % [r["kind"], r.get("id", ""), " (already owned -> Star Dust)" if owned else ""]

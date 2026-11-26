@@ -205,10 +205,10 @@ func _enter_tile(tile: Dictionary) -> void:
 			last_reward_text = tr("You pry open a rotten chest: +%d gold.") % g
 			_log(last_reward_text)
 			if rng.randf() < CHEST_WEAPON_CHANCE:
-				last_reward_text += " A weapon lies among the bones."
+				last_reward_text += tr(" A weapon lies among the bones.")
 				_offer_loot(1, "map")
 			elif rng.randf() < 0.35:
-				last_reward_text += " Inside, a bone chisel."
+				last_reward_text += tr(" Inside, a bone chisel.")
 				_offer_carving("map")
 			else:
 				phase = "map"
@@ -424,12 +424,12 @@ func _on_battle_ended(victory: bool) -> void:
 		for h in heroes:
 			if Combat.is_alive(h):
 				h["hp"] = min(h["max_hp"], h["hp"] + Combat.PET_MEND)
-		last_reward_text += " The Candle Moth mends your wounds (+%d HP)." % Combat.PET_MEND
+		last_reward_text += tr(" The Candle Moth mends your wounds (+%d HP).") % Combat.PET_MEND
 	if combat_kind == "elite":
 		var heal_pct := int(region.get("elite_heal_percent", 0))
 		for h in heroes:
 			h["hp"] = min(h["max_hp"], h["hp"] + h["max_hp"] * heal_pct / 100)
-		last_reward_text += " The party catches its breath (+%d%% HP). The elite drops its arms." % heal_pct
+		last_reward_text += tr(" The party catches its breath (+%d%% HP). The elite drops its arms.") % heal_pct
 		_offer_loot(2, "carve")
 	else:
 		_offer_carving("map")
@@ -551,6 +551,7 @@ func choose_event_option(index: int) -> void:
 	if next == "fight":
 		return  # combat already started
 	if next == "carve":
+		last_reward_text = event_result  # the event's own words, not a stale shop/chest message
 		_offer_carving("map")
 		return
 	changed.emit()

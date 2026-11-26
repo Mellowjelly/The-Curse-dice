@@ -1,9 +1,184 @@
 [
-	{"id": "ash_crow", "name": "Ash Crow", "passive": "fate_start", "desc": "d4 pecks. Starts every fight with +2 Fate.", "faces": [{"type": "attack", "value": 1}, {"type": "attack", "value": 2}, {"type": "attack", "value": 2}, {"type": "blank", "value": 0}], "starter": true, "grade": "SR"},
-	{"id": "grave_pup", "name": "Grave Pup", "passive": "first_strike", "desc": "d4 bites. Bites a random enemy for 3 when a fight starts.", "faces": [{"type": "attack", "value": 2}, {"type": "attack", "value": 3}, {"type": "attack", "value": 2}, {"type": "blank", "value": 0}], "starter": true, "grade": "SR"},
-	{"id": "candle_moth", "name": "Candle Moth", "passive": "mend", "desc": "d4 of soft light. After every won fight, all heroes heal 1.", "faces": [{"type": "heal", "value": 1}, {"type": "shield", "value": 1}, {"type": "fire", "value": 1}, {"type": "blank", "value": 0}], "starter": true, "grade": "SR"},
-	{"id": "black_cat", "name": "Black Cat", "passive": "lucky", "desc": "d4 of mischief. +1 reroll every round.", "faces": [{"type": "attack", "value": 2}, {"type": "shield", "value": 2}, {"type": "attack", "value": 1}, {"type": "blank", "value": 0}], "starter": true, "grade": "SR"},
-	{"id": "ember_salamander", "name": "Ember Salamander", "passive": "burn_aura", "starter": false, "desc": "d4 of sparks. Every enemy starts each fight burning (1).", "faces": [{"type": "fire", "value": 1}, {"type": "fire", "value": 1}, {"type": "attack", "value": 1}, {"type": "blank", "value": 0}], "grade": "SSR"},
-	{"id": "lantern_wisp", "name": "Lantern Wisp", "passive": "ward", "starter": false, "desc": "d4 of cold light. Every hero starts each fight with 3 shield.", "faces": [{"type": "shield", "value": 1}, {"type": "heal", "value": 1}, {"type": "shield", "value": 2}, {"type": "blank", "value": 0}], "grade": "SSR"},
-	{"id": "gilded_rat", "name": "Gilded Rat", "passive": "greedy", "starter": false, "desc": "d4 of nibbles. +50% gold from fights and chests.", "faces": [{"type": "attack", "value": 1}, {"type": "attack", "value": 2}, {"type": "attack", "value": 1}, {"type": "blank", "value": 0}], "grade": "SR"}
+	{
+		"id": "ash_crow",
+		"name": "Ash Crow",
+		"passive": "fate_start",
+		"desc": "Its d4 pecks enemies. Passive: starts every fight with +2 Fate.",
+		"faces": [
+			{
+				"type": "attack",
+				"value": 1
+			},
+			{
+				"type": "attack",
+				"value": 2
+			},
+			{
+				"type": "attack",
+				"value": 2
+			},
+			{
+				"type": "blank",
+				"value": 0
+			}
+		],
+		"starter": true,
+		"grade": "SR"
+	},
+	{
+		"id": "grave_pup",
+		"name": "Grave Pup",
+		"passive": "first_strike",
+		"desc": "Its d4 bites enemies. Passive: bites a random enemy for 3 when a fight starts.",
+		"faces": [
+			{
+				"type": "attack",
+				"value": 2
+			},
+			{
+				"type": "attack",
+				"value": 3
+			},
+			{
+				"type": "attack",
+				"value": 2
+			},
+			{
+				"type": "blank",
+				"value": 0
+			}
+		],
+		"starter": true,
+		"grade": "SR"
+	},
+	{
+		"id": "candle_moth",
+		"name": "Candle Moth",
+		"passive": "mend",
+		"desc": "Its d4 heals, shields or burns. Passive: after every won fight, all heroes heal 1.",
+		"faces": [
+			{
+				"type": "heal",
+				"value": 1
+			},
+			{
+				"type": "shield",
+				"value": 1
+			},
+			{
+				"type": "fire",
+				"value": 1
+			},
+			{
+				"type": "blank",
+				"value": 0
+			}
+		],
+		"starter": true,
+		"grade": "SR"
+	},
+	{
+		"id": "black_cat",
+		"name": "Black Cat",
+		"passive": "lucky",
+		"desc": "Its d4 scratches or shields. Passive: +1 reroll every round (3 instead of 2).",
+		"faces": [
+			{
+				"type": "attack",
+				"value": 2
+			},
+			{
+				"type": "shield",
+				"value": 2
+			},
+			{
+				"type": "attack",
+				"value": 1
+			},
+			{
+				"type": "blank",
+				"value": 0
+			}
+		],
+		"starter": true,
+		"grade": "SR"
+	},
+	{
+		"id": "ember_salamander",
+		"name": "Ember Salamander",
+		"passive": "burn_aura",
+		"starter": false,
+		"desc": "Its d4 spits sparks. Passive: every enemy starts each fight burning (1).",
+		"faces": [
+			{
+				"type": "fire",
+				"value": 1
+			},
+			{
+				"type": "fire",
+				"value": 1
+			},
+			{
+				"type": "attack",
+				"value": 1
+			},
+			{
+				"type": "blank",
+				"value": 0
+			}
+		],
+		"grade": "SSR"
+	},
+	{
+		"id": "lantern_wisp",
+		"name": "Lantern Wisp",
+		"passive": "ward",
+		"starter": false,
+		"desc": "Its d4 shields or heals. Passive: every hero starts each fight with 3 shield.",
+		"faces": [
+			{
+				"type": "shield",
+				"value": 1
+			},
+			{
+				"type": "heal",
+				"value": 1
+			},
+			{
+				"type": "shield",
+				"value": 2
+			},
+			{
+				"type": "blank",
+				"value": 0
+			}
+		],
+		"grade": "SSR"
+	},
+	{
+		"id": "gilded_rat",
+		"name": "Gilded Rat",
+		"passive": "greedy",
+		"starter": false,
+		"desc": "Its d4 nibbles enemies. Passive: +50% gold from fights and chests.",
+		"faces": [
+			{
+				"type": "attack",
+				"value": 1
+			},
+			{
+				"type": "attack",
+				"value": 2
+			},
+			{
+				"type": "attack",
+				"value": 1
+			},
+			{
+				"type": "blank",
+				"value": 0
+			}
+		],
+		"grade": "SR"
+	}
 ]

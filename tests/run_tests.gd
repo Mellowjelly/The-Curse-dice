@@ -50,6 +50,7 @@ func _init() -> void:
 	test_v31_safe_saves()
 	test_v31_isle_quests()
 	test_v32_translations()
+	test_v32_player_bugs()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1001,3 +1002,14 @@ func _collect_untranslated(x: Variant, key: String, th: Dictionary, keep: Array,
 			return
 		if not th.has(x) and not x in keep and not x in out:
 			out.append(x)
+
+
+## Bugs the AI player found in 3.2.
+func test_v32_player_bugs() -> void:
+	var r := Run.new(321)
+	var altar: Dictionary = GameData.load_json("res://data/events.json")[0]
+	r.event = altar
+	r.phase = "event"
+	r.last_reward_text = "The Bone Carver sets to work on your dice."
+	r.choose_event_option(0)
+	check(not r.last_reward_text.contains("Bone Carver"), "an event that leads to carving shows its own text (got: %s)" % r.last_reward_text)
