@@ -1,0 +1,13 @@
+help
+status
+# first, meet the villagers
+talk tobin
+talk marla
+talk pip
+talk hesk
+recipes
+# Accept all three requests - they all fit the road
+accept tobin
+accept marla
+accept pip
+road
