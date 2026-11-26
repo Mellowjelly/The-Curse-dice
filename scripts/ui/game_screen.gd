@@ -45,7 +45,7 @@ func _ready() -> void:
 	add_child(UI.full_rect(_combat_view))
 	_combat_view.hide()
 	_combat_view.finished.connect(_on_combat_finished)
-	Sfx.music(self)
+	Sfx.music(self, "deadwood")
 	profile = Profile.new()
 	profile.load_profile()
 	var saved := Profile.load_run_data()
@@ -303,6 +303,7 @@ func _enter_combat() -> void:
 
 func _on_combat_finished(_victory: bool) -> void:
 	_in_combat = false
+	Sfx.music(self, "deadwood")
 	_on_run_changed()
 
 

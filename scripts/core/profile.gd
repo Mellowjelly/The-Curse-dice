@@ -27,6 +27,9 @@ var npc_active := {}              # villager id -> { "base": int, "run_best": in
 var villagers: Array
 var materials := {}               # banked materials from the open world
 var world_state := {}             # saved open-world session (see world.gd to_dict)
+var gear: Array = []              # crafted items: { "uid": int, "recipe": id }
+var equipped := {}                # hero id -> { "weapon": uid, "armor": uid }
+var next_uid := 1
 var star_rules: Dictionary
 var curse := 0                    # chosen Curse level (opt-in difficulty, unlocked by wins)
 const MAX_CURSE := 4
@@ -84,6 +87,9 @@ func load_profile() -> void:
 	npc_active = d.get("npc_active", {})
 	materials = d.get("materials", {})
 	world_state = d.get("world_state", {})
+	gear = d.get("gear", [])
+	equipped = d.get("equipped", {})
+	next_uid = d.get("next_uid", 1)
 
 
 func save() -> void:
@@ -93,7 +99,7 @@ func save() -> void:
 		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
 		"star_dust": star_dust, "stars": stars, "npc_step": npc_step, "npc_active": npc_active,
-		"materials": materials, "world_state": world_state})
+		"materials": materials, "world_state": world_state, "gear": gear, "equipped": equipped, "next_uid": next_uid})
 
 
 # ---------------------------------------------------------------- town
@@ -213,6 +219,7 @@ func run_options() -> Dictionary:
 	o["owned_pets"] = owned_pets.duplicate()
 	o["time"] = time_name()
 	o["stars"] = stars.duplicate()
+	o["gear"] = gear_bonuses()
 	o["unlocked_weapons"] = unlocked_weapons.duplicate()
 	return o
 
@@ -447,6 +454,93 @@ func trade_material(id: String, amount: int, into: String, value: int) -> bool:
 		materials.erase(id)
 	save()
 	return true
+
+
+# ---------------------------------------------------------------- crafting (the Forge)
+
+func recipes() -> Array:
+	return GameData.load_json("res://data/recipes.json")
+
+
+func recipe(id: String) -> Dictionary:
+	for r in recipes():
+		if r["id"] == id:
+			return r
+	return {}
+
+
+func can_craft(id: String) -> bool:
+	var r := recipe(id)
+	if r.is_empty() or embers < int(r["embers"]):
+		return false
+	for m in r["materials"]:
+		if int(materials.get(m, 0)) < int(r["materials"][m]):
+			return false
+	return true
+
+
+## Crafts one item from banked materials. Returns its uid, or -1.
+func craft(id: String) -> int:
+	if not can_craft(id):
+		return -1
+	var r := recipe(id)
+	embers -= int(r["embers"])
+	for m in r["materials"]:
+		materials[m] = int(materials[m]) - int(r["materials"][m])
+		if materials[m] <= 0:
+			materials.erase(m)
+	var uid := next_uid
+	next_uid += 1
+	gear.append({"uid": uid, "recipe": id})
+	save()
+	return uid
+
+
+func gear_item(uid: int) -> Dictionary:
+	for g in gear:
+		if int(g["uid"]) == uid:
+			return g
+	return {}
+
+
+## Who wears this item ("" if nobody).
+func gear_owner(uid: int) -> String:
+	for hero in equipped:
+		for slot in equipped[hero]:
+			if int(equipped[hero][slot]) == uid:
+				return hero
+	return ""
+
+
+## Puts an item on a hero (taking it off anyone else). uid -1 empties the slot.
+func equip_gear(hero_id: String, slot: String, uid: int) -> void:
+	if uid >= 0:
+		var prev := gear_owner(uid)
+		if prev != "":
+			equipped[prev].erase(slot)
+	if not equipped.has(hero_id):
+		equipped[hero_id] = {}
+	if uid < 0:
+		equipped[hero_id].erase(slot)
+	else:
+		equipped[hero_id][slot] = uid
+	save()
+
+
+## What each hero's gear does, for runs and the open world:
+## { hero_id: { "weapon": {name, faces}, "armor": {name, hp, shield} } }
+func gear_bonuses() -> Dictionary:
+	var out := {}
+	for hero in equipped:
+		for slot in equipped[hero]:
+			var g := gear_item(int(equipped[hero][slot]))
+			if g.is_empty():
+				continue
+			var r := recipe(g["recipe"])
+			if not out.has(hero):
+				out[hero] = {}
+			out[hero][slot] = r
+	return out
 
 
 # ---------------------------------------------------------------- time of day

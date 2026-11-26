@@ -16,6 +16,22 @@ static func set_muted(value: bool) -> void:
 	muted = value
 	AudioServer.set_bus_mute(0, value)
 static var _music_player: AudioStreamPlayer
+static var _music_mood := ""
+static var _music_cache := {}
+
+## Each place has its own tune: [bpm, root Hz, scale (semitones), instrument, drums, pad, noise]
+const MOODS := {
+	"town": [70, 110.0, [0, 3, 5, 7, 10], "pluck", false, true, ""],
+	"deadwood": [60, 98.0, [0, 2, 3, 7, 8], "bell", false, true, "wind"],
+	"swamp": [54, 82.4, [0, 1, 3, 5, 7, 8], "bass", false, true, "bubbles"],
+	"deepforest": [84, 130.8, [0, 2, 3, 5, 7, 9, 10], "pluck", false, true, "wind"],
+	"coast": [64, 146.8, [0, 2, 3, 5, 7, 8, 10], "bell", false, true, "waves"],
+	"snow": [72, 196.0, [0, 2, 4, 6, 7, 9, 11], "bell", false, true, "wind"],
+	"volcanic": [92, 73.4, [0, 1, 4, 5, 7, 8], "bass", true, true, "rumble"],
+	"wasteland": [50, 61.7, [0, 1, 3, 6, 7, 10], "bell", false, true, "wind"],
+	"battle": [120, 110.0, [0, 3, 5, 7, 10], "pluck", true, false, ""],
+	"boss": [132, 98.0, [0, 1, 3, 5, 7, 8], "bass", true, true, ""],
+}
 
 
 static func play(node: Node, sound: String, volume_db: float = VOLUME_DB) -> void:
@@ -32,17 +48,124 @@ static func play(node: Node, sound: String, volume_db: float = VOLUME_DB) -> voi
 	p.play()
 
 
-## A low ambient drone that loops forever (one instance for the whole game).
-static func music(node: Node) -> void:
-	if node == null or not node.is_inside_tree():
+## Plays the tune for a place (see MOODS), cross-fading from the previous one.
+## A real track at res://assets/audio/music_<mood>.ogg replaces the generated one.
+static func music(node: Node, mood: String = "town") -> void:
+	if node == null or not node.is_inside_tree() or mood == _music_mood:
 		return
-	if _music_player != null and is_instance_valid(_music_player):
-		return
+	_music_mood = mood
+	var root := node.get_tree().root
+	var old := _music_player
 	_music_player = AudioStreamPlayer.new()
-	_music_player.stream = _stream("drone")
-	_music_player.volume_db = -14.0
-	node.get_tree().root.add_child(_music_player)
+	var file := "res://assets/audio/music_%s.ogg" % mood
+	if ResourceLoader.exists(file):
+		_music_player.stream = load(file)
+	else:
+		if not _music_cache.has(mood):
+			_music_cache[mood] = _compose(mood)
+		_music_player.stream = _music_cache[mood]
+	_music_player.volume_db = -40.0
+	root.add_child(_music_player)
 	_music_player.play()
+	var tw := root.create_tween()
+	tw.tween_property(_music_player, "volume_db", -13.0, 1.5)
+	if old != null and is_instance_valid(old):
+		var tw2 := root.create_tween()
+		tw2.tween_property(old, "volume_db", -50.0, 1.5)
+		tw2.tween_callback(old.queue_free)
+
+
+const MUSIC_RATE := 16000
+
+
+## Composes a short looping tune: a pad on the root, a wandering melody in the mood's scale,
+## optional drums and an ambient texture (wind, waves, bubbles, rumble).
+static func _compose(mood: String) -> AudioStreamWAV:
+	var m: Array = MOODS.get(mood, MOODS["town"])
+	var bpm: float = m[0]
+	var root_hz: float = m[1]
+	var scale: Array = m[2]
+	var beat := 60.0 / bpm
+	var beats := 16
+	var n := int(MUSIC_RATE * beat * beats)
+	var buf := PackedFloat32Array()
+	buf.resize(n)
+	buf.fill(0.0)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(mood)
+	# Pad: root and fifth, slowly breathing.
+	if m[5]:
+		for i in n:
+			var t := float(i) / MUSIC_RATE
+			var swell := 0.55 + 0.45 * sin(TAU * t / (beat * beats))
+			buf[i] += (sin(TAU * root_hz * 0.5 * t) * 0.16 + sin(TAU * root_hz * 0.75 * t) * 0.07) * swell
+	# Melody: a random walk through the scale, with rests.
+	var degree := 0
+	var step_beats := 1.0 if bpm < 80 else 0.5
+	var steps := int(beats / step_beats)
+	for k in steps:
+		if rng.randf() < 0.28:
+			continue
+		degree = clamp(degree + rng.randi_range(-2, 2), -2, scale.size() + 2)
+		var octave := 1 + int(floor(float(degree) / scale.size()))
+		var semis: int = scale[posmod(degree, scale.size())] + 12 * octave
+		var f := root_hz * pow(2.0, semis / 12.0)
+		var start := int(k * step_beats * beat * MUSIC_RATE)
+		var length := int(min(beat * 1.6, beat * step_beats * 2.5) * MUSIC_RATE)
+		var amp := 0.22 if m[3] == "bass" else 0.16
+		var decay := 3.0 if m[3] == "bell" else (6.0 if m[3] == "pluck" else 2.0)
+		for j in length:
+			var idx := (start + j) % n  # wrap so the loop is seamless
+			var t := float(j) / MUSIC_RATE
+			var v := sin(TAU * f * t)
+			if m[3] == "bell":
+				v += 0.4 * sin(TAU * f * 2.76 * t)
+			elif m[3] == "bass":
+				v = sin(TAU * f * 0.5 * t) + 0.3 * sin(TAU * f * t)
+			buf[idx] += v * amp * exp(-decay * t)
+	# Drums: kick on the beat, a softer hit off the beat.
+	if m[4]:
+		for b in beats:
+			var start := int(b * beat * MUSIC_RATE)
+			for j in int(0.25 * MUSIC_RATE):
+				var t := float(j) / MUSIC_RATE
+				var f := 90.0 * exp(-12.0 * t) + 40.0
+				buf[(start + j) % n] += sin(TAU * f * t) * 0.45 * exp(-14.0 * t)
+			if b % 2 == 1:
+				for j in int(0.08 * MUSIC_RATE):
+					buf[(start + j) % n] += rng.randf_range(-1, 1) * 0.12 * exp(-50.0 * float(j) / MUSIC_RATE)
+	# Ambient texture.
+	var tex: String = m[6]
+	if tex != "":
+		var prev := 0.0
+		for i in n:
+			var t := float(i) / MUSIC_RATE
+			var noise := rng.randf_range(-1, 1)
+			prev = prev * 0.97 + noise * 0.03  # low-passed noise
+			match tex:
+				"wind":
+					buf[i] += prev * 0.5 * (0.6 + 0.4 * sin(TAU * t / 5.0))
+				"waves":
+					buf[i] += prev * 0.9 * pow(0.5 + 0.5 * sin(TAU * t / (beat * 4)), 2)
+				"rumble":
+					buf[i] += prev * 0.9
+				"bubbles":
+					if rng.randf() < 0.0004:
+						var f := rng.randf_range(300, 700)
+						for j in int(0.06 * MUSIC_RATE):
+							buf[(i + j) % n] += sin(TAU * (f + j * 4.0) * float(j) / MUSIC_RATE) * 0.12 * exp(-40.0 * float(j) / MUSIC_RATE)
+	# Touch silence for 10 ms at both ends, so the loop point never clicks.
+	var fade := int(0.01 * MUSIC_RATE)
+	for j in fade:
+		var k := float(j) / fade
+		buf[j] *= k
+		buf[n - 1 - j] *= k
+	# Gentle limiter.
+	for i in n:
+		buf[i] = tanh(buf[i] * 1.2) * 0.8
+	var w := _to_wav(buf, true)
+	w.mix_rate = MUSIC_RATE
+	return w
 
 
 static func _stream(sound: String) -> AudioStream:

@@ -206,6 +206,33 @@ def depleted():
     return outline(img)
 
 
+# ---------------------------------------------------------------- trees you can chop (bigger, with a cut mark)
+
+TREES = {
+    "ashwood": ((70, 60, 54), (110, 100, 96)), "bogwood": ((60, 52, 40), (70, 96, 60)),
+    "elderwood": ((80, 56, 36), (50, 120, 54)), "driftwood": ((150, 130, 104), (90, 120, 90)),
+    "frostpine": ((70, 50, 36), (220, 230, 240)), "charwood": ((40, 30, 30), (220, 100, 40)),
+    "bonewood": ((210, 200, 186), (150, 140, 130)),
+}
+
+
+def chop_tree(trunk, crown):
+    img, d = canvas(40, 56)
+    d.ellipse([8, 49, 32, 55], fill=(0, 0, 0, 70))
+    d.rectangle([17, 30, 23, 52], fill=trunk + (255,))
+    d.ellipse([4, 4, 36, 34], fill=crown + (255,))
+    d.ellipse([9, 8, 24, 20], fill=tuple(min(255, v + 25) for v in crown) + (255,))
+    d.line([(24, 40), (20, 44)], fill=(240, 220, 170, 255), width=2)     # an axe notch: this one can be chopped
+    return outline(img)
+
+
+def stump():
+    img, d = canvas(40, 56)
+    d.ellipse([10, 48, 30, 54], fill=(0, 0, 0, 60))
+    d.rectangle([15, 42, 25, 51], fill=(80, 60, 44, 255)); d.ellipse([15, 39, 25, 45], fill=(150, 120, 90, 255))
+    return outline(img)
+
+
 if __name__ == "__main__":
     os.makedirs("assets/world", exist_ok=True)
     rng = random.Random(3)
@@ -223,4 +250,7 @@ if __name__ == "__main__":
     for m, cols in MINERALS.items():
         ore(cols).save(f"assets/world/ore_{m}.png")
     depleted().save("assets/world/ore_depleted.png")
+    for t, (trunk, crown) in TREES.items():
+        chop_tree(trunk, crown).save(f"assets/world/tree_{t}.png")
+    stump().save("assets/world/tree_stump.png")
     print("world art done")

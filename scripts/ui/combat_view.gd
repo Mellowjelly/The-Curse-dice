@@ -59,6 +59,7 @@ func _ready() -> void:
 func bind(c: Combat, fight_title: String, background: String = "battle_early", tint: Color = Color.WHITE) -> void:
 	_set_background(background)
 	_bg_art.modulate = tint
+	Sfx.music(self, "boss" if c.monsters.any(func(m): return m.get("boss", false)) else "battle")
 	if combat != null:
 		for pair in [[combat.log_added, _on_log], [combat.state_changed, _refresh],
 				[combat.battle_ended, _on_battle_ended], [combat.damaged, _on_damaged],

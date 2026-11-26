@@ -13,8 +13,8 @@ var data: Dictionary
 var size := 96
 var countries: Array = []
 var grid := PackedByteArray()      # country index per cell (y * size + x); 255 = water
-var nodes: Array = []              # { id, cell: Vector2i, country, depleted_until }
-var enemies: Array = []            # { id, cell: Vector2i, country, group: Array, defeated_until }
+var nodes: Array = []              # { id, kind: "ore"|"tree", cell: Vector2i, country, depleted_until }
+var enemies: Array = []            # { id, cell: Vector2i, country, group: Array, defeated_until, boss: bool }
 var party: Array = []              # hero units (HP carries between fights)
 var pet: Dictionary = {}
 var bag := {}                      # material id -> amount (lost if you fall in a dangerous country)
@@ -61,18 +61,50 @@ func _generate(world_seed: int) -> void:
 	var eid := 0
 	for ci in countries.size():
 		var cells := cells_of(ci)
-		for k in int(data["nodes_per_country"]):
-			nodes.append({"id": "n%d" % nid, "cell": cells[rng.randi_range(0, cells.size() - 1)], "country": ci, "depleted_until": 0.0})
+		var c: Dictionary = countries[ci]
+		var used := {}
+		# Ore fields: veins cluster around a few spots.
+		var fields: Array = []
+		for k in int(data.get("ore_fields", 2)):
+			fields.append(cells[rng.randi_range(0, cells.size() - 1)])
+		var guard := 0
+		var placed := 0
+		while placed < int(data["nodes_per_country"]) and guard < 500:
+			guard += 1
+			var f: Vector2i = fields[placed % fields.size()]
+			var cell := f + Vector2i(rng.randi_range(-3, 3), rng.randi_range(-3, 3))
+			if country_index_at(cell) != ci or used.has(cell):
+				continue
+			used[cell] = true
+			nodes.append({"id": "n%d" % nid, "kind": "ore", "cell": cell, "country": ci, "depleted_until": 0.0})
 			nid += 1
+			placed += 1
+		# Trees to chop, scattered.
+		for k in int(data.get("trees_per_country", 0)):
+			var cell: Vector2i = cells[rng.randi_range(0, cells.size() - 1)]
+			if used.has(cell):
+				continue
+			used[cell] = true
+			nodes.append({"id": "n%d" % nid, "kind": "tree", "cell": cell, "country": ci, "depleted_until": 0.0})
+			nid += 1
+		# Roaming monsters and beasts.
 		for k in int(data["enemies_per_country"]):
-			var groups: Array = countries[ci]["monsters"]
+			var groups: Array = c["beasts"] if rng.randf() < 0.6 and c.has("beasts") else c["monsters"]
 			var cell: Vector2i = cells[rng.randi_range(0, cells.size() - 1)]
 			# Keep the start of Ashfall Vale quiet.
 			if ci == 0 and Vector2(cell).distance_to(Vector2(player_cell)) < 6:
 				continue
 			enemies.append({"id": "e%d" % eid, "cell": cell, "country": ci,
-				"group": groups[rng.randi_range(0, groups.size() - 1)], "defeated_until": 0.0})
+				"group": groups[rng.randi_range(0, groups.size() - 1)], "defeated_until": 0.0, "boss": false})
 			eid += 1
+		# The country's boss waits in its lair near the centre.
+		if c.has("boss"):
+			var centre := Vector2i(int(c["center"][0]), int(c["center"][1]))
+			var lair := centre + Vector2i(4, -3) if ci == 0 else centre
+			if country_index_at(lair) != ci:
+				lair = centre
+			enemies.append({"id": "boss_%s" % c["id"], "cell": lair, "country": ci, "group": [c["boss"]],
+				"defeated_until": 0.0, "boss": true})
 
 
 func cells_of(country_index: int) -> Array:
@@ -106,7 +138,7 @@ func is_dangerous(country: Dictionary) -> bool:
 # ---------------------------------------------------------------- party
 
 ## Builds the travelling party from the profile (stars applied). Call when leaving town.
-func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String) -> void:
+func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String, gear: Dictionary = {}) -> void:
 	party = []
 	var by_id := {}
 	for d in GameData.load_heroes():
@@ -114,6 +146,8 @@ func setup_party(hero_ids: Array, stars: Dictionary, pet_id: String) -> void:
 	for id in hero_ids:
 		var u := Combat.make_unit(by_id[id])
 		Run.apply_hero_stars(u, int(stars.get("hero:" + id, 1)))
+		u["weapon"] = {}
+		Run.apply_gear(u, gear.get(id, {}))
 		party.append(u)
 	pet = {}
 	for p in GameData.load_pets():
@@ -153,7 +187,9 @@ func gather(node_id: String, rng: RandomNumberGenerator) -> Dictionary:
 		var c: Dictionary = countries[n["country"]]
 		var r: Array = data["gather_amount"]
 		var res: Dictionary
-		if rng.randf() < float(data["rare_chance"]):
+		if n.get("kind", "ore") == "tree":
+			res = {"id": c["wood"]["id"], "name": c["wood"]["name"], "amount": rng.randi_range(int(r[0]), int(r[1]) + 1), "rare": false}
+		elif rng.randf() < float(data["rare_chance"]):
 			res = {"id": c["rare"]["id"], "name": c["rare"]["name"], "amount": 1, "rare": true}
 		else:
 			res = {"id": c["mineral"]["id"], "name": c["mineral"]["name"], "amount": rng.randi_range(int(r[0]), int(r[1])), "rare": false}
@@ -165,7 +201,11 @@ func gather(node_id: String, rng: RandomNumberGenerator) -> Dictionary:
 
 ## Value of one unit of a material (for trading in town).
 func material_value(id: String) -> int:
+	if data.get("hides", {}).has(id):
+		return int(data["hides"][id][1])
 	for c in countries:
+		if c.get("wood", {}).get("id", "") == id:
+			return int(c["wood"]["value"])
 		if c["mineral"]["id"] == id:
 			return int(c["mineral"]["value"])
 		if c["rare"]["id"] == id:
@@ -174,7 +214,11 @@ func material_value(id: String) -> int:
 
 
 func material_name(id: String) -> String:
+	if data.get("hides", {}).has(id):
+		return data["hides"][id][0]
 	for c in countries:
+		if c.get("wood", {}).get("id", "") == id:
+			return c["wood"]["name"]
 		if c["mineral"]["id"] == id:
 			return c["mineral"]["name"]
 		if c["rare"]["id"] == id:
@@ -191,11 +235,14 @@ func enemy_active(e: Dictionary) -> bool:
 ## Monster definitions for a fight with this enemy group, scaled by the country's tier.
 func fight_defs(e: Dictionary) -> Array:
 	var tier := int(countries[e["country"]]["tier"])
+	var is_boss: bool = e.get("boss", false)
 	var out: Array = []
 	for id in e["group"]:
 		var d: Dictionary = monster_defs[id].duplicate(true)
-		d["hp"] = int(round(float(d["hp"]) * (1.0 + 0.22 * (tier - 1))))
-		var bonus := (tier - 1) / 2
+		# Early bosses get a big boost; late bosses are already huge and are meant for crafted gear.
+		var boss_hp := (1.35 if tier <= 2 else 1.0) if is_boss else 1.0
+		d["hp"] = int(round(float(d["hp"]) * (1.0 + 0.22 * (tier - 1)) * boss_hp))
+		var bonus := tier / 2 + (1 if is_boss and tier <= 2 else 0) - (1 if is_boss and tier >= 3 else 0)
 		for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:
 			for f in faces:
 				if f["type"] in ["attack", "sweep"]:
@@ -215,12 +262,26 @@ func start_fight(e: Dictionary, seed_value: int) -> Combat:
 func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> Dictionary:
 	var tier := int(countries[e["country"]]["tier"])
 	if victory:
-		e["defeated_until"] = clock + float(data["enemy_respawn_seconds"])
+		var is_boss: bool = e.get("boss", false)
+		e["defeated_until"] = clock + float(data["boss_respawn_seconds" if is_boss else "enemy_respawn_seconds"])
 		for h in party:
 			if not Combat.is_alive(h):
 				h["hp"] = max(1, h["max_hp"] / 4)
-		var dust := 1 if rng.randf() < 0.25 * tier else 0
-		return {"victory": true, "embers": 4 * tier + rng.randi_range(0, 3 * tier), "dust": dust, "lost_bag": false}
+		# Beasts leave hides; bosses leave a trophy.
+		var drops := {}
+		for id in e["group"]:
+			var hide: String = monster_defs[id].get("hide", "")
+			if hide != "":
+				drops[hide] = int(drops.get(hide, 0)) + (1 if is_boss else rng.randi_range(1, 2))
+		if is_boss:
+			var c: Dictionary = countries[e["country"]]
+			drops[c["mineral"]["id"]] = int(drops.get(c["mineral"]["id"], 0)) + 6
+			drops[c["rare"]["id"]] = int(drops.get(c["rare"]["id"], 0)) + 1
+		for id in drops:
+			bag[id] = int(bag.get(id, 0)) + drops[id]
+		var dust := (3 + tier) if is_boss else (1 if rng.randf() < 0.25 * tier else 0)
+		var embers := (30 * tier) if is_boss else 4 * tier + rng.randi_range(0, 3 * tier)
+		return {"victory": true, "embers": embers, "dust": dust, "lost_bag": false, "drops": drops, "boss": is_boss}
 	var lost := is_dangerous(countries[e["country"]]) and not bag.is_empty()
 	if lost:
 		bag.clear()
@@ -228,7 +289,7 @@ func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> D
 	player_cell = Vector2i(int(countries[0]["center"][0]), int(countries[0]["center"][1]))
 	for h in party:
 		h["hp"] = max(1, h["max_hp"] / 2)
-	return {"victory": false, "embers": 0, "dust": 0, "lost_bag": lost}
+	return {"victory": false, "embers": 0, "dust": 0, "lost_bag": lost, "drops": {}, "boss": e.get("boss", false)}
 
 
 # ---------------------------------------------------------------- save

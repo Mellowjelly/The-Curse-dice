@@ -1,0 +1,346 @@
+[
+	{
+		"id": "iron_hatchet",
+		"name": "Grave-Iron Hatchet",
+		"slot": "weapon",
+		"grade": "SR",
+		"materials": {
+			"grave_iron": 6,
+			"ashwood": 4
+		},
+		"embers": 20,
+		"faces": [
+			{
+				"type": "attack",
+				"value": 4
+			},
+			{
+				"type": "attack",
+				"value": 3
+			}
+		]
+	},
+	{
+		"id": "copper_spear",
+		"name": "Bog-Copper Spear",
+		"slot": "weapon",
+		"grade": "SR",
+		"materials": {
+			"bog_copper": 6,
+			"bogwood": 4,
+			"serpent_skin": 2
+		},
+		"embers": 35,
+		"faces": [
+			{
+				"type": "attack",
+				"value": 5
+			},
+			{
+				"type": "cleave",
+				"value": 2
+			}
+		]
+	},
+	{
+		"id": "amber_staff",
+		"name": "Amberheart Staff",
+		"slot": "weapon",
+		"grade": "SR",
+		"materials": {
+			"amberheart": 6,
+			"elderwood": 5,
+			"spider_silk": 2
+		},
+		"embers": 35,
+		"faces": [
+			{
+				"type": "fire",
+				"value": 4
+			},
+			{
+				"type": "heal",
+				"value": 3
+			}
+		]
+	},
+	{
+		"id": "pearl_trident",
+		"name": "Pearl Trident",
+		"slot": "weapon",
+		"grade": "SR",
+		"materials": {
+			"sea_pearl": 6,
+			"driftwood": 4,
+			"crab_shell": 3
+		},
+		"embers": 50,
+		"faces": [
+			{
+				"type": "cleave",
+				"value": 3
+			},
+			{
+				"type": "attack",
+				"value": 5
+			}
+		]
+	},
+	{
+		"id": "silver_longbow",
+		"name": "Frost-Silver Longbow",
+		"slot": "weapon",
+		"grade": "SR",
+		"materials": {
+			"frost_silver": 6,
+			"frostpine": 6,
+			"frost_pelt": 2
+		},
+		"embers": 50,
+		"faces": [
+			{
+				"type": "attack",
+				"value": 6
+			},
+			{
+				"type": "attack",
+				"value": 4
+			}
+		]
+	},
+	{
+		"id": "obsidian_blade",
+		"name": "Obsidian Blade",
+		"slot": "weapon",
+		"grade": "SR",
+		"materials": {
+			"obsidian": 8,
+			"charwood": 4,
+			"lava_scale": 3
+		},
+		"embers": 70,
+		"faces": [
+			{
+				"type": "blood",
+				"value": 9
+			},
+			{
+				"type": "fire",
+				"value": 5
+			}
+		]
+	},
+	{
+		"id": "alpha_fang_blade",
+		"name": "Alpha-Fang Blade",
+		"slot": "weapon",
+		"grade": "SSR",
+		"materials": {
+			"alpha_fang": 1,
+			"grave_iron": 10,
+			"wolf_pelt": 4
+		},
+		"embers": 60,
+		"faces": [
+			{
+				"type": "attack",
+				"value": 7
+			},
+			{
+				"type": "cleave",
+				"value": 3
+			}
+		]
+	},
+	{
+		"id": "drake_glaive",
+		"name": "Drake-Scale Glaive",
+		"slot": "weapon",
+		"grade": "SSR",
+		"materials": {
+			"drake_scale": 1,
+			"obsidian": 10,
+			"charwood": 6
+		},
+		"embers": 120,
+		"faces": [
+			{
+				"type": "cleave",
+				"value": 5
+			},
+			{
+				"type": "fire",
+				"value": 6
+			}
+		]
+	},
+	{
+		"id": "soul_scythe",
+		"name": "Soulstone Scythe",
+		"slot": "weapon",
+		"grade": "SSR",
+		"materials": {
+			"bishop_relic": 1,
+			"soulstone": 8,
+			"bonewood": 6
+		},
+		"embers": 160,
+		"faces": [
+			{
+				"type": "cleave",
+				"value": 6
+			},
+			{
+				"type": "blood",
+				"value": 10
+			}
+		]
+	},
+	{
+		"id": "wolfhide_coat",
+		"name": "Wolfhide Coat",
+		"slot": "armor",
+		"grade": "SR",
+		"materials": {
+			"wolf_pelt": 5,
+			"ashwood": 2
+		},
+		"embers": 15,
+		"hp": 4,
+		"shield": 0
+	},
+	{
+		"id": "boarhide_jerkin",
+		"name": "Boarhide Jerkin",
+		"slot": "armor",
+		"grade": "SR",
+		"materials": {
+			"boar_hide": 5,
+			"grave_iron": 3
+		},
+		"embers": 20,
+		"hp": 3,
+		"shield": 2
+	},
+	{
+		"id": "serpent_vest",
+		"name": "Serpentscale Vest",
+		"slot": "armor",
+		"grade": "SR",
+		"materials": {
+			"serpent_skin": 6,
+			"bog_copper": 4
+		},
+		"embers": 35,
+		"hp": 6,
+		"shield": 1
+	},
+	{
+		"id": "bear_mantle",
+		"name": "Bearhide Mantle",
+		"slot": "armor",
+		"grade": "SR",
+		"materials": {
+			"bear_hide": 6,
+			"elderwood": 3
+		},
+		"embers": 40,
+		"hp": 8,
+		"shield": 1
+	},
+	{
+		"id": "crab_plate",
+		"name": "Crabshell Plate",
+		"slot": "armor",
+		"grade": "SR",
+		"materials": {
+			"crab_shell": 6,
+			"sea_pearl": 3
+		},
+		"embers": 50,
+		"hp": 5,
+		"shield": 4
+	},
+	{
+		"id": "frost_cloak",
+		"name": "Frostpelt Cloak",
+		"slot": "armor",
+		"grade": "SR",
+		"materials": {
+			"frost_pelt": 6,
+			"frost_silver": 4
+		},
+		"embers": 55,
+		"hp": 10,
+		"shield": 2
+	},
+	{
+		"id": "lava_armor",
+		"name": "Lavascale Armor",
+		"slot": "armor",
+		"grade": "SR",
+		"materials": {
+			"lava_scale": 8,
+			"obsidian": 4
+		},
+		"embers": 70,
+		"hp": 12,
+		"shield": 3
+	},
+	{
+		"id": "bog_heart_charm",
+		"name": "Bog-Heart Mail",
+		"slot": "armor",
+		"grade": "SSR",
+		"materials": {
+			"bog_heart": 1,
+			"serpent_skin": 6,
+			"bogwood": 6
+		},
+		"embers": 70,
+		"hp": 10,
+		"shield": 4
+	},
+	{
+		"id": "thornback_carapace",
+		"name": "Thornback Carapace",
+		"slot": "armor",
+		"grade": "SSR",
+		"materials": {
+			"thornback_hide": 1,
+			"bear_hide": 6,
+			"elderwood": 6
+		},
+		"embers": 90,
+		"hp": 14,
+		"shield": 4
+	},
+	{
+		"id": "tide_aegis",
+		"name": "Tide Aegis",
+		"slot": "armor",
+		"grade": "SSR",
+		"materials": {
+			"tide_carapace": 1,
+			"crab_shell": 8,
+			"sea_pearl": 6
+		},
+		"embers": 110,
+		"hp": 12,
+		"shield": 7
+	},
+	{
+		"id": "matriarch_shroud",
+		"name": "Matriarch's Shroud",
+		"slot": "armor",
+		"grade": "SSR",
+		"materials": {
+			"pale_fang": 1,
+			"frost_pelt": 8,
+			"frost_silver": 6
+		},
+		"embers": 130,
+		"hp": 18,
+		"shield": 4
+	}
+]

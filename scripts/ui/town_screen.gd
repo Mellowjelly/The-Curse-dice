@@ -34,6 +34,7 @@ func _ready() -> void:
 	heroes_db = GameData.load_heroes()
 	_build()
 	_refresh()
+	Sfx.music(self, "town")
 
 
 ## Building hotspots on the town art (art pixels; the art is drawn x4). Must match tools/make_backgrounds.py.
@@ -50,6 +51,8 @@ const IDLE_SPOTS := [Vector2(444, 584), Vector2(544, 584), Vector2(10, 590)]
 var _scene_layer: Control
 var _collection: VBoxContainer
 var _storage: VBoxContainer
+var _forge: VBoxContainer
+var _forge_slot := "weapon"
 var _dialog: PanelContainer
 var _dialog_npc := ""
 var _dialog_reveal: Dictionary = {}
@@ -125,6 +128,7 @@ func _build() -> void:
 	root.add_child(_tabs)
 	_party_box = _tab("Party")
 	_collection = _tab("Collection")
+	_forge = _tab("Forge")
 	_buildings = _tab("Buildings")
 	_summon_box = _tab("Summon")
 	_quests = _tab("Quests")
@@ -236,7 +240,7 @@ func _refresh_scene() -> void:
 		spot.add_theme_stylebox_override("pressed", hover)
 		spot.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 		spot.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-		spot.pressed.connect(func(): _tabs.current_tab = 2; Sfx.play(self, "click"))
+		spot.pressed.connect(func(): _tabs.current_tab = 3 if id != "smithy" else 2; Sfx.play(self, "click"))
 		if lv == 0:
 			# Not built yet: the building stands dark and ruined.
 			var dark := ColorRect.new()
@@ -381,6 +385,7 @@ func _refresh() -> void:
 	_refresh_party()
 	_refresh_collection()
 	_refresh_storage()
+	_refresh_forge()
 	_refresh_buildings()
 	if _dialog.visible:
 		_render_dialog()
@@ -729,10 +734,7 @@ func _refresh_storage() -> void:
 		_storage.add_child(UI.label("Empty. Explore the Cursed Isle and gather minerals.", 15, UI.DIM))
 		return
 	var wdata: Dictionary = GameData.load_json("res://data/world.json")
-	var info := {}
-	for c in wdata["countries"]:
-		info[c["mineral"]["id"]] = [c["mineral"]["name"], int(c["mineral"]["value"]), c["name"], false]
-		info[c["rare"]["id"]] = [c["rare"]["name"], int(c["rare"]["value"]), c["name"], true]
+	var info := _material_info()
 	for id in profile.materials:
 		var meta: Array = info.get(id, [id, 1, "?", false])
 		var amount: int = int(profile.materials[id])
@@ -762,3 +764,95 @@ func _refresh_storage() -> void:
 		grind.disabled = dust_amount <= 0
 		row.add_child(grind)
 		_storage.add_child(row)
+
+
+## id -> [name, value, where it comes from, rare?] for every material on the Cursed Isle.
+func _material_info() -> Dictionary:
+	var wdata: Dictionary = GameData.load_json("res://data/world.json")
+	var info := {}
+	for c in wdata["countries"]:
+		info[c["mineral"]["id"]] = [c["mineral"]["name"], int(c["mineral"]["value"]), c["name"], false]
+		info[c["rare"]["id"]] = [c["rare"]["name"], int(c["rare"]["value"]), c["name"], true]
+		info[c["wood"]["id"]] = [c["wood"]["name"], int(c["wood"]["value"]), c["name"], false]
+	for h in wdata["hides"]:
+		info[h] = [wdata["hides"][h][0], int(wdata["hides"][h][1]), "beasts and bosses", int(wdata["hides"][h][1]) >= 25]
+	return info
+
+
+# ---------------------------------------------------------------- the Forge: craft and equip gear
+
+func _refresh_forge() -> void:
+	_clear(_forge)
+	var info := _material_info()
+	_forge.add_child(UI.wrap_label("The Gravesmith turns ore, wood and hides into gear. A crafted weapon becomes the hero's dice faces 5-6; armour adds max HP and a shield at the start of every fight. Gear works on the road and on the Cursed Isle.", 13, UI.DIM, 540))
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 6)
+	for slot in ["weapon", "armor", "armory"]:
+		var label: String = {"weapon": "Weapons", "armor": "Armour", "armory": "Armory (%d)" % profile.gear.size()}[slot]
+		var b := UI.choice_button(label, func(): _forge_slot = slot; _refresh_forge(), UI.GOLD if slot == _forge_slot else UI.BORDER)
+		b.autowrap_mode = TextServer.AUTOWRAP_OFF
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size = Vector2(0, 40)
+		tabs.add_child(b)
+	_forge.add_child(tabs)
+	if _forge_slot == "armory":
+		_refresh_armory()
+		return
+	for r in profile.recipes():
+		if r["slot"] != _forge_slot:
+			continue
+		var grade: String = r["grade"]
+		var box := VBoxContainer.new()
+		var head := HBoxContainer.new()
+		var title := UI.label("[%s] %s" % [grade, r["name"]], 15, UI.grade_color(grade))
+		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(title)
+		var effect := ""
+		if r["slot"] == "weapon":
+			effect = "faces: " + "  ".join(r["faces"].map(UI.face_short))
+		else:
+			effect = "+%d max HP, +%d shield each fight" % [int(r["hp"]), int(r["shield"])]
+		head.add_child(UI.label(effect, 13, UI.TEXT))
+		box.add_child(head)
+		var need: Array[String] = []
+		for m in r["materials"]:
+			var have := int(profile.materials.get(m, 0))
+			var want := int(r["materials"][m])
+			need.append("%s %d/%d" % [info.get(m, [m])[0], have, want])
+		need.append("Embers %d/%d" % [profile.embers, int(r["embers"])])
+		var row := HBoxContainer.new()
+		row.add_child(UI.wrap_label("   ".join(need), 12, UI.GREEN if profile.can_craft(r["id"]) else UI.DIM, 400))
+		var craft := UI.button("Craft", func(): if profile.craft(r["id"]) >= 0: Sfx.play(self, "triple"); _refresh(), 13)
+		craft.disabled = not profile.can_craft(r["id"])
+		craft.custom_minimum_size = Vector2(80, 34)
+		row.add_child(craft)
+		box.add_child(row)
+		_forge.add_child(box)
+		_forge.add_child(HSeparator.new())
+
+
+func _refresh_armory() -> void:
+	if profile.gear.is_empty():
+		_forge.add_child(UI.label("Nothing crafted yet.", 14, UI.DIM))
+		return
+	var heroes: Array = profile.party
+	for g in profile.gear:
+		var uid := int(g["uid"])
+		var r := profile.recipe(g["recipe"])
+		var owner := profile.gear_owner(uid)
+		var row := VBoxContainer.new()
+		row.add_child(UI.label("[%s] %s  -  %s" % [r["grade"], r["name"], ("worn by " + owner.capitalize()) if owner != "" else "in the chest"], 14,
+			UI.grade_color(r["grade"])))
+		var btns := HBoxContainer.new()
+		btns.add_theme_constant_override("separation", 6)
+		for hid in heroes:
+			var b := UI.button(("On " if owner == hid else "Give ") + String(hid).capitalize(), func(): profile.equip_gear(hid, r["slot"], uid); Sfx.play(self, "click"); _refresh(), 12)
+			b.disabled = owner == hid
+			b.custom_minimum_size = Vector2(110, 30)
+			btns.add_child(b)
+		if owner != "":
+			var off := UI.button("Take off", func(): profile.equip_gear(owner, r["slot"], -1); _refresh(), 12)
+			off.custom_minimum_size = Vector2(90, 30)
+			btns.add_child(off)
+		row.add_child(btns)
+		_forge.add_child(row)

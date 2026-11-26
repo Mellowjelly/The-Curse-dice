@@ -360,6 +360,8 @@ func _start_round() -> void:
 		h["locked"] = false
 		if is_alive(h):
 			h["face"] = rng.randi_range(0, h["faces"].size() - 1)
+			if round_number == 1 and int(h.get("armor_shield", 0)) > 0:
+				h["shield"] += int(h["armor_shield"])  # crafted armour
 	if not pet.is_empty() and pet["passive"] == "ward" and round_number == 1:
 		for h in heroes:
 			if is_alive(h):

@@ -439,6 +439,125 @@ def villager_guard():
     return frames(c.img, 24)
 
 
+# ---------------------------------------------------------------- beasts of the Cursed Isle
+
+def dire_wolf(fur=(92, 88, 96), dark=(58, 54, 62), eye=(230, 70, 50)):
+    c = Canvas()
+    for x in (9, 12, 20, 23):
+        c.rect(x, 24, x + 1, 31, dark)                                   # legs
+    c.ell(6, 15, 25, 26, fur); c.ell(8, 17, 16, 23, dark)                # body
+    c.poly([(6, 18), (1, 13), (4, 21)], fur)                             # tail
+    c.ell(20, 10, 30, 19, fur); c.poly([(27, 14), (31, 16), (27, 18)], dark)  # head, snout
+    c.poly([(21, 11), (22, 6), (24, 11)], dark)                          # ear
+    c.px(25, 13, eye); c.px(29, 17, WHITE)
+    return frames(c.img, 23)
+
+
+def wild_boar(hide=(110, 76, 56), dark=(70, 46, 34)):
+    c = Canvas()
+    for x in (9, 13, 19, 23):
+        c.rect(x, 25, x + 1, 31, dark)
+    c.ell(6, 14, 26, 27, hide); c.line([(9, 15), (22, 13)], dark, 2)    # bristles
+    c.ell(21, 16, 30, 25, hide); c.rect(28, 20, 30, 22, (190, 140, 120))  # snout
+    c.poly([(26, 23), (29, 26), (27, 22)], BONE)                         # tusk
+    c.px(24, 18, K); c.poly([(22, 15), (23, 11), (25, 16)], dark)
+    return frames(c.img, 24)
+
+
+def marsh_serpent(skin=(70, 110, 60), belly=(170, 160, 90), eye=(240, 200, 60)):
+    c = Canvas()
+    c.ell(3, 24, 17, 31, skin); c.ell(10, 21, 24, 29, skin)              # coils
+    c.ell(5, 26, 14, 30, belly)
+    c.line([(20, 23), (22, 14)], skin, 4)                                # rearing neck
+    c.ell(18, 8, 28, 16, skin); c.px(24, 11, eye)                        # head
+    c.line([(28, 14), (31, 13)], RED); c.px(31, 12, RED)                 # tongue
+    for x, y in ((7, 26), (13, 24), (19, 25)):
+        c.px(x, y, (40, 70, 40))
+    return frames(c.img, 22)
+
+
+def giant_spider(body=(46, 36, 52), mark=(190, 40, 40)):
+    c = Canvas()
+    for side in (-1, 1):
+        for i, (dx, dy) in enumerate(((6, -4), (9, 0), (9, 4), (6, 8))):
+            x0, y0 = 16 + side * 4, 21 + i - 1
+            c.line([(x0, y0), (x0 + side * dx, y0 + dy - 6), (x0 + side * (dx + 3), y0 + dy + 4)], body)
+    c.ell(9, 15, 23, 27, body); c.ell(12, 18, 20, 24, mark)              # abdomen with mark
+    c.ell(13, 11, 19, 17, body)
+    for x in (14, 15, 17, 18):
+        c.px(x, 13, RED)                                                 # many eyes
+    return frames(c.img, 24)
+
+
+def cave_bear(fur=(96, 66, 44), dark=(62, 40, 28), eye=(30, 20, 20)):
+    c = Canvas()
+    c.rect(7, 24, 10, 31, dark); c.rect(20, 24, 23, 31, dark)
+    c.ell(4, 10, 27, 28, fur); c.ell(7, 13, 16, 22, dark)                # huge body
+    c.ell(18, 5, 29, 16, fur); c.ell(16, 3, 20, 7, fur); c.ell(25, 3, 29, 7, fur)  # head, ears
+    c.ell(24, 10, 30, 15, (170, 130, 100)); c.px(29, 11, K)               # muzzle
+    c.px(22, 9, eye); c.px(26, 9, eye)
+    c.poly([(28, 24), (31, 27), (27, 27)], BONE)                         # claws
+    return frames(c.img, 23)
+
+
+def sand_crab(shell=(190, 80, 50), dark=(130, 50, 34)):
+    c = Canvas()
+    for x in (7, 10, 21, 24):
+        c.line([(x, 24), (x + (-3 if x < 16 else 3), 30)], dark)
+    c.ell(7, 16, 25, 27, shell); c.ell(9, 17, 17, 22, (220, 120, 80))
+    c.ell(1, 10, 9, 17, shell); c.ell(23, 9, 31, 16, shell)               # claws
+    c.line([(5, 13), (8, 11)], K)
+    c.rect(13, 13, 13, 16, dark); c.rect(18, 13, 18, 16, dark); c.px(13, 12, K); c.px(18, 12, K)
+    return frames(c.img, 24)
+
+
+def lava_lizard(scale=(150, 40, 30), glow=(250, 150, 50)):
+    c = Canvas()
+    c.line([(2, 25), (9, 22)], scale, 3)
+    c.ell(7, 18, 23, 27, scale)
+    for x in (10, 14, 18):
+        c.px(x, 19, glow); c.px(x + 1, 22, glow)
+    c.ell(19, 14, 29, 22, scale); c.px(25, 16, FLAME)
+    c.rect(9, 26, 10, 30, scale); c.rect(19, 26, 20, 30, scale)
+    c.px(29, 18, glow); c.px(30, 16, FLAME)
+    return frames(c.img, 25)
+
+
+def bone_vulture(feather=(60, 50, 56), bone=BONE):
+    c = Canvas()
+    c.poly([(2, 12), (14, 16), (12, 22)], feather); c.poly([(30, 12), (18, 16), (20, 22)], feather)  # wings
+    c.ell(11, 14, 21, 26, feather)
+    c.line([(16, 14), (18, 8)], bone, 2); c.ell(16, 4, 23, 10, bone)     # bare neck and skull
+    c.poly([(22, 7), (26, 9), (22, 10)], GOLD_D); c.px(19, 6, RED)
+    c.rect(14, 26, 14, 30, GOLD_D); c.rect(18, 26, 18, 30, GOLD_D)
+    return frames(c.img, 25)
+
+
+def recolor(strip, mapping):
+    """Bosses: the same creatures, recoloured and grown 1.5x (48x48 frames)."""
+    from PIL import Image as _I
+    w, h = strip.size
+    big = strip.resize((w * 3 // 2, h * 3 // 2), _I.NEAREST)
+    px = big.load()
+    for y in range(big.height):
+        for x in range(big.width):
+            r, g, b, a = px[x, y]
+            if a and (r, g, b) != K:
+                nr, ng, nb = mapping(r, g, b)
+                px[x, y] = (max(0, min(255, nr)), max(0, min(255, ng)), max(0, min(255, nb)), a)
+    return big
+
+
+BOSSES = {
+    "ashen_alpha": (dire_wolf, lambda r, g, b: (r + 70, g + 30, b + 20)),            # pale ash wolf
+    "bog_mother": (marsh_serpent, lambda r, g, b: (g // 2, g + 10, b + 60)),          # drowned blue-green
+    "thornback": (cave_bear, lambda r, g, b: (r // 2, g + 40, b // 2)),                # moss-grown bear
+    "tidecrusher": (sand_crab, lambda r, g, b: (b, g + 20, r + 40)),                  # deep-sea crab
+    "pale_matriarch": (lambda: dire_wolf((200, 214, 230), (130, 150, 180), (120, 200, 255)), lambda r, g, b: (r, g, b + 10)),
+    "cinder_drake": (lava_lizard, lambda r, g, b: (r + 40, g // 2, b // 3)),
+}
+
+
 SPRITES = {
     "varek": varek, "lys": lys, "aldric": aldric, "rook": rook, "vael": vael, "mordecai": mordecai,
     "ghoul": ghoul, "cultist": cultist, "bone_hound": bone_hound, "plague_rat": plague_rat,
@@ -448,6 +567,9 @@ SPRITES = {
     "ember_salamander": ember_salamander, "lantern_wisp": lantern_wisp, "gilded_rat": gilded_rat,
     "villager_farmer": villager_farmer, "villager_woman": villager_woman, "villager_child": villager_child,
     "villager_guard": villager_guard,
+    "dire_wolf": dire_wolf, "wild_boar": wild_boar, "marsh_serpent": marsh_serpent, "giant_spider": giant_spider,
+    "cave_bear": cave_bear, "frost_wolf": lambda: dire_wolf((200, 214, 230), (130, 150, 180), (120, 200, 255)),
+    "sand_crab": sand_crab, "lava_lizard": lava_lizard, "bone_vulture": bone_vulture,
 }
 
 if __name__ == "__main__":
@@ -456,3 +578,6 @@ if __name__ == "__main__":
     for name, fn in SPRITES.items():
         fn().save(f"assets/sprites/{name}.png")
         print("wrote", name)
+    for name, (fn, mapping) in BOSSES.items():
+        recolor(fn(), mapping).save(f"assets/sprites/{name}.png")
+        print("wrote boss", name)

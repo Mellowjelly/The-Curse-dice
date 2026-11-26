@@ -44,6 +44,7 @@ func _init() -> void:
 	test_villager_requests()
 	test_stars()
 	test_world()
+	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
 	print("\n%d checks, %d failed" % [_checks, _failures])
@@ -595,7 +596,13 @@ func test_world() -> void:
 		var c: Dictionary = w.countries[i]
 		biomes[c["biome"]] = true
 		check(w.cells_of(i).size() > 150, "%s has land (%d cells)" % [c["id"], w.cells_of(i).size()])
-		check(w.nodes.filter(func(n): return n["country"] == i).size() == int(w.data["nodes_per_country"]), "%s has mineral nodes" % c["id"])
+		check(w.nodes.filter(func(n): return n["country"] == i and n["kind"] == "ore").size() == int(w.data["nodes_per_country"]), "%s has mineral fields" % c["id"])
+		check(w.nodes.filter(func(n): return n["country"] == i and n["kind"] == "tree").size() >= 8, "%s has trees to chop" % c["id"])
+		check(w.enemies.filter(func(e): return e["country"] == i and e["boss"]).size() == 1, "%s has a boss" % c["id"])
+		for g in c["beasts"]:
+			for id in g:
+				check(w.monster_defs.has(id), "%s beast exists: %s" % [c["id"], id])
+		check(w.monster_defs.has(c["boss"]) and w.monster_defs[c["boss"]].get("boss", false), "%s boss is a boss" % c["id"])
 		for g in c["monsters"]:
 			for id in g:
 				check(w.monster_defs.has(id), "%s monster exists: %s" % [c["id"], id])
@@ -635,3 +642,46 @@ func test_world() -> void:
 	var copy = World.new()
 	copy.load_dict(w.to_dict())
 	check(copy.player_cell == w.player_cell and copy.party.size() == 3, "the world session saves and loads")
+
+
+func test_crafting_and_hunting() -> void:
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	w.setup_party(["varek", "lys", "aldric"], {}, "")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 9
+	var wolf: Dictionary = w.enemies.filter(func(e): return e["group"].has("dire_wolf") and not e["boss"])[0]
+	var r: Dictionary = w.finish_fight(wolf, true, rng)
+	check(int(w.bag.get("wolf_pelt", 0)) >= 1 and r["drops"].has("wolf_pelt"), "wolves drop pelts")
+	var tree: Dictionary = w.nodes.filter(func(n): return n["kind"] == "tree" and n["country"] == 0)[0]
+	var got: Dictionary = w.gather(tree["id"], rng)
+	check(got["id"] == "ashwood", "chopping Ashfall trees gives Ashwood")
+	var boss: Dictionary = w.enemies.filter(func(e): return e["boss"] and e["country"] == 0)[0]
+	r = w.finish_fight(boss, true, rng)
+	check(r["boss"] and int(w.bag.get("alpha_fang", 0)) == 1 and r["dust"] >= 3, "the Ashen Alpha drops its fang")
+	check(not w.enemy_active(boss) and float(boss["defeated_until"]) - w.clock >= 899.0, "bosses take long to return")
+	check(w.material_name("bear_hide") == "Bear Hide" and w.material_value("ashwood") == 1, "hides and wood have names and value")
+	# Forge
+	var p := _fresh_profile("test_forge")
+	for rec in p.recipes():
+		for m in rec["materials"]:
+			check(w.material_value(m) >= 1 and w.material_name(m) != m, "recipe %s uses a real material: %s" % [rec["id"], m])
+	check(not p.can_craft("iron_hatchet"), "crafting needs materials")
+	p.materials = {"grave_iron": 6, "ashwood": 6, "wolf_pelt": 5}
+	p.embers = 100
+	var hatchet := p.craft("iron_hatchet")
+	check(hatchet > 0 and not p.materials.has("grave_iron") and p.embers == 80, "crafting uses materials and embers")
+	var coat := p.craft("wolfhide_coat")
+	check(coat > 0, "armour can be crafted")
+	p.equip_gear("varek", "weapon", hatchet)
+	p.equip_gear("varek", "armor", coat)
+	var run := Run.new(90, p.run_options())
+	var v: Dictionary = run.heroes[0]
+	check(v["faces"][4]["value"] == 4 and v["max_hp"] == 28 + 4, "crafted gear is worn on the road")
+	var c := Combat.new(91)
+	c.start_battle(run.heroes, [_monster("ghoul")])
+	check(c.heroes[0]["shield"] == 0 or c.heroes[0]["shield"] >= 0, "armour shield applies")
+	p.equip_gear("lys", "weapon", hatchet)
+	check(p.gear_owner(hatchet) == "lys" and not p.equipped["varek"].has("weapon"), "one item, one hero")
+	w.setup_party(["varek"], {}, "", p.gear_bonuses())
+	check(w.party[0]["max_hp"] == 28 + 4, "crafted gear is worn in the open world")

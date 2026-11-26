@@ -80,6 +80,7 @@ func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []
 		u["max_hp"] += bonus_hp
 		u["hp"] += bonus_hp
 		apply_hero_stars(u, star_of("hero", u["id"]))
+		apply_gear(u, upgrades.get("gear", {}).get(u["id"], {}))
 		heroes.append(u)
 	var unlocked: Array = upgrades.get("unlocked_weapons", [])
 	weapons_db = GameData.load_weapons().filter(func(w): return not w.get("locked", false) or w["id"] in unlocked)
@@ -271,6 +272,21 @@ func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 			if f["type"] in ["attack", "sweep"]:
 				f["value"] = int(f["value"]) + bonus
 	return d
+
+
+# ---------------------------------------------------------------- crafted gear from the Forge
+
+## Crafted weapon = the hero's starting weapon (faces 5-6). Armour = +max HP and shield in round 1 of every fight.
+static func apply_gear(u: Dictionary, g: Dictionary) -> void:
+	if g.has("weapon"):
+		var w: Dictionary = g["weapon"]
+		equip_weapon(u, {"id": w["id"], "name": w["name"], "rarity": "crafted", "faces": w["faces"].duplicate(true)})
+	if g.has("armor"):
+		var a: Dictionary = g["armor"]
+		u["max_hp"] += int(a["hp"])
+		u["hp"] += int(a["hp"])
+		u["armor_shield"] = int(a["shield"])
+		u["armor"] = a["name"]
 
 
 # ---------------------------------------------------------------- stars from the town's Collection

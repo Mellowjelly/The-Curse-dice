@@ -67,18 +67,17 @@ func _ready() -> void:
 	profile = Profile.new()
 	profile.load_profile()
 	world = World.new()
-	if profile.world_state.is_empty():
-		var pet_id: String = profile.owned_pets[0] if not profile.owned_pets.is_empty() else ""
-		world.setup_party(profile.party, profile.stars, pet_id)
-	else:
+	if not profile.world_state.is_empty():
 		world.load_dict(profile.world_state)
+	# The party always sets out with its current gear and stars from town.
+	var pet_id: String = profile.owned_pets[0] if not profile.owned_pets.is_empty() else ""
+	world.setup_party(profile.party, profile.stars, pet_id, profile.gear_bonuses())
 	_build_world()
 	_build_hud()
 	_player.position = _ground.map_to_local(world.player_cell)
 	_target = _player.position
 	_camera.position = _player.position
 	_camera.reset_smoothing()
-	Sfx.music(self)
 	_refresh_hud()
 
 
@@ -130,8 +129,14 @@ func _build_world() -> void:
 	for n in world.nodes:
 		var c: Dictionary = world.countries[n["country"]]
 		var spr := Sprite2D.new()
-		spr.set_meta("ore", c["mineral"]["id"])
-		spr.offset = Vector2(0, -10)
+		if n["kind"] == "tree":
+			spr.set_meta("tex", "tree_" + c["wood"]["id"])
+			spr.set_meta("spent", "tree_stump")
+			spr.offset = Vector2(0, -24)
+		else:
+			spr.set_meta("tex", "ore_" + c["mineral"]["id"])
+			spr.set_meta("spent", "ore_depleted")
+			spr.offset = Vector2(0, -10)
 		spr.position = _ground.map_to_local(n["cell"])
 		_objects.add_child(spr)
 		_node_sprites[n["id"]] = spr
@@ -142,7 +147,19 @@ func _build_world() -> void:
 		var a := AnimatedSprite2D.new()
 		a.sprite_frames = UnitSprite.frames_for(e["group"][0])
 		a.flip_h = true
-		a.offset = Vector2(0, -16) if e["group"][0] != "rotting_bishop" else Vector2(0, -24)
+		var big: bool = e.get("boss", false)
+		a.offset = Vector2(0, -24) if big else Vector2(0, -16)
+		if big:
+			a.scale = Vector2(1.3, 1.3)
+			var crown := Label.new()
+			crown.text = "BOSS: " + w_name(e["group"][0])
+			crown.add_theme_font_size_override("font_size", 8)
+			crown.add_theme_color_override("font_color", Color("#f2c443"))
+			crown.add_theme_color_override("font_shadow_color", Color.BLACK)
+			crown.position = Vector2(-40, -70)
+			crown.size = Vector2(80, 10)
+			crown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			holder.add_child(crown)
 		a.speed_scale = rng.randf_range(0.8, 1.2)
 		a.play("idle")
 		holder.add_child(a)
@@ -155,7 +172,9 @@ func _build_world() -> void:
 			holder.add_child(l)
 		_objects.add_child(holder)
 		_enemy_nodes[e["id"]] = holder
-		# Lazy wandering around their spot.
+		# Lazy wandering around their spot (bosses guard their lair).
+		if e.get("boss", false):
+			continue
 		var tw := holder.create_tween().set_loops()
 		var home := holder.position
 		tw.tween_property(holder, "position", home + Vector2(rng.randf_range(-24, 24), rng.randf_range(-12, 12)), rng.randf_range(2.0, 4.0))
@@ -174,10 +193,14 @@ func _build_world() -> void:
 	_refresh_world_objects()
 
 
+func w_name(monster_id: String) -> String:
+	return world.monster_defs[monster_id]["name"]
+
+
 func _refresh_world_objects() -> void:
 	for n in world.nodes:
 		var spr: Sprite2D = _node_sprites[n["id"]]
-		spr.texture = load("res://assets/world/ore_%s.png" % spr.get_meta("ore")) if world.node_ready(n) else load("res://assets/world/ore_depleted.png")
+		spr.texture = load("res://assets/world/%s.png" % (spr.get_meta("tex") if world.node_ready(n) else spr.get_meta("spent")))
 	for e in world.enemies:
 		_enemy_nodes[e["id"]].visible = world.enemy_active(e)
 
@@ -250,8 +273,8 @@ func _build_hud() -> void:
 	_toast.add_theme_color_override("font_shadow_color", Color.BLACK)
 	_toast.add_theme_constant_override("shadow_offset_x", 2)
 	_toast.add_theme_constant_override("shadow_offset_y", 2)
-	_toast.position = Vector2(440, 520)
-	_toast.size = Vector2(400, 30)
+	_toast.position = Vector2(240, 520)
+	_toast.size = Vector2(800, 30)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast.modulate.a = 0.0
 	_hud.add_child(_toast)
@@ -301,8 +324,8 @@ func _build_big_map(tex: Texture2D) -> Control:
 		l.position = map.position + Vector2(c["center"][0], c["center"][1]) * scale - Vector2(90, 20)
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dim.add_child(l)
-		var mineral := UI.label(c["mineral"]["name"], 11, Color("#d8c8f0"))
-		mineral.position = l.position + Vector2(40, 38)
+		var mineral := UI.label("%s, %s\nBoss: %s" % [c["mineral"]["name"], c["wood"]["name"], world.monster_defs[c["boss"]]["name"]], 11, Color("#d8c8f0"))
+		mineral.position = l.position + Vector2(20, 38)
 		mineral.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dim.add_child(mineral)
 	return dim
@@ -320,6 +343,8 @@ func _refresh_hud() -> void:
 		_desc_label.text = c["desc"]
 		if ci != _last_country and _last_country != -1:
 			_show_toast("Entering %s" % c["name"], TIER_COLORS[tier])
+		if not _in_combat:
+			Sfx.music(self, c["biome"])
 		_last_country = ci
 	var scale := 192.0 / world.size
 	_mini_dot.position = Vector2(world.player_cell) * scale - Vector2(3, 3)
@@ -334,7 +359,7 @@ func _refresh_hud() -> void:
 	var parts: Array[String] = []
 	for id in world.bag:
 		parts.append("%s x%d" % [world.material_name(id), int(world.bag[id])])
-	_bag_label.text = "Bag: " + (", ".join(parts) if not parts.is_empty() else "empty (tap a glowing vein to gather)")
+	_bag_label.text = "Bag: " + (", ".join(parts) if not parts.is_empty() else "empty - tap a vein to mine, a marked tree to chop, hunt beasts for hides")
 
 
 func _show_toast(text: String, color: Color = UI.GOLD) -> void:
@@ -357,7 +382,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Tapped a vein? Walk there and gather.
 		for n in world.nodes:
 			var spr: Sprite2D = _node_sprites[n["id"]]
-			if spr.position.distance_to(p + Vector2(0, 8)) < 18 and world.node_ready(n):
+			var reach := 22.0 if n["kind"] == "tree" else 18.0
+			if spr.position.distance_to(p + Vector2(0, 8 if n["kind"] == "ore" else 16)) < reach and world.node_ready(n):
 				_pending_node = n["id"]
 				p = spr.position + Vector2(0, 7)  # stand just in front of the vein
 				break
@@ -447,7 +473,11 @@ func _on_combat_finished(victory: bool) -> void:
 	if victory:
 		profile.embers += int(r["embers"])
 		profile.star_dust += int(r["dust"])
-		_show_toast("Victory! +%d Soul Embers%s" % [r["embers"], (", +%d Star Dust" % r["dust"]) if r["dust"] > 0 else ""])
+		var loot: Array[String] = []
+		for id in r.get("drops", {}):
+			loot.append("%s x%d" % [world.material_name(id), int(r["drops"][id])])
+		_show_toast(("BOSS DEFEATED! " if r.get("boss", false) else "Victory! ") + "+%d Embers%s%s" % [r["embers"],
+			(", +%d Dust" % r["dust"]) if r["dust"] > 0 else "", ("  |  " + ", ".join(loot)) if not loot.is_empty() else ""])
 	else:
 		_player.position = _ground.map_to_local(world.player_cell)
 		_target = _player.position

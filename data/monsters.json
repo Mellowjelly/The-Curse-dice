@@ -52,7 +52,8 @@
 			{ "type": "attack", "value": 5 }
 		],
 		"phase2": {"at": 0.5, "text": "The Rotting Bishop tears off his vestments. Something underneath was never human.", "faces": [{"type": "attack", "value": 8}, {"type": "attack", "value": 10}, {"type": "sweep", "value": 5}, {"type": "sweep", "value": 6}, {"type": "attack", "value": 6}, {"type": "attack", "value": 7}]},
-		"death_line": "The Bishop collapses into rot and candle wax. Somewhere, a bell stops ringing."
+		"death_line": "The Bishop collapses into rot and candle wax. Somewhere, a bell stops ringing.",
+		"hide": "bishop_relic"
 	},
 	{
 		"id": "plague_rat",
@@ -107,5 +108,233 @@
 			{ "type": "shield", "value": 8 },
 			{ "type": "blank", "value": 0 }
 		]
+	},
+	{
+		"id": "dire_wolf",
+		"name": "Dire Wolf",
+		"hp": 12,
+		"hide": "wolf_pelt",
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "shield", "value": 2 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "wild_boar",
+		"name": "Wild Boar",
+		"hp": 15,
+		"hide": "boar_hide",
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "attack", "value": 6 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "marsh_serpent",
+		"name": "Marsh Serpent",
+		"hp": 13,
+		"hide": "serpent_skin",
+		"faces": [
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "sweep", "value": 2 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "heal", "value": 3 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "giant_spider",
+		"name": "Giant Spider",
+		"hp": 11,
+		"hide": "spider_silk",
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "sweep", "value": 2 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "cave_bear",
+		"name": "Cave Bear",
+		"hp": 24,
+		"hide": "bear_hide",
+		"faces": [
+			{ "type": "attack", "value": 5 },
+			{ "type": "attack", "value": 7 },
+			{ "type": "shield", "value": 4 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "heal", "value": 4 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "frost_wolf",
+		"name": "Frost Wolf",
+		"hp": 14,
+		"hide": "frost_pelt",
+		"faces": [
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "sweep", "value": 2 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "sand_crab",
+		"name": "Giant Crab",
+		"hp": 16,
+		"hide": "crab_shell",
+		"faces": [
+			{ "type": "shield", "value": 5 },
+			{ "type": "shield", "value": 4 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "lava_lizard",
+		"name": "Lava Lizard",
+		"hp": 15,
+		"hide": "lava_scale",
+		"faces": [
+			{ "type": "attack", "value": 5 },
+			{ "type": "attack", "value": 6 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "shield", "value": 3 },
+			{ "type": "blank", "value": 0 }
+		]
+	},
+	{
+		"id": "bone_vulture",
+		"name": "Bone Vulture",
+		"hp": 12,
+		"hide": "vulture_plume",
+		"faces": [
+			{ "type": "attack", "value": 5 },
+			{ "type": "attack", "value": 6 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "blank", "value": 0 },
+			{ "type": "attack", "value": 3 }
+		]
+	},
+	{
+		"id": "ashen_alpha",
+		"name": "The Ashen Alpha",
+		"hp": 48,
+		"boss": true,
+		"hide": "alpha_fang",
+		"faces": [
+			{ "type": "attack", "value": 6 },
+			{ "type": "attack", "value": 7 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "shield", "value": 5 },
+			{ "type": "attack", "value": 8 }
+		],
+		"phase2": {"at": 0.5, "text": "The Ashen Alpha howls. The whole forest answers.", "faces": [{"type": "attack", "value": 8}, {"type": "attack", "value": 9}, {"type": "sweep", "value": 4}, {"type": "sweep", "value": 4}, {"type": "attack", "value": 7}, {"type": "attack", "value": 6}]},
+		"death_line": "The Alpha falls. Somewhere far away, a pack goes quiet."
+	},
+	{
+		"id": "bog_mother",
+		"name": "The Bog Mother",
+		"hp": 56,
+		"boss": true,
+		"hide": "bog_heart",
+		"faces": [
+			{ "type": "sweep", "value": 3 },
+			{ "type": "attack", "value": 6 },
+			{ "type": "heal", "value": 6 },
+			{ "type": "attack", "value": 7 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "shield", "value": 6 }
+		],
+		"phase2": {"at": 0.5, "text": "The Bog Mother sheds her skin. The water boils.", "faces": [{"type": "sweep", "value": 5}, {"type": "attack", "value": 8}, {"type": "attack", "value": 9}, {"type": "sweep", "value": 4}, {"type": "heal", "value": 5}, {"type": "attack", "value": 7}]},
+		"death_line": "She sinks into the black water. The marsh breathes out."
+	},
+	{
+		"id": "thornback",
+		"name": "Thornback",
+		"hp": 64,
+		"boss": true,
+		"hide": "thornback_hide",
+		"faces": [
+			{ "type": "attack", "value": 7 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "shield", "value": 8 },
+			{ "type": "heal", "value": 6 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "attack", "value": 6 }
+		],
+		"phase2": {"at": 0.5, "text": "Thornback rears up. Thorns burst from its back.", "faces": [{"type": "attack", "value": 9}, {"type": "sweep", "value": 5}, {"type": "attack", "value": 10}, {"type": "shield", "value": 6}, {"type": "sweep", "value": 4}, {"type": "attack", "value": 8}]},
+		"death_line": "The old bear lies down. Flowers grow where it fell."
+	},
+	{
+		"id": "tidecrusher",
+		"name": "Old Tidecrusher",
+		"hp": 80,
+		"boss": true,
+		"hide": "tide_carapace",
+		"faces": [
+			{ "type": "shield", "value": 9 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "shield", "value": 7 },
+			{ "type": "attack", "value": 7 }
+		],
+		"phase2": {"at": 0.5, "text": "The tide rushes in behind Old Tidecrusher.", "faces": [{"type": "attack", "value": 10}, {"type": "sweep", "value": 5}, {"type": "attack", "value": 11}, {"type": "shield", "value": 8}, {"type": "sweep", "value": 5}, {"type": "attack", "value": 9}]},
+		"death_line": "The shell cracks open. The sea takes back what is left."
+	},
+	{
+		"id": "pale_matriarch",
+		"name": "The Pale Matriarch",
+		"hp": 70,
+		"boss": true,
+		"hide": "pale_fang",
+		"faces": [
+			{ "type": "attack", "value": 8 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "sweep", "value": 5 },
+			{ "type": "attack", "value": 7 },
+			{ "type": "shield", "value": 6 }
+		],
+		"phase2": {"at": 0.5, "text": "A blizzard rises around the Pale Matriarch.", "faces": [{"type": "sweep", "value": 6}, {"type": "attack", "value": 11}, {"type": "attack", "value": 10}, {"type": "sweep", "value": 5}, {"type": "attack", "value": 9}, {"type": "heal", "value": 8}]},
+		"death_line": "The Matriarch's howl freezes in the air and shatters."
+	},
+	{
+		"id": "cinder_drake",
+		"name": "The Cinder Drake",
+		"hp": 70,
+		"boss": true,
+		"hide": "drake_scale",
+		"faces": [
+			{ "type": "sweep", "value": 4 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "sweep", "value": 5 },
+			{ "type": "shield", "value": 8 },
+			{ "type": "attack", "value": 10 }
+		],
+		"phase2": {"at": 0.5, "text": "The Cinder Drake drinks the lava. Its scales glow white.", "faces": [{"type": "sweep", "value": 6}, {"type": "attack", "value": 11}, {"type": "attack", "value": 12}, {"type": "sweep", "value": 5}, {"type": "attack", "value": 9}, {"type": "heal", "value": 6}]},
+		"death_line": "The Drake cools into black glass."
 	}
 ]
