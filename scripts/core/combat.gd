@@ -80,6 +80,7 @@ static func make_unit(def: Dictionary) -> Dictionary:
 		"locked": false,
 		"target": -1,     # monsters only: which hero they intend to hit
 		"boss": def.get("boss", false),
+		"elite": def.get("elite", false),
 		"element": def.get("element", ""),
 		"skill": def.get("skill", {}),  # heroes only, see data/heroes.json
 		"phase2": def.get("phase2", {}),  # monsters only: { "at": 0.5, "faces": [...], "text": "..." }
@@ -383,6 +384,8 @@ func _start_round() -> void:
 		if is_alive(m):
 			m["face"] = rng.randi_range(0, m["faces"].size() - 1)
 			m["target"] = _random_alive_index(heroes)
+			if m.get("elite", false) and current_face(m)["type"] == "blank":
+				m["face"] = _best_attack_face(m)  # 3.3: elites never idle - they are the road's real threat
 	if not is_alive(monsters[target_index]):
 		target_index = _first_alive_index(monsters)
 	_log(tr("--- Round %d ---") % round_number)
@@ -393,6 +396,17 @@ const BACKSTAB_DAMAGE := 9
 const BOSS_HARDEN_HIT := 12
 const BOSS_HARDEN_SHIELD := 6
 const OVERKILL_SPILL := 0.0  # 3.1: off - bots showed it rewarded careless targeting more than careful play
+
+
+func _best_attack_face(m: Dictionary) -> int:
+	var best := int(m["face"])
+	var best_value := -1
+	for i in m["faces"].size():
+		var f: Dictionary = m["faces"][i]
+		if f["type"] in ["attack", "sweep"] and int(f["value"]) > best_value:
+			best = i
+			best_value = int(f["value"])
+	return best
 
 
 ## Pays an HP price for a skill; never kills the hero.

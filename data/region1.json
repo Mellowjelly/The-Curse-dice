@@ -174,7 +174,7 @@
 		},
 		"elite": {
 			"hp": 1.45,
-			"damage": 2
+			"damage": 1
 		},
 		"boss": {
 			"hp": 1.2,

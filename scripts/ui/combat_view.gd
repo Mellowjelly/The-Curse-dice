@@ -435,6 +435,8 @@ func _refresh() -> void:
 	_title.text = tr("%s   -   Round %d") % [title, combat.round_number]
 	_fate.text = tr("Fate %d/%d") % [combat.fate, Combat.MAX_FATE]
 	_reroll_btn.text = tr("REROLL (%d left)") % combat.rerolls_left
+	if not combat.pet.is_empty() and combat.pet.get("passive", "") == "lucky" and combat.rerolls_left > 0:
+		_reroll_btn.text += tr(" +1 %s") % tr(combat.pet["name"])  # show where the extra reroll comes from
 	_reroll_btn.disabled = combat.finished or combat.rerolls_left <= 0
 	_fate_btn.text = tr("FATE REROLL (-%d Fate)") % Combat.FATE_REROLL_COST
 	_fate_btn.disabled = combat.finished or combat.fate < Combat.FATE_REROLL_COST

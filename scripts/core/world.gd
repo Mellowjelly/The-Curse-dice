@@ -289,7 +289,7 @@ func finish_fight(e: Dictionary, victory: bool, rng: RandomNumberGenerator) -> D
 		for id in e["group"]:
 			var hide: String = monster_defs[id].get("hide", "")
 			if hide != "":
-				drops[hide] = int(drops.get(hide, 0)) + (1 if is_boss else rng.randi_range(1, 2))
+				drops[hide] = int(drops.get(hide, 0)) + (1 if is_boss else rng.randi_range(2, 3))  # 3.3: 2-3 hides, less grind
 		var c: Dictionary = countries[e["country"]]
 		if is_boss:
 			drops[c["mineral"]["id"]] = int(drops.get(c["mineral"]["id"], 0)) + 6

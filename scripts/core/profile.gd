@@ -359,7 +359,10 @@ func record_world_fight(group: Array, victory: bool, twists: int, boss: bool = f
 			_add("kills_" + id, 1)
 		_add("isle_kills", group.size())
 		if boss:
-			grave_dice += 1  # Isle bosses pay a Grave Die
+			# Isle bosses pay Grave Dice: 3 the first time each one falls, then 1.
+			var first := stat("isle_boss_" + str(group[0])) == 0
+			_add("isle_boss_" + str(group[0]), 1)
+			grave_dice += 3 if first else 1
 	_add("fate_twists", twists)
 	save()
 

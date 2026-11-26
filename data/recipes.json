@@ -202,7 +202,7 @@
 		"slot": "armor",
 		"grade": "SR",
 		"materials": {
-			"wolf_pelt": 5,
+			"wolf_pelt": 4,
 			"ashwood": 2
 		},
 		"embers": 15,
@@ -215,7 +215,7 @@
 		"slot": "armor",
 		"grade": "SR",
 		"materials": {
-			"boar_hide": 5,
+			"boar_hide": 4,
 			"grave_iron": 3
 		},
 		"embers": 20,
@@ -228,7 +228,7 @@
 		"slot": "armor",
 		"grade": "SR",
 		"materials": {
-			"serpent_skin": 6,
+			"serpent_skin": 4,
 			"bog_copper": 4
 		},
 		"embers": 35,
@@ -241,7 +241,7 @@
 		"slot": "armor",
 		"grade": "SR",
 		"materials": {
-			"bear_hide": 6,
+			"bear_hide": 4,
 			"elderwood": 3
 		},
 		"embers": 40,
@@ -254,7 +254,7 @@
 		"slot": "armor",
 		"grade": "SR",
 		"materials": {
-			"crab_shell": 6,
+			"crab_shell": 4,
 			"sea_pearl": 3
 		},
 		"embers": 50,
@@ -267,7 +267,7 @@
 		"slot": "armor",
 		"grade": "SR",
 		"materials": {
-			"frost_pelt": 6,
+			"frost_pelt": 4,
 			"frost_silver": 4
 		},
 		"embers": 55,
@@ -280,7 +280,7 @@
 		"slot": "armor",
 		"grade": "SR",
 		"materials": {
-			"lava_scale": 8,
+			"lava_scale": 4,
 			"obsidian": 4
 		},
 		"embers": 70,
@@ -294,7 +294,7 @@
 		"grade": "SSR",
 		"materials": {
 			"bog_heart": 1,
-			"serpent_skin": 6,
+			"serpent_skin": 5,
 			"bogwood": 6
 		},
 		"embers": 70,
@@ -308,7 +308,7 @@
 		"grade": "SSR",
 		"materials": {
 			"thornback_hide": 1,
-			"bear_hide": 6,
+			"bear_hide": 5,
 			"elderwood": 6
 		},
 		"embers": 90,
@@ -322,7 +322,7 @@
 		"grade": "SSR",
 		"materials": {
 			"tide_carapace": 1,
-			"crab_shell": 8,
+			"crab_shell": 5,
 			"sea_pearl": 6
 		},
 		"embers": 110,
@@ -336,7 +336,7 @@
 		"grade": "SSR",
 		"materials": {
 			"pale_fang": 1,
-			"frost_pelt": 8,
+			"frost_pelt": 5,
 			"frost_silver": 6
 		},
 		"embers": 130,

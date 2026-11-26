@@ -6,7 +6,7 @@ config_version=5
 [application]
 
 config/name="Cursed Dice"
-config/version="3.2.0"
+config/version="3.3.0"
 config/description="Dark fantasy dice adventure (prototype)"
 run/main_scene="res://scenes/title.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")

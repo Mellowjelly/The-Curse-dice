@@ -55,9 +55,9 @@
 		}
 	],
 	"embers": {
-		"per_tile": 0.6,
-		"per_fight": 1,
-		"per_elite": 10,
-		"victory": 40
+		"per_tile": 1.0,
+		"per_fight": 3,
+		"per_elite": 12,
+		"victory": 70
 	}
 }

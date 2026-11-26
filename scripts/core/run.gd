@@ -585,7 +585,7 @@ func _apply_effects(effects: Array, lines: Array[String]) -> String:
 				add_gold(int(e["value"]))
 				lines.append(tr("%+d gold.") % int(e["value"]))
 			"fate":
-				combat.fate = min(Combat.MAX_FATE, combat.fate + int(e["value"]))
+				combat.gain_fate(int(e["value"]), tr("Fate"))  # overflow -> free rerolls, never wasted
 				lines.append(tr("+%d Fate.") % int(e["value"]))
 			"revive":
 				for h in heroes:
@@ -668,7 +668,7 @@ func buy(item_id: String) -> void:
 				if Combat.is_alive(h):
 					h["hp"] = min(h["max_hp"], h["hp"] + 8)
 		"fate_shard":
-			combat.fate = min(Combat.MAX_FATE, combat.fate + 3)
+			combat.gain_fate(3, tr("Fate Shard") + ":")  # Fate beyond 5 becomes free rerolls in the next fight
 		"resurrect":
 			for h in heroes:
 				if not Combat.is_alive(h):

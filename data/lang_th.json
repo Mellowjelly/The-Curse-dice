@@ -761,5 +761,8 @@
 	" The party catches its breath (+%d%% HP). The elite drops its arms.": " ทีมได้พักหายใจ (+%d%% HP) ศัตรูชั้นยอดทิ้งอาวุธไว้",
 	"Reward: %d Star Dust (you already have %s)": "รางวัล: ผงดาว %d (คุณมี %s แล้ว)",
 	"hero": "ฮีโร่",
-	"companion": "สัตว์คู่ใจ"
+	"companion": "สัตว์คู่ใจ",
+	"Fate": "ชะตา",
+	" +1 %s": " +1 %s",
+	"The Bishop has fallen. The road can be walked under a Curse now: harder, but +25% Soul Embers per level (Party tab).": "บิชอปล่มสลายแล้ว ตอนนี้เดินถนนภายใต้คำสาปได้: ยากขึ้น แต่ได้เถ้าวิญญาณ +25% ต่อระดับ (แท็บ ทีม)"
 }

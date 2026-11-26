@@ -381,6 +381,8 @@ func _refresh() -> void:
 		for q in last_result["quests"]:
 			t += tr("   Quest complete: %s (+%d)") % [tr(q["name"]), int(q["reward"])]
 		_result_box.add_child(UI.wrap_label(t, 14, UI.GOLD, 560))
+	if profile.max_curse() > 0 and profile.curse == 0:
+		_result_box.add_child(UI.wrap_label(tr("The Bishop has fallen. The road can be walked under a Curse now: harder, but +25% Soul Embers per level (Party tab)."), 13, UI.BLOOD, 560))
 	var saved := Profile.has_saved_run()
 	_go.text = tr("Continue your journey") if saved else (tr("Set out on the Hollow Road") if profile.party.size() == 3 else tr("Choose 3 heroes to set out"))
 	_go.disabled = not saved and profile.party.size() != 3

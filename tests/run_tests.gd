@@ -361,7 +361,7 @@ func test_profile_and_quests() -> void:
 	run.stats["fights"] = 3
 	run.stats["kills"] = {"ghoul": 30}
 	var res := p.record_run(run)
-	check(res["embers"] == 12 + 3 + 15 + 20, "embers = tiles*0.6 + fights + quests (got %d)" % res["embers"])
+	check(res["embers"] == 20 + 9 + 15 + 20, "embers = tiles*1.0 + fights*3 + quests (got %d)" % res["embers"])
 	check("first_steps" in p.quests_done and "ghoul_hunter" in p.quests_done, "quests complete from run stats")
 	var again := Profile.new(path)
 	again.load_profile()
@@ -981,6 +981,19 @@ func test_v32_translations() -> void:
 		if f.ends_with(".json") and not f.begins_with("lang_"):
 			_collect_untranslated(GameData.load_json("res://data/" + f), "", th, keep_english, missing)
 	check(missing.is_empty(), "all story text has Thai (%d missing, e.g. %s)" % [missing.size(), str(missing.slice(0, 3))])
+	# Every tr("...") text in the scripts has a Thai line too (UI and the rules' messages).
+	var tr_re := RegEx.new()
+	tr_re.compile("(?<![\\w.])tr\\(\"((?:[^\"\\\\]|\\\\.)*)\"\\)")
+	var untranslated: Array[String] = []
+	for dir in ["res://scripts/core", "res://scripts/ui"]:
+		for f in DirAccess.get_files_at(dir):
+			if not f.ends_with(".gd"):
+				continue
+			for m in tr_re.search_all(FileAccess.get_file_as_string(dir + "/" + f)):
+				var key := m.get_string(1).c_unescape()
+				if not th.has(key) and not key in untranslated and not key.contains("."):
+					untranslated.append(key)
+	check(untranslated.is_empty(), "every tr() text has Thai (%d missing: %s)" % [untranslated.size(), str(untranslated.slice(0, 5))])
 
 
 const _NOT_TEXT_KEYS := ["id", "type", "sprite", "element", "grade", "slot", "stat", "scope", "kind", "material",
@@ -1027,3 +1040,20 @@ func test_v33_changes() -> void:
 	p.npc_active = m["npc_active"]
 	check(p.npc_request("tobin")["id"] == "tobin_harvest", "the active request is still the one shown")
 	check(p.npc_request("marla").is_empty(), "a finished chain stays finished")
+	var r := Run.new(333)
+	r.combat.fate = 4
+	r.phase = "shop"
+	r.gold = 999
+	r.buy("fate_shard")
+	check(r.combat.fate == Combat.MAX_FATE and r.combat._overflow_rerolls == 2, "Fate beyond 5 becomes free rerolls, not lost")
+	var idle := 0
+	for seed in 40:
+		var c := Combat.new(900 + seed)
+		var knight := _monster("grave_knight")
+		knight["elite"] = true
+		c.start_battle(_heroes(), [knight])
+		for rnd in 3:
+			if Combat.current_face(c.monsters[0])["type"] == "blank":
+				idle += 1
+			c._start_round()
+	check(idle == 0, "elites never roll an idle blank (%d idle rounds)" % idle)

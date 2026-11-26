@@ -398,7 +398,7 @@
 	"safe_tier": 2,
 	"trade": {
 		"embers_per_value": 1,
-		"dust_per_value": 0.1
+		"dust_per_value": 0.25
 	},
 	"trees_per_country": 14,
 	"ore_fields": 3,
