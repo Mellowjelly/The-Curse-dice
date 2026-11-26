@@ -298,20 +298,20 @@ func summon_roll(rng: RandomNumberGenerator, banner: String = "heroes") -> Dicti
 			"heroes":
 				owned_heroes.append(item["id"])
 				result = {"kind": "hero", "id": item["id"], "name": item["name"], "new": true,
-					"text": "A new hero joins you: %s! %s" % [item["name"], item.get("lore", "")]}
+					"text": tr("A new hero joins you: %s! %s") % [tr(item["name"]), tr(item.get("lore", ""))]}
 			"relics":
 				unlocked_weapons.append(item["id"])
 				result = {"kind": "relic", "id": item["id"], "name": item["name"], "new": true,
-					"text": "Relic unlocked: %s. It can now appear on the road." % item["name"]}
+					"text": tr("Relic unlocked: %s. It can now appear on the road.") % tr(item["name"])}
 			"pets":
 				owned_pets.append(item["id"])
 				result = {"kind": "pet", "id": item["id"], "name": item["name"], "new": true,
-					"text": "A new companion follows you: %s. %s" % [item["name"], item.get("desc", "")]}
+					"text": tr("A new companion follows you: %s. %s") % [tr(item["name"]), tr(item.get("desc", ""))]}
 	else:
 		var amount := int(summon["embers_amount"])
 		embers += amount
 		result = {"kind": "embers", "id": "", "name": "Soul Embers", "new": false,
-			"text": "Embers swirl from the dice: +%d Soul Embers. (%d/%d toward a guaranteed find)" % [amount, pity_count(banner), int(summon["pity"])]}
+			"text": tr("Embers swirl from the dice: +%d Soul Embers. (%d/%d toward a guaranteed find)") % [amount, pity_count(banner), int(summon["pity"])]}
 	save()
 	return result
 
@@ -421,13 +421,13 @@ func grant(r: Dictionary) -> Dictionary:
 	match kind:
 		"dust":
 			star_dust += int(r["amount"])
-			return {"kind": "dust", "id": "", "name": "Star Dust x%d" % int(r["amount"]), "new": false, "text": "+%d Star Dust" % int(r["amount"])}
+			return {"kind": "dust", "id": "", "name": tr("Star Dust x%d") % int(r["amount"]), "new": false, "text": tr("+%d Star Dust") % int(r["amount"])}
 		"dice":
 			grave_dice += int(r["amount"])
-			return {"kind": "dice", "id": "", "name": "Grave Dice x%d" % int(r["amount"]), "new": false, "text": "+%d Grave Dice" % int(r["amount"])}
+			return {"kind": "dice", "id": "", "name": tr("Grave Dice x%d") % int(r["amount"]), "new": false, "text": tr("+%d Grave Dice") % int(r["amount"])}
 		"embers":
 			embers += int(r["amount"])
-			return {"kind": "embers", "id": "", "name": "Soul Embers x%d" % int(r["amount"]), "new": false, "text": "+%d Soul Embers" % int(r["amount"])}
+			return {"kind": "embers", "id": "", "name": tr("Soul Embers x%d") % int(r["amount"]), "new": false, "text": tr("+%d Soul Embers") % int(r["amount"])}
 	var id: String = r["id"]
 	var def := item_def(kind, id)
 	var owned_list: Array = {"hero": owned_heroes, "pet": owned_pets, "relic": unlocked_weapons}[kind]
@@ -435,10 +435,10 @@ func grant(r: Dictionary) -> Dictionary:
 		var dust := 8 if def.get("grade", "SR") == "SSR" else 5
 		star_dust += dust
 		return {"kind": "dust", "id": id, "name": def.get("name", id), "new": false, "grade": def.get("grade", "SR"),
-			"text": "%s is already with you, so it turns into %d Star Dust." % [def.get("name", id), dust]}
+			"text": tr("%s is already with you, so it turns into %d Star Dust.") % [tr(def.get("name", id)), dust]}
 	owned_list.append(id)
 	return {"kind": kind, "id": id, "name": def.get("name", id), "new": true, "grade": def.get("grade", "SR"),
-		"text": "%s joins you!" % def.get("name", id)}
+		"text": tr("%s joins you!") % tr(def.get("name", id))}
 
 
 func item_def(kind: String, id: String) -> Dictionary:

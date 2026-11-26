@@ -177,7 +177,7 @@ func reroll_move() -> bool:
 		return false
 	combat.fate -= MOVE_REROLL_FATE
 	move_options = _roll_distinct_moves()
-	_log("Fate bends the road (-%d Fate)" % MOVE_REROLL_FATE)
+	_log(tr("Fate bends the road (-%d Fate)") % MOVE_REROLL_FATE)
 	changed.emit()
 	return true
 
@@ -202,7 +202,7 @@ func _enter_tile(tile: Dictionary) -> void:
 			_start_fight(tile["type"], tier_at(pos))
 		"chest":
 			var g := _gold_roll("chest")
-			last_reward_text = "You pry open a rotten chest: +%d gold." % g
+			last_reward_text = tr("You pry open a rotten chest: +%d gold.") % g
 			_log(last_reward_text)
 			if rng.randf() < CHEST_WEAPON_CHANCE:
 				last_reward_text += " A weapon lies among the bones."
@@ -233,7 +233,7 @@ func _enter_tile(tile: Dictionary) -> void:
 				var pct := rest_percent()
 				for h in heroes:
 					h["hp"] = min(h["max_hp"], max(h["hp"], 0) + max(1, h["max_hp"] * pct / 100))
-				_log("The last campfire warms you (+%d%% HP)." % pct)
+				_log(tr("The last campfire warms you (+%d%% HP).") % pct)
 			phase = "rest"
 			changed.emit()
 		_:
@@ -249,7 +249,7 @@ func _start_fight(kind: String, tier: String) -> void:
 	var pool: Array = region["encounters"][pool_name]
 	var ids: Array = pool[rng.randi_range(0, pool.size() - 1)]
 	phase = "combat"
-	_log("== %s ==" % ("BOSS" if kind == "boss" else ("Elite fight" if kind == "elite" else "Fight")))
+	_log("== %s ==" % (tr("BOSS") if kind == "boss" else (tr("Elite fight") if kind == "elite" else tr("Fight"))))
 	combat.start_battle(heroes, ids.map(func(id): return scaled_monster(monster_defs[id], kind, tier)))
 	changed.emit()
 
@@ -419,7 +419,7 @@ func _on_battle_ended(victory: bool) -> void:
 		if not Combat.is_alive(h):
 			h["hp"] = max(1, h["max_hp"] * pct / 100)
 	var g := _gold_roll("elite" if combat_kind == "elite" else "fight")
-	last_reward_text = "Victory! +%d gold." % g
+	last_reward_text = tr("Victory! +%d gold.") % g
 	if combat.pet.get("passive", "") == "mend":
 		for h in heroes:
 			if Combat.is_alive(h):
@@ -518,7 +518,7 @@ func choose_carving(index: int) -> void:
 	if o["face"] in WEAPON_SLOTS and not hero["weapon"].is_empty():
 		hero["weapon"]["faces"][WEAPON_SLOTS.find(o["face"])] = o["new"]
 	stats["carves"] += 1
-	_log("Carved: " + o["text"])
+	_log(tr("Carved: ") + o["text"])
 	skip_carving()
 
 
@@ -546,7 +546,7 @@ func choose_event_option(index: int) -> void:
 		return
 	var lines: Array[String] = []
 	var next := _apply_effects(event["options"][index]["effects"], lines)
-	event_result = " ".join(lines) if not lines.is_empty() else "You move on."
+	event_result = " ".join(lines) if not lines.is_empty() else tr("You move on.")
 	_log(event_result)
 	if next == "fight":
 		return  # combat already started
@@ -574,27 +574,27 @@ func _apply_effects(effects: Array, lines: Array[String]) -> String:
 					h["hp"] = clamp(h["hp"] + int(e["value"]), 1, h["max_hp"])
 					var diff: int = h["hp"] - before
 					if diff != 0:
-						lines.append("%s %s %d HP." % [Combat.short_name(h), "heals" if diff > 0 else "loses", abs(diff)])
+						lines.append((tr("%s heals %d HP.") if diff > 0 else tr("%s loses %d HP.")) % [Combat.short_name(h), abs(diff)])
 			"max_hp":
 				for h in _pick_heroes(e["who"]):
 					h["max_hp"] = max(5, h["max_hp"] + int(e["value"]))
 					h["hp"] = min(h["hp"], h["max_hp"])
-					lines.append("%s's max HP is now %d." % [Combat.short_name(h), h["max_hp"]])
+					lines.append(tr("%s's max HP is now %d.") % [Combat.short_name(h), h["max_hp"]])
 			"gold":
 				add_gold(int(e["value"]))
-				lines.append("%+d gold." % int(e["value"]))
+				lines.append(tr("%+d gold.") % int(e["value"]))
 			"fate":
 				combat.fate = min(Combat.MAX_FATE, combat.fate + int(e["value"]))
-				lines.append("+%d Fate." % int(e["value"]))
+				lines.append(tr("+%d Fate.") % int(e["value"]))
 			"revive":
 				for h in heroes:
 					if not Combat.is_alive(h):
 						h["hp"] = max(1, h["max_hp"] * int(e["percent"]) / 100)
-						lines.append("%s rises." % Combat.short_name(h))
+						lines.append(tr("%s rises.") % Combat.short_name(h))
 			"carve":
 				next = "carve"
 			"fight":
-				lines.append(e.get("text", "You are attacked!"))
+				lines.append(tr(e.get("text", "You are attacked!")))
 				event_result = " ".join(lines)
 				_start_fight("fight", e.get("pool", tier_at(pos)))
 				return "fight"
@@ -660,7 +660,7 @@ func buy(item_id: String) -> void:
 	var item: Dictionary = region["shop"].filter(func(it): return it["id"] == item_id)[0]
 	gold -= price(item)
 	shop_bought.append(item_id)
-	_log("Bought " + item["name"])
+	_log(tr("Bought ") + tr(item["name"]))
 	match item_id:
 		"tonic":
 			for h in heroes:
@@ -673,11 +673,11 @@ func buy(item_id: String) -> void:
 				if not Combat.is_alive(h):
 					h["hp"] = h["max_hp"] / 2
 		"carving":
-			last_reward_text = "The Bone Carver sets to work on your dice."
+			last_reward_text = tr("The Bone Carver sets to work on your dice.")
 			_offer_carving("shop")
 			return
 		"weapon":
-			last_reward_text = "The merchant lays two weapons on the cloth."
+			last_reward_text = tr("The merchant lays two weapons on the cloth.")
 			_offer_loot(2, "shop")
 			return
 	changed.emit()
@@ -699,7 +699,7 @@ func choose_pet(index: int) -> void:
 	apply_pet_treat(p, upgrades.get("gear", {}).get("pet:" + String(p["id"]), {}).get("treat", {}))
 	p["face"] = 0
 	combat.pet = p
-	_log("%s follows you." % p["name"])
+	_log(tr("%s follows you.") % tr(p["name"]))
 	pet_offers = []
 	_next_start_step()
 
@@ -711,7 +711,7 @@ func _next_start_step() -> void:
 		changed.emit()
 		return
 	var step: String = _start_queue.pop_front()
-	last_reward_text = "A gift from the town."
+	last_reward_text = tr("A gift from the town.")
 	if step == "loot":
 		_offer_loot(int(upgrades.get("smithy", 0)), "start", "common")
 	else:
@@ -752,7 +752,7 @@ func equip(weapon_index: int, hero_index: int) -> void:
 	if hero_index < 0 or hero_index >= heroes.size():
 		return
 	equip_weapon(heroes[hero_index], weapon_offers[weapon_index])
-	_log("%s takes up %s." % [Combat.short_name(heroes[hero_index]), weapon_offers[weapon_index]["name"]])
+	_log(tr("%s takes up %s.") % [Combat.short_name(heroes[hero_index]), tr(weapon_offers[weapon_index]["name"])])
 	skip_loot()
 
 
@@ -793,14 +793,14 @@ func rest_heal() -> void:
 	for h in heroes:
 		var amount: int = max(1, h["max_hp"] * pct / 100)
 		h["hp"] = min(h["max_hp"], max(h["hp"], 0) + amount)
-	_log("The party rests by the fire.")
+	_log(tr("The party rests by the fire."))
 	phase = "map"
 	changed.emit()
 
 
 func rest_carve() -> void:
 	if phase == "rest":
-		last_reward_text = "By the fire, you whittle at your dice."
+		last_reward_text = tr("By the fire, you whittle at your dice.")
 		_offer_carving("map")
 
 
