@@ -197,7 +197,7 @@ func _build_world() -> void:
 
 
 func w_name(monster_id: String) -> String:
-	return world.monster_defs[monster_id]["name"]
+	return tr(world.monster_defs[monster_id]["name"])
 
 
 func _refresh_world_objects() -> void:
@@ -318,7 +318,7 @@ func _build_big_map(tex: Texture2D) -> Control:
 	dim.add_child(title)
 	var scale := 560.0 / world.size
 	for c in world.countries:
-		var l := UI.label(tr("%s\nTier %s") % [c["name"], ["I", "II", "III", "IV", "V"][int(c["tier"]) - 1]], 15, TIER_COLORS[int(c["tier"])])
+		var l := UI.label(tr("%s\nTier %s") % [tr(c["name"]), ["I", "II", "III", "IV", "V"][int(c["tier"]) - 1]], 15, TIER_COLORS[int(c["tier"])])
 		l.add_theme_color_override("font_shadow_color", Color.BLACK)
 		l.add_theme_constant_override("shadow_offset_x", 2)
 		l.add_theme_constant_override("shadow_offset_y", 2)
@@ -327,7 +327,7 @@ func _build_big_map(tex: Texture2D) -> Control:
 		l.position = map.position + Vector2(c["center"][0], c["center"][1]) * scale - Vector2(90, 20)
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dim.add_child(l)
-		var mineral := UI.label(tr("%s, %s\nBoss: %s") % [c["mineral"]["name"], c["wood"]["name"], world.monster_defs[c["boss"]]["name"]], 11, Color("#d8c8f0"))
+		var mineral := UI.label(tr("%s, %s\nBoss: %s") % [tr(c["mineral"]["name"]), tr(c["wood"]["name"]), world.monster_defs[c["boss"]]["name"]], 11, Color("#d8c8f0"))
 		mineral.position = l.position + Vector2(20, 38)
 		mineral.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dim.add_child(mineral)
@@ -339,14 +339,14 @@ func _refresh_hud() -> void:
 	if ci != 255:
 		var c: Dictionary = world.countries[ci]
 		var tier := int(c["tier"])
-		_country_label.text = c["name"]
+		_country_label.text = tr(c["name"])
 		_tier_label.text = tr("Tier %s   -   %s   -   Mineral: %s") % [["I", "II", "III", "IV", "V"][tier - 1],
-			tr("Danger: fall here and you lose your bag") if world.is_dangerous(c) else tr("Safe: your bag is kept if you fall"), c["mineral"]["name"]]
+			tr("Danger: fall here and you lose your bag") if world.is_dangerous(c) else tr("Safe: your bag is kept if you fall"), tr(c["mineral"]["name"])]
 		_tier_label.add_theme_color_override("font_color", TIER_COLORS[tier])
 		var rec: String = ["", tr("any party"), tr("SR gear recommended"), tr("SR gear and 2-star heroes recommended"), tr("SSR gear recommended"), tr("SSR gear and 3-star heroes recommended")][tier]
-		_desc_label.text = tr("%s  Recommended: %s.") % [c["desc"], rec]
+		_desc_label.text = tr("%s  Recommended: %s.") % [tr(c["desc"]), rec]
 		if ci != _last_country and _last_country != -1:
-			_show_toast(tr("Entering %s") % c["name"], TIER_COLORS[tier])
+			_show_toast(tr("Entering %s") % tr(c["name"]), TIER_COLORS[tier])
 		if not _in_combat:
 			Sfx.music(self, c["biome"])
 		_last_country = ci
@@ -450,7 +450,7 @@ func _process(delta: float) -> void:
 			_gather_bar.hide()
 			if not got.is_empty():
 				Sfx.play(self, "triple" if got["rare"] else "fate")
-				_show_toast((tr("RARE! ") if got["rare"] else "") + "+%d %s" % [got["amount"], got["name"]], Color("#b07cf0") if got["rare"] else UI.GOLD)
+				_show_toast((tr("RARE! ") if got["rare"] else "") + "+%d %s" % [got["amount"], tr(got["name"])], Color("#b07cf0") if got["rare"] else UI.GOLD)
 				_refresh_world_objects()
 				_refresh_hud()
 				_save()
@@ -484,7 +484,7 @@ func _start_fight(e: Dictionary) -> void:
 	var look: Array = BATTLE_SCENES[c["biome"]]
 	var combat := world.start_fight(e, rng.randi())
 	_combat_view.show()
-	_combat_view.bind(combat, tr("%s - Tier %d") % [c["name"], int(c["tier"])], look[0], look[1])
+	_combat_view.bind(combat, tr("%s - Tier %d") % [tr(c["name"]), int(c["tier"])], look[0], look[1])
 
 
 func _on_combat_finished(victory: bool) -> void:

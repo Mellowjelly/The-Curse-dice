@@ -2,7 +2,7 @@
 
 ## The owner
 - The owner is the **director** of this game and is a **beginner**: no programming experience, working solo with an AI team.
-- **Always reply to the owner in Thai.** Code, code comments, file names and in-game text stay in English (Thai localization comes later).
+- **Always reply to the owner in Thai.** Code, code comments and file names stay in English. In-game text is written in English and translated in `data/lang_th.json`.
 - Explain what you changed in plain language, as you would to a non-programmer. Give the owner a way to see it (what to click, what to watch for).
 - Work in small steps. One feature at a time, test it, then move on. Do not refactor things nobody asked about.
 - When a decision is about *fun, tone or story*, offer 2–3 options with a recommendation and let the owner choose. When it is purely technical, decide yourself and say what you chose.
@@ -27,6 +27,9 @@ Monetization is NOT a goal. Gacha must be fair: all currency earnable by playing
 - `scripts/ui/` = screens. They display state and forward clicks to core. **No game rules in UI.**
 - `data/*.json` = all content (heroes, monsters, encounters). Never hard-code content in scripts.
 - Use `preload()` constants rather than `class_name` for cross-script references, so headless tests work without an editor import.
+- **Translation (Thai):** `data/lang_th.json` maps English text -> Thai. Any new player-facing text (UI or data) needs a Thai line there.
+  UI code wraps text in `tr()` (formatted text: `tr("Round %d") % n`); data fields shown on screen are wrapped too (`tr(m["name"])`).
+  Keep `%s/%d` placeholders in the same order. Hero and place names stay English. A test fails if story text has no Thai line.
 
 ### Folders
 ```

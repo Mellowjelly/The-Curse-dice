@@ -133,7 +133,7 @@ func toggle_lock(hero_index: int) -> void:
 	if not is_alive(h):
 		return
 	if h.get("twisted", false):
-		_log("%s's die was twisted by Fate and stays put this round." % short_name(h))
+		_log(tr("%s's die was twisted by Fate and stays put this round.") % short_name(h))
 		return
 	h["locked"] = not h["locked"]
 	state_changed.emit()
@@ -159,7 +159,7 @@ func fate_reroll() -> bool:
 		return false
 	fate -= FATE_REROLL_COST
 	rerolls_left += 1
-	_log("Fate bends: +1 reroll (-%d Fate)" % FATE_REROLL_COST)
+	_log(tr("Fate bends: +1 reroll (-%d Fate)") % FATE_REROLL_COST)
 	state_changed.emit()
 	return true
 
@@ -176,7 +176,7 @@ func fate_twist(hero_index: int, face_index: int) -> bool:
 	h["face"] = face_index
 	h["locked"] = true
 	h["twisted"] = true  # a twisted die cannot be unlocked by accident
-	_log("* Fate twists %s's die to %s %d (-%d Fate)" % [short_name(h), String(h["faces"][face_index]["type"]).to_upper(),
+	_log(tr("* Fate twists %s's die to %s %d (-%d Fate)") % [short_name(h), String(h["faces"][face_index]["type"]).to_upper(),
 		int(h["faces"][face_index]["value"]), FATE_TWIST_COST])
 	state_changed.emit()
 	return true
@@ -230,7 +230,7 @@ func use_skill(hero_index: int) -> bool:
 	var h: Dictionary = heroes[hero_index]
 	var who := short_name(h)
 	h["charge"] = 0
-	_log("* %s uses %s!" % [who, h["skill"]["name"]])
+	_log(tr("* %s uses %s!") % [who, tr(h["skill"]["name"])])
 	match h["skill"]["id"]:
 		"broken_oath":
 			# Taunt: every monster that plans a single-target attack now targets this hero.
@@ -238,11 +238,11 @@ func use_skill(hero_index: int) -> bool:
 			for m in monsters:
 				if is_alive(m) and current_face(m)["type"] == "attack":
 					m["target"] = hero_index
-			_log("%s gains %d shield and draws every single-target attack to himself" % [who, OATH_SHIELD])
+			_log(tr("%s gains %d shield and draws every single-target attack to himself") % [who, OATH_SHIELD])
 			var oath_cost: int = min(OATH_HP_COST, h["hp"] - 1)
 			if oath_cost > 0:
 				h["hp"] -= oath_cost
-				_log("The broken oath bleeds %s (-%d HP)" % [who, oath_cost])
+				_log(tr("The broken oath bleeds %s (-%d HP)") % [who, oath_cost])
 		"hollow_flame":
 			for m in monsters:
 				if is_alive(m):
@@ -252,7 +252,7 @@ func use_skill(hero_index: int) -> bool:
 			var cost: int = min(HOLLOW_FLAME_HP_COST, h["hp"] - 1)
 			if cost > 0:
 				h["hp"] -= cost
-				_log("The flame feeds on %s (-%d HP)" % [who, cost])
+				_log(tr("The flame feeds on %s (-%d HP)") % [who, cost])
 		"last_rite":
 			var revived := false
 			for ally in heroes:
@@ -264,13 +264,13 @@ func use_skill(hero_index: int) -> bool:
 					ally["hp"] = LAST_RITE_REVIVE_HP
 					ally["face"] = rng.randi_range(0, ally["faces"].size() - 1)
 					ally["locked"] = false
-					_log("%s rises from death!" % ally["name"])
-			_log("All allies heal %d" % LAST_RITE_HEAL)
+					_log(tr("%s rises from death!") % tr(ally["name"]))
+			_log(tr("All allies heal %d") % LAST_RITE_HEAL)
 			# Dark price: the faithless priest pays with his own life force.
 			var rite_cost: int = min(LAST_RITE_HP_COST, h["hp"] - 1)
 			if rite_cost > 0:
 				h["hp"] -= rite_cost
-				_log("%s's faith is paid in blood (-%d HP)" % [who, rite_cost])
+				_log(tr("%s's faith is paid in blood (-%d HP)") % [who, rite_cost])
 		"backstab":
 			var t := _get_target()
 			_damage(t, BACKSTAB_DAMAGE, who, true, h)
@@ -279,7 +279,7 @@ func use_skill(hero_index: int) -> bool:
 			for m in monsters:
 				if is_alive(m):
 					m["burn"] = min(MAX_BURN, m["burn"] + 3)
-			_log("A sickly green fog: every enemy is burning")
+			_log(tr("A sickly green fog: every enemy is burning"))
 			_pay_hp(h, 2, "The plague bites %s" % who)
 		"loaded_dice":
 			var best := 0
@@ -288,7 +288,7 @@ func use_skill(hero_index: int) -> bool:
 					best = fi
 			h["face"] = best
 			h["locked"] = true
-			_log("%s's die lands on %s." % [who, String(h["faces"][best]["type"]).to_upper()])
+			_log(tr("%s's die lands on %s.") % [who, String(h["faces"][best]["type"]).to_upper()])
 			gain_fate(2, "Loaded Dice:")
 			_pay_hp(h, 3, "Luck is never free for %s" % who)
 		_:
@@ -308,10 +308,10 @@ func end_turn() -> void:
 	var fate_gain := 0
 	for t in combos:
 		if combos[t] >= 3:
-			_log("COMBO! Triple %s - values doubled" % t.to_upper())
+			_log(tr("COMBO! Triple %s - values doubled") % t.to_upper())
 			fate_gain += FATE_PER_PAIR
 		elif combos[t] >= 2:
-			_log("Combo: pair of %s - +1 each" % t.to_upper())
+			_log(tr("Combo: pair of %s - +1 each") % t.to_upper())
 			fate_gain += FATE_PER_PAIR
 	if fate_gain > 0:
 		gain_fate(fate_gain, "The combo feeds your Fate")
@@ -344,15 +344,15 @@ func intent_text(monster: Dictionary) -> String:
 		"attack":
 			var t: int = monster["target"]
 			var who: String = short_name(heroes[t]) if t >= 0 else "?"
-			return "Attack %d -> %s" % [v, who]
+			return tr("Attack %d -> %s") % [v, who]
 		"sweep":
-			return "Sweep %d -> ALL" % v
+			return tr("Sweep %d -> ALL") % v
 		"shield":
-			return "Shield %d" % v
+			return tr("Shield %d") % v
 		"heal":
-			return "Heal %d" % v
+			return tr("Heal %d") % v
 		_:
-			return "Hesitates"
+			return tr("Hesitates")
 
 
 # ---------------------------------------------------------------- internals
@@ -377,7 +377,7 @@ func _start_round() -> void:
 		for h in heroes:
 			if is_alive(h):
 				h["shield"] += PET_WARD
-		_log("%s wards the party (+%d shield)" % [pet["name"], PET_WARD])
+		_log(tr("%s wards the party (+%d shield)") % [tr(pet["name"]), PET_WARD])
 	for m in monsters:
 		m.erase("held_face")
 		if is_alive(m):
@@ -385,7 +385,7 @@ func _start_round() -> void:
 			m["target"] = _random_alive_index(heroes)
 	if not is_alive(monsters[target_index]):
 		target_index = _first_alive_index(monsters)
-	_log("--- Round %d ---" % round_number)
+	_log(tr("--- Round %d ---") % round_number)
 	state_changed.emit()
 
 
@@ -400,7 +400,7 @@ func _pay_hp(h: Dictionary, amount: int, text: String) -> void:
 	var cost: int = min(amount, h["hp"] - 1)
 	if cost > 0:
 		h["hp"] -= cost
-		_log("%s (-%d HP)" % [text, cost])
+		_log(tr("%s (-%d HP)") % [text, cost])
 
 
 static func _face_power(f: Dictionary) -> int:
@@ -414,7 +414,7 @@ func _spill(overkill: int, who: String, h: Dictionary) -> void:
 		return
 	var next := _get_target()
 	if not next.is_empty():
-		_log("The blow carries on!")
+		_log(tr("The blow carries on!"))
 		_damage(next, spill, who, false, h)
 
 
@@ -427,7 +427,7 @@ func flee() -> bool:
 		return false
 	fled = true
 	finished = true
-	_log("You break away and run!")
+	_log(tr("You break away and run!"))
 	state_changed.emit()
 	battle_ended.emit(false)
 	return true
@@ -456,7 +456,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 			_damage(t, value, who, false, h)
 			if is_alive(t):
 				t["burn"] = min(MAX_BURN, t["burn"] + BURN_PER_FIRE)
-				_log("%s is burning (%d)" % [t["name"], t["burn"]])
+				_log(tr("%s is burning (%d)") % [tr(t["name"]), t["burn"]])
 		"blood":
 			var t := _get_target()
 			if t.is_empty():
@@ -466,30 +466,30 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 			var cost: int = min(BLOOD_SELF_DAMAGE, h["hp"] - 1)
 			if cost > 0:
 				h["hp"] -= cost
-				_log("%s pays %d HP in blood" % [who, cost])
+				_log(tr("%s pays %d HP in blood") % [who, cost])
 		"cleave":
 			for m in monsters:
 				if is_alive(m):
 					_damage(m, value, who, false, h)
 		"shield":
 			h["shield"] += value
-			_log("%s raises a shield (%d)" % [who, value])
+			_log(tr("%s raises a shield (%d)") % [who, value])
 		"guard":
 			for ally in heroes:
 				if is_alive(ally):
 					ally["shield"] += value
-			_log("%s guards the party (+%d shield all)" % [who, value])
+			_log(tr("%s guards the party (+%d shield all)") % [who, value])
 		"heal":
 			var ally := _lowest_hp_ratio(heroes)
 			var healed: int = min(value, ally["max_hp"] - ally["hp"])
 			ally["hp"] += healed
 			var extra := value - healed
 			if healed > 0:
-				_log("%s heals %s for %d" % [who, short_name(ally), healed])
+				_log(tr("%s heals %s for %d") % [who, short_name(ally), healed])
 			if extra > 0:
 				# Healing nobody needs is not wasted: it becomes a ward.
 				ally["shield"] += extra
-				_log("%s's prayer wards %s (+%d shield)" % [who, short_name(ally), extra])
+				_log(tr("%s's prayer wards %s (+%d shield)") % [who, short_name(ally), extra])
 		"blank":
 			gain_fate(1, "%s rolls nothing..." % who)
 
@@ -500,7 +500,7 @@ func _apply_pet_battle_start() -> void:
 	match pet["passive"]:
 		"fate_start":
 			fate = min(MAX_FATE, fate + 2)
-			_log("%s caws: +2 Fate" % pet["name"])
+			_log(tr("%s caws: +2 Fate") % tr(pet["name"]))
 		"first_strike":
 			var i := _random_alive_index(monsters)
 			if i >= 0:
@@ -508,7 +508,7 @@ func _apply_pet_battle_start() -> void:
 		"burn_aura":
 			for m in monsters:
 				m["burn"] = min(MAX_BURN, m["burn"] + 1)
-			_log("%s sets every enemy alight" % pet["name"])
+			_log(tr("%s sets every enemy alight") % tr(pet["name"]))
 
 
 func _apply_pet_face() -> void:
@@ -526,12 +526,12 @@ func _apply_pet_face() -> void:
 			var ally := _lowest_hp_ratio(heroes)
 			if not ally.is_empty():
 				ally["hp"] = min(ally["max_hp"], ally["hp"] + v)
-				_log("%s heals %s for %d" % [pet["name"], short_name(ally), v])
+				_log(tr("%s heals %s for %d") % [tr(pet["name"]), short_name(ally), v])
 		"shield":
 			var ally := _lowest_hp_ratio(heroes)
 			if not ally.is_empty():
 				ally["shield"] += v
-				_log("%s shields %s (%d)" % [pet["name"], short_name(ally), v])
+				_log(tr("%s shields %s (%d)") % [tr(pet["name"]), short_name(ally), v])
 
 
 ## Adds Fate. Fate beyond the cap is not wasted: it becomes a free reroll next round.
@@ -543,10 +543,10 @@ func gain_fate(amount: int, reason: String) -> void:
 	fate += added
 	var over := amount - added
 	if added > 0:
-		_log("%s +%d Fate" % [reason, added])
+		_log(tr("%s +%d Fate") % [reason, added])
 	if over > 0:
 		_overflow_rerolls += over
-		_log("%s Fate overflows: +%d free reroll next round" % [reason, over])
+		_log(tr("%s Fate overflows: +%d free reroll next round") % [reason, over])
 
 
 func _monster_phase() -> void:
@@ -557,12 +557,12 @@ func _monster_phase() -> void:
 		m["shield"] = 0
 		if m["burn"] > 0:
 			m["hp"] = max(0, m["hp"] - m["burn"])
-			_log("%s burns for %d" % [m["name"], m["burn"]])
+			_log(tr("%s burns for %d") % [tr(m["name"]), m["burn"]])
 			_check_phase(m)
 			m["burn"] -= 1
 			if not is_alive(m):
 				m["burn"] = 0
-				_log("%s is reduced to ash!" % m["name"])
+				_log(tr("%s is reduced to ash!") % tr(m["name"]))
 	if _all_dead(monsters):
 		_finish(true)
 		return
@@ -581,24 +581,24 @@ func _monster_phase() -> void:
 					t = _random_alive_index(heroes)
 				_damage(heroes[t], v, m["name"], false, m)
 			"sweep":
-				_log("%s sweeps the whole party!" % m["name"])
+				_log(tr("%s sweeps the whole party!") % tr(m["name"]))
 				for h in heroes:
 					if is_alive(h):
 						_damage(h, v, m["name"], false, m)
 			"shield":
 				m["shield"] += v
-				_log("%s shields itself (%d)" % [m["name"], v])
+				_log(tr("%s shields itself (%d)") % [tr(m["name"]), v])
 			"heal":
 				var ally := _lowest_hp_ratio(monsters)
 				var healed: int = min(v, ally["max_hp"] - ally["hp"])
 				ally["hp"] += healed
 				if healed > 0:
-					_log("%s heals %s for %d" % [m["name"], ally["name"], healed])
+					_log(tr("%s heals %s for %d") % [tr(m["name"]), tr(ally["name"]), healed])
 				if v - healed > 0:
 					ally["shield"] += v - healed
-					_log("%s wards %s (+%d shield)" % [m["name"], ally["name"], v - healed])
+					_log(tr("%s wards %s (+%d shield)") % [tr(m["name"]), tr(ally["name"]), v - healed])
 			_:
-				_log("%s hesitates" % m["name"])
+				_log(tr("%s hesitates") % tr(m["name"]))
 		if _all_dead(heroes):
 			_finish(false)
 			return
@@ -642,24 +642,24 @@ func _damage(unit: Dictionary, amount: int, source: String, pierce := false, att
 	var dealt := amount - absorbed
 	var overkill: int = max(0, dealt - int(unit["hp"]))
 	unit["hp"] = max(0, unit["hp"] - dealt)
-	var text := "%s hits %s for %d" % [source, unit["name"], dealt]
+	var text := tr("%s hits %s for %d") % [tr(source), tr(unit["name"]), dealt]
 	if mult > 1.0 and dealt > 0:
-		text += " (super effective!)"
+		text += tr(" (super effective!)")
 	elif mult < 1.0 and dealt > 0:
-		text += " (resisted)"
+		text += tr(" (resisted)")
 	if absorbed > 0:
-		text += " (%d blocked)" % absorbed
+		text += tr(" (%d blocked)") % absorbed
 	_log(text)
 	damaged.emit(unit, dealt, absorbed)
 	# Bosses harden after a huge single hit, so one lucky combo cannot end the fight.
 	if unit.get("boss", false) and dealt >= BOSS_HARDEN_HIT and is_alive(unit) and heroes.has(attacker):
 		unit["shield"] += BOSS_HARDEN_SHIELD
-		_log("%s hardens against the blow (+%d shield)" % [unit["name"], BOSS_HARDEN_SHIELD])
+		_log(tr("%s hardens against the blow (+%d shield)") % [tr(unit["name"]), BOSS_HARDEN_SHIELD])
 	_check_phase(unit)
 	if not is_alive(unit):
 		unit["burn"] = 0
 		unit["shield"] = 0
-		_log("%s falls!" % unit["name"])
+		_log(tr("%s falls!") % tr(unit["name"]))
 	return overkill
 
 
@@ -673,7 +673,7 @@ func _check_phase(unit: Dictionary) -> void:
 		unit["held_face"] = current_face(unit)
 		unit["phased"] = true
 		unit["faces"] = p2["faces"].duplicate(true)
-		_log("!! " + p2["text"])
+		_log("!! " + tr(p2["text"]))
 		phase_changed.emit(unit, p2["text"])
 
 
@@ -724,8 +724,8 @@ func _finish(victory: bool) -> void:
 		fate = min(MAX_FATE, fate + FATE_PER_VICTORY)
 		for m in monsters:
 			if m.get("death_line", "") != "":
-				_log("!! " + m["death_line"])
-	_log("VICTORY!" if victory else "Your party has fallen...")
+				_log("!! " + tr(m["death_line"]))
+	_log(tr("VICTORY!") if victory else "Your party has fallen...")
 	state_changed.emit()
 	battle_ended.emit(victory)
 

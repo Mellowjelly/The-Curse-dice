@@ -233,7 +233,7 @@ func _refresh_scene() -> void:
 		spot.flat = true
 		spot.position = rect.position
 		spot.size = rect.size
-		spot.tooltip_text = tr("%s (Lv %d/%d)\n%s") % [b["name"], lv, b["costs"].size(), b["desc"]]
+		spot.tooltip_text = tr("%s (Lv %d/%d)\n%s") % [tr(b["name"]), lv, b["costs"].size(), tr(b["desc"])]
 		var hover := StyleBoxFlat.new()
 		hover.bg_color = Color(1, 0.8, 0.4, 0.12)
 		hover.border_color = UI.GOLD
@@ -251,7 +251,7 @@ func _refresh_scene() -> void:
 			dark.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			spot.add_child(dark)
 		_scene_layer.add_child(spot)
-		var sign := UI.label((tr("%s\nLv %d") % [b["name"].split(" ")[-1], lv]) if lv > 0 else tr("%s\n(ruined)") % b["name"].split(" ")[-1], 11,
+		var sign := UI.label((tr("%s\nLv %d") % [tr(b["name"].split(" ")[-1]), lv]) if lv > 0 else tr("%s\n(ruined)") % tr(b["name"].split(" ")[-1]), 11,
 			UI.GOLD if lv > 0 else UI.DIM)
 		sign.set_meta("dynamic", true)
 		sign.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -276,7 +276,7 @@ func _refresh_scene() -> void:
 		talk.size = Vector2(70, 96)
 		talk.position = Vector2(13, 0)
 		talk.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		talk.tooltip_text = "%s %s" % [vdef["name"], vdef["title"]]
+		talk.tooltip_text = "%s %s" % [tr(vdef["name"]), tr(vdef["title"])]
 		for st in ["normal", "hover", "pressed", "focus"]:
 			talk.add_theme_stylebox_override(st, StyleBoxEmpty.new())
 		talk.pressed.connect(func(): _open_dialog(vid))
@@ -372,14 +372,14 @@ func _refresh() -> void:
 	_refresh_time_box()
 	_refresh_scene()
 	var speaker := _hero_def(profile.party[0] if not profile.party.is_empty() else "varek")
-	_fire_line.text = tr("At the fire, %s stares into the embers: \"%s\"") % [speaker.get("name", "?"), speaker.get("lore", "")]
+	_fire_line.text = tr("At the fire, %s stares into the embers: \"%s\"") % [tr(speaker.get("name", "?")), tr(speaker.get("lore", ""))]
 	_clear(_result_box)
 	if not last_result.is_empty():
 		var t := tr("Your last journey earned %d Soul Embers and %d Grave Dice.") % [int(last_result["embers"]), int(last_result.get("dice", 0))]
 		if last_result.has("banked"):
 			t = tr("Back from the Cursed Isle. Stored: ") + last_result["banked"]
 		for q in last_result["quests"]:
-			t += tr("   Quest complete: %s (+%d)") % [q["name"], int(q["reward"])]
+			t += tr("   Quest complete: %s (+%d)") % [tr(q["name"]), int(q["reward"])]
 		_result_box.add_child(UI.wrap_label(t, 14, UI.GOLD, 560))
 	var saved := Profile.has_saved_run()
 	_go.text = tr("Continue your journey") if saved else (tr("Set out on the Hollow Road") if profile.party.size() == 3 else tr("Choose 3 heroes to set out"))
@@ -425,7 +425,7 @@ func _refresh_party() -> void:
 		var id: String = h["id"]
 		var owned: bool = id in profile.owned_heroes
 		var chosen: bool = id in profile.party
-		var text := tr("%s  (%s)\nHP %d   Skill: %s\n%s") % [h["name"], h["role"], int(h["hp"]), h["skill"]["name"],
+		var text := tr("%s  (%s)\nHP %d   Skill: %s\n%s") % [tr(h["name"]), tr(h["role"]), int(h["hp"]), tr(h["skill"]["name"]),
 			" ".join(h["faces"].map(UI.face_short))] if owned else (tr("???\nNot yet summoned\n(Summon Roll tab)") if profile.feature_unlocked("summon") else tr("???\nA hero still lost\nin the dice"))
 		if owned:
 			text = "[%s] %s  %s\n%s" % [h.get("grade", "SR"), UI.stars_text(profile.star("hero", id)), String(h.get("element", "")).capitalize(), text]
@@ -476,10 +476,10 @@ func _refresh_buildings() -> void:
 		row.add_theme_constant_override("separation", 10)
 		var info := VBoxContainer.new()
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_child(UI.label(tr("%s   Lv %d/%d") % [b["name"], lv, b["costs"].size()], 17, UI.GOLD if lv > 0 else UI.TEXT))
-		info.add_child(UI.wrap_label(b["desc"], 13, UI.DIM, 340))
+		info.add_child(UI.label(tr("%s   Lv %d/%d") % [tr(b["name"]), lv, b["costs"].size()], 17, UI.GOLD if lv > 0 else UI.TEXT))
+		info.add_child(UI.wrap_label(tr(b["desc"]), 13, UI.DIM, 340))
 		row.add_child(info)
-		var btn := _confirm_button(tr("MAX") if cost < 0 else tr("Build (%d Embers)") % cost, func(): if profile.upgrade(id): Sfx.play(self, "fate"); _toast(tr("%s is now level %d.") % [b["name"], profile.level(id)]); _refresh(), 16)
+		var btn := _confirm_button(tr("MAX") if cost < 0 else tr("Build (%d Embers)") % cost, func(): if profile.upgrade(id): Sfx.play(self, "fate"); _toast(tr("%s is now level %d.") % [tr(b["name"]), profile.level(id)]); _refresh(), 16)
 		btn.disabled = not profile.can_upgrade(id)
 		btn.custom_minimum_size = Vector2(170, 44)
 		row.add_child(btn)
@@ -502,9 +502,9 @@ func _refresh_summon() -> void:
 		bb.custom_minimum_size = Vector2(0, 56)
 		row.add_child(bb)
 	var info: Dictionary = s["banners"][_banner]
-	_summon_box.add_child(UI.label(info["name"], 18, UI.GOLD))
+	_summon_box.add_child(UI.label(tr(info["name"]), 18, UI.GOLD))
 	_summon_box.add_child(UI.wrap_label(tr("%s  Each roll: %d%% something new, otherwise %d Soul Embers. Guaranteed new within %d rolls (now %d/%d).") % [
-		info["desc"], int(s["new_chance"]), int(s["embers_amount"]), int(s["pity"]), profile.pity_count(_banner), int(s["pity"])], 13, UI.DIM, 540))
+		tr(info["desc"]), int(s["new_chance"]), int(s["embers_amount"]), int(s["pity"]), profile.pity_count(_banner), int(s["pity"])], 13, UI.DIM, 540))
 	var sealed := profile.locked_in(_banner)
 	if sealed.is_empty():
 		_summon_box.add_child(UI.label(tr("Everything in this banner is yours."), 14, UI.GREEN))
@@ -548,9 +548,9 @@ func _reveal_card(r: Dictionary) -> Control:
 	hb.add_child(pic)
 	var txt := VBoxContainer.new()
 	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	txt.add_child(UI.label((tr("NEW!  ") if r["new"] else "") + (("[%s] " % grade) if grade != "" else "") + r["name"], 20,
+	txt.add_child(UI.label((tr("NEW!  ") if r["new"] else "") + (("[%s] " % grade) if grade != "" else "") + tr(r["name"]), 20,
 		UI.grade_color(grade) if grade != "" else UI.TEXT))
-	txt.add_child(UI.wrap_label(r["text"], 13, Color("#d8c8f0"), 260))
+	txt.add_child(UI.wrap_label(tr(r["text"]), 13, Color("#d8c8f0"), 260))
 	hb.add_child(txt)
 	# Pop-in reveal.
 	panel.pivot_offset = Vector2(280, 60)
@@ -576,9 +576,9 @@ func _refresh_quests() -> void:
 	_clear(_quests)
 	for q in profile.quests:
 		var done: bool = q["id"] in profile.quests_done
-		var line := tr("%s %s  (%d/%d)  +%d Embers") % [tr("[done]") if done else "-", q["name"], profile.quest_progress(q), int(q["goal"]), int(q["reward"])]
+		var line := tr("%s %s  (%d/%d)  +%d Embers") % [tr("[done]") if done else "-", tr(q["name"]), profile.quest_progress(q), int(q["goal"]), int(q["reward"])]
 		_quests.add_child(UI.label(line, 15, UI.GREEN if done else UI.TEXT))
-		_quests.add_child(UI.wrap_label("     " + q["desc"], 12, UI.DIM, 540))
+		_quests.add_child(UI.wrap_label("     " + tr(q["desc"]), 12, UI.DIM, 540))
 	_refresh_bestiary()
 
 
@@ -606,8 +606,8 @@ func _refresh_bestiary() -> void:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if e["known"]:
 			var rank: String = "" if e["rank"] == "common" else "  [%s]" % String(e["rank"]).to_upper()
-			info.add_child(UI.label("%s%s   x%d" % [e["name"], rank, int(e["kills"])], 15, UI.TEXT))
-			info.add_child(UI.wrap_label(e["lore"], 12, UI.DIM, 330))
+			info.add_child(UI.label("%s%s   x%d" % [tr(e["name"]), rank, int(e["kills"])], 15, UI.TEXT))
+			info.add_child(UI.wrap_label(tr(e["lore"]), 12, UI.DIM, 330))
 		else:
 			info.add_child(UI.label("???", 15, UI.DIM))
 			info.add_child(UI.label(tr("Not yet met."), 12, UI.DIM))
@@ -622,7 +622,7 @@ func _refresh_bestiary() -> void:
 				var res := profile.claim_bestiary(id)
 				if not res.is_empty():
 					Sfx.play(self, "fate")
-					_toast(tr("Bestiary: ") + res["text"])
+					_toast(tr("Bestiary: ") + tr(res["text"]))
 				_refresh(), 13)
 			btn.custom_minimum_size = Vector2(90, 40)
 			row.add_child(btn)
@@ -674,7 +674,7 @@ func _render_dialog() -> void:
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation", 6)
 	hb.add_child(box)
-	box.add_child(UI.label("%s, %s" % [v["name"], v["title"]], 18, UI.GOLD))
+	box.add_child(UI.label("%s, %s" % [tr(v["name"]), tr(v["title"])], 18, UI.GOLD))
 	var req := profile.npc_request(_dialog_npc)
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 8)
@@ -685,17 +685,17 @@ func _render_dialog() -> void:
 		box.add_child(UI.wrap_label(tr("\"You have done so much for us. Ashfall will not forget you.\""), 14, UI.TEXT, 460))
 	elif profile.is_request_done(_dialog_npc):
 		box.add_child(UI.wrap_label(tr("\"You did it? Truly?\""), 14, UI.TEXT, 460))
-		box.add_child(UI.label(tr("%s  -  done!") % req["title"], 15, UI.GREEN))
+		box.add_child(UI.label(tr("%s  -  done!") % tr(req["title"]), 15, UI.GREEN))
 		buttons.add_child(_dialog_button(tr("Claim reward"), _claim_dialog))
 	elif profile.is_request_active(_dialog_npc):
-		box.add_child(UI.wrap_label("\"%s\"" % v["greeting"][randi() % v["greeting"].size()], 14, UI.TEXT, 460))
-		box.add_child(UI.label("%s:  %d / %d" % [req["title"], profile.request_progress(_dialog_npc), int(req["goal"]["amount"])], 15, UI.GOLD))
-		box.add_child(UI.wrap_label(req["ask"], 12, UI.DIM, 460))
+		box.add_child(UI.wrap_label("\"%s\"" % tr(v["greeting"][randi() % v["greeting"].size()]), 14, UI.TEXT, 460))
+		box.add_child(UI.label("%s:  %d / %d" % [tr(req["title"]), profile.request_progress(_dialog_npc), int(req["goal"]["amount"])], 15, UI.GOLD))
+		box.add_child(UI.wrap_label(tr(req["ask"]), 12, UI.DIM, 460))
 		if req["goal"]["scope"] == "deliver":
 			box.add_child(UI.label(tr("Counts what is in your Storage. Handed over when you claim."), 12, UI.DIM))
 	else:
-		box.add_child(UI.wrap_label("\"%s\"" % req["ask"], 14, UI.TEXT, 460))
-		box.add_child(UI.label(tr("Request: ") + req["title"], 15, UI.GOLD))
+		box.add_child(UI.wrap_label("\"%s\"" % tr(req["ask"]), 14, UI.TEXT, 460))
+		box.add_child(UI.label(tr("Request: ") + tr(req["title"]), 15, UI.GOLD))
 		box.add_child(_reward_line(req["reward"]))
 		buttons.add_child(_dialog_button(tr("I will help"), func(): profile.accept_request(_dialog_npc); Sfx.play(self, "fate"); _refresh()))
 	var bye := UI.button(tr("Goodbye"), func(): _dialog.hide(); _refresh(), 14)
@@ -716,7 +716,7 @@ func _reward_line(r: Dictionary) -> Control:
 	if kind in ["hero", "pet", "relic"]:
 		var d := profile.item_def(kind, r["id"])
 		var grade: String = d.get("grade", "SR")
-		return UI.label(tr("Reward: [%s] %s (%s)") % [grade, d.get("name", r["id"]), {"hero": "hero", "pet": "companion", "relic": tr("relic weapon")}[kind]], 15, UI.grade_color(grade))
+		return UI.label(tr("Reward: [%s] %s (%s)") % [grade, tr(d.get("name", r["id"])), {"hero": "hero", "pet": "companion", "relic": tr("relic weapon")}[kind]], 15, UI.grade_color(grade))
 	var names := {"dust": tr("Star Dust"), "dice": tr("Grave Dice"), "embers": tr("Soul Embers")}
 	return UI.label(tr("Reward: %d %s") % [int(r["amount"]), names[kind]], 15, Color("#d8c8f0"))
 
@@ -760,10 +760,10 @@ func _refresh_collection() -> void:
 			info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			if owned:
 				var st := profile.star(kind, id)
-				info.add_child(UI.label("[%s] %s   %s" % [grade, d["name"], UI.stars_text(st)], 15, UI.grade_color(grade)))
+				info.add_child(UI.label("[%s] %s   %s" % [grade, tr(d["name"]), UI.stars_text(st)], 15, UI.grade_color(grade)))
 				var nxt := st + 1
 				var desc: Array = profile.star_rules["desc"][kind]
-				info.add_child(UI.wrap_label((tr("Next star: ") + desc[st]) if nxt <= 5 else tr("Fully upgraded."), 12, UI.DIM, 330))
+				info.add_child(UI.wrap_label((tr("Next star: ") + tr(desc[st])) if nxt <= 5 else tr("Fully upgraded."), 12, UI.DIM, 330))
 			else:
 				info.add_child(UI.label("[%s] ???" % grade, 15, UI.DIM))
 				info.add_child(UI.label(tr("Not yet found (summon or villagers' rewards)"), 12, UI.DIM))
@@ -824,9 +824,9 @@ func _material_info() -> Dictionary:
 	var wdata: Dictionary = GameData.load_json("res://data/world.json")
 	var info := {}
 	for c in wdata["countries"]:
-		info[c["mineral"]["id"]] = [c["mineral"]["name"], int(c["mineral"]["value"]), c["name"], false]
-		info[c["rare"]["id"]] = [c["rare"]["name"], int(c["rare"]["value"]), c["name"], true]
-		info[c["wood"]["id"]] = [c["wood"]["name"], int(c["wood"]["value"]), c["name"], false]
+		info[c["mineral"]["id"]] = [tr(c["mineral"]["name"]), int(c["mineral"]["value"]), tr(c["name"]), false]
+		info[c["rare"]["id"]] = [tr(c["rare"]["name"]), int(c["rare"]["value"]), tr(c["name"]), true]
+		info[c["wood"]["id"]] = [tr(c["wood"]["name"]), int(c["wood"]["value"]), tr(c["name"]), false]
 	for h in wdata["hides"]:
 		info[h] = [wdata["hides"][h][0], int(wdata["hides"][h][1]), tr("beasts and bosses"), int(wdata["hides"][h][1]) >= 25]
 	return info
@@ -899,7 +899,7 @@ func _refresh_forge() -> void:
 		var grade: String = r["grade"]
 		var box := VBoxContainer.new()
 		var head := HBoxContainer.new()
-		var title := UI.label("[%s] %s" % [grade, r["name"]], 15, UI.grade_color(grade))
+		var title := UI.label("[%s] %s" % [grade, tr(r["name"])], 15, UI.grade_color(grade))
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		head.add_child(title)
 		var effect := ""
@@ -912,7 +912,7 @@ func _refresh_forge() -> void:
 		head.add_child(UI.label(effect, 13, UI.TEXT))
 		box.add_child(head)
 		if r["slot"] == "treat":
-			box.add_child(UI.wrap_label(r.get("desc", "") + tr(" (Fills the companion's blank d4 face for good; a 5-star companion gets +1 on its weakest face.)"), 12, UI.DIM, 540))
+			box.add_child(UI.wrap_label(tr(r.get("desc", "")) + tr(" (Fills the companion's blank d4 face for good; a 5-star companion gets +1 on its weakest face.)"), 12, UI.DIM, 540))
 		if r["slot"] == "weapon":
 			var now: Array[String] = []
 			for hid in profile.party:
@@ -929,7 +929,7 @@ func _refresh_forge() -> void:
 		need.append(tr("Embers %d/%d") % [profile.embers, int(r["embers"])])
 		var row := HBoxContainer.new()
 		row.add_child(UI.wrap_label("   ".join(need), 12, UI.GREEN if profile.can_craft(r["id"]) else UI.DIM, 400))
-		var craft := _confirm_button(tr("Craft"), func(): if profile.craft(r["id"]) >= 0: Sfx.play(self, "triple"); _toast(tr("Crafted %s. Equip it in the Armory.") % r["name"]); _refresh())
+		var craft := _confirm_button(tr("Craft"), func(): if profile.craft(r["id"]) >= 0: Sfx.play(self, "triple"); _toast(tr("Crafted %s. Equip it in the Armory.") % tr(r["name"])); _refresh())
 		craft.disabled = not profile.can_craft(r["id"])
 		craft.custom_minimum_size = Vector2(80, 34)
 		row.add_child(craft)
@@ -950,16 +950,16 @@ func _refresh_armory() -> void:
 		var row := VBoxContainer.new()
 		var where: String = tr("in the chest")
 		if owner.begins_with("pet:"):
-			where = tr("fed to ") + String(profile.item_def("pet", owner.substr(4)).get("name", owner))
+			where = tr("fed to ") + tr(String(profile.item_def("pet", owner.substr(4)).get("name", owner)))
 		elif owner != "":
 			where = tr("worn by ") + owner.capitalize()
-		row.add_child(UI.label("[%s] %s  -  %s" % [r["grade"], r["name"], where], 14,
+		row.add_child(UI.label("[%s] %s  -  %s" % [r["grade"], tr(r["name"]), where], 14,
 			UI.grade_color(r["grade"])))
 		var btns := HFlowContainer.new()
 		btns.add_theme_constant_override("h_separation", 6)
 		if r["slot"] == "treat":
 			for pid in profile.owned_pets:
-				var pet_name: String = profile.item_def("pet", pid).get("name", pid)
+				var pet_name: String = tr(profile.item_def("pet", pid).get("name", pid))
 				var fb := UI.button((tr("Fed: ") if owner == "pet:" + pid else tr("Feed ")) + pet_name, func(): if profile.feed_treat(pid, uid): Sfx.play(self, "fate"); _toast(tr("%s will remember the taste.") % pet_name); _refresh(), 12)
 				fb.disabled = owner == "pet:" + pid
 				fb.custom_minimum_size = Vector2(130, 30)

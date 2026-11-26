@@ -971,3 +971,33 @@ func test_v32_translations() -> void:
 			bad.append(key)
 	check(bad.is_empty(), "Thai placeholders match English: %s" % str(bad))
 	check(ResourceLoader.exists("res://assets/fonts/NotoSansThai-Regular.woff2"), "Thai font is bundled")
+	# Every player-facing text in data/ has a Thai line (proper names of heroes and places may stay English).
+	var keep_english := ["Varek the Oathbroken", "Lys the Hollow", "Brother Aldric", "Rook the Gravedigger",
+		"Sister Vael", "Mordecai the Gambler", "The Hollow Road"]
+	var missing: Array[String] = []
+	for f in DirAccess.get_files_at("res://data"):
+		if f.ends_with(".json") and not f.begins_with("lang_"):
+			_collect_untranslated(GameData.load_json("res://data/" + f), "", th, keep_english, missing)
+	check(missing.is_empty(), "all story text has Thai (%d missing, e.g. %s)" % [missing.size(), str(missing.slice(0, 3))])
+
+
+const _NOT_TEXT_KEYS := ["id", "type", "sprite", "element", "grade", "slot", "stat", "scope", "kind", "material",
+	"times", "color", "biome", "music", "tile", "icon", "bg", "background", "rarity", "mood", "strong", "effect", "goal", "phase", "group"]
+
+
+func _collect_untranslated(x: Variant, key: String, th: Dictionary, keep: Array, out: Array[String]) -> void:
+	if x is Dictionary:
+		for k in x:
+			_collect_untranslated(x[k], k, th, keep, out)
+	elif x is Array:
+		for v in x:
+			_collect_untranslated(v, key, th, keep, out)
+	elif x is String:
+		var re := RegEx.new()
+		re.compile("[A-Za-z]{2}")
+		var ident := RegEx.new()
+		ident.compile("^[a-z0-9_]+$")
+		if key in _NOT_TEXT_KEYS or re.search(x) == null or ident.search(x) != null:
+			return
+		if not th.has(x) and not x in keep and not x in out:
+			out.append(x)

@@ -272,13 +272,13 @@ func _on_run_changed() -> void:
 		_recorded = true
 		Profile.delete_saved_run()
 		TownScreen.last_result = profile.record_run(run)
-	_header.text = tr("%s  -  tile %d / %d") % [run.region["name"], run.pos, run.board.size() - 1]
+	_header.text = tr("%s  -  tile %d / %d") % [tr(run.region["name"]), run.pos, run.board.size() - 1]
 	if run.time_of_day() != "":
 		_header.text += "   (%s)" % run.time_of_day().capitalize()
 	_map_art.modulate = UI.TIME_TINT.get(run.time_of_day(), Color.WHITE)
 	_stats.text = tr("Gold %d    Fate %d/%d") % [run.gold, run.combat.fate, Combat.MAX_FATE]
 	if not run.combat.pet.is_empty():
-		_stats.text += tr("    Pet: ") + run.combat.pet["name"]
+		_stats.text += tr("    Pet: ") + tr(run.combat.pet["name"])
 	_style_tiles()
 	_move_token()
 	_refresh_party()
@@ -322,12 +322,12 @@ func _refresh_party() -> void:
 		holder.add_child(card)
 		card.add_theme_constant_override("separation", 4)
 		var alive := Combat.is_alive(h)
-		card.add_child(UI.label(h["name"] + ("" if alive else tr("  (fallen)")), 15, UI.TEXT if alive else UI.DIM))
+		card.add_child(UI.label(tr(h["name"]) + ("" if alive else tr("  (fallen)")), 15, UI.TEXT if alive else UI.DIM))
 		card.add_child(UI.hp_bar(h["hp"], h["max_hp"], 18))
 		card.add_child(UI.wrap_label(" ".join(h["faces"].map(UI.face_short)), 13, UI.DIM, 150))
-		card.add_child(UI.label(tr("Skill: ") + h["skill"].get("name", "-"), 12, UI.DIM))
+		card.add_child(UI.label(tr("Skill: ") + tr(h["skill"].get("name", "-")), 12, UI.DIM))
 		var w: Dictionary = h.get("weapon", {})
-		card.add_child(UI.label(tr("Weapon: ") + (w["name"] if not w.is_empty() else tr("bare hands")), 12,
+		card.add_child(UI.label(tr("Weapon: ") + (tr(w["name"]) if not w.is_empty() else tr("bare hands")), 12,
 			UI.BLOOD if w.get("rarity", "") == "cursed" else UI.DIM))
 		_party_box.add_child(holder)
 
@@ -391,7 +391,7 @@ func _refresh_modal() -> void:
 				var p: Dictionary = run.pet_offers[i]
 				var grade: String = p.get("grade", "SR")
 				var st := run.star_of("pet", p["id"])
-				var text := "[%s] %s  %s  [%s]\n%s" % [grade, p["name"], UI.stars_text(st), " ".join(p["faces"].map(UI.face_short)), p["desc"]]
+				var text := "[%s] %s  %s  [%s]\n%s" % [grade, tr(p["name"]), UI.stars_text(st), " ".join(p["faces"].map(UI.face_short)), tr(p["desc"])]
 				_modal_box.add_child(UI.choice_button(text, func(): run.choose_pet(i), UI.grade_color(grade)))
 		"loot":
 			_modal_title(tr("Weapons"))
@@ -401,8 +401,8 @@ func _refresh_modal() -> void:
 			for wi in run.weapon_offers.size():
 				var w: Dictionary = run.weapon_offers[wi]
 				var color := UI.BLOOD if w["rarity"] == "cursed" else (UI.GOLD if w["rarity"] == "rare" else UI.TEXT)
-				_modal_box.add_child(UI.label(tr("%s  (%s)   faces: %s") % [w["name"], w["rarity"], "  ".join(w["faces"].map(UI.face_short))], 18, color))
-				_modal_box.add_child(UI.wrap_label(w["desc"], 14, UI.DIM, 680))
+				_modal_box.add_child(UI.label(tr("%s  (%s)   faces: %s") % [tr(w["name"]), w["rarity"], "  ".join(w["faces"].map(UI.face_short))], 18, color))
+				_modal_box.add_child(UI.wrap_label(tr(w["desc"]), 14, UI.DIM, 680))
 				var row := HBoxContainer.new()
 				row.add_theme_constant_override("separation", 8)
 				for hi in run.heroes.size():
@@ -420,11 +420,11 @@ func _refresh_modal() -> void:
 			_modal_text(tr("Choose one carving. It changes that hero's die for the rest of the run."), UI.DIM)
 			for i in run.carve_offers.size():
 				var o: Dictionary = run.carve_offers[i]
-				_modal_box.add_child(UI.choice_button(o["text"], func(): run.choose_carving(i), UI.FACE_COLORS[o["new"]["type"]]))
+				_modal_box.add_child(UI.choice_button(tr(o["text"]), func(): run.choose_carving(i), UI.FACE_COLORS[o["new"]["type"]]))
 			_modal_box.add_child(UI.button(tr("Skip"), func(): run.skip_carving()))
 		"event":
-			_modal_title(run.event["title"], Color("#b39ddb"))
-			_modal_text(run.event["text"])
+			_modal_title(tr(run.event["title"]), Color("#b39ddb"))
+			_modal_text(tr(run.event["text"]))
 			if run.event_result == "":
 				for i in run.event["options"].size():
 					var opt: Dictionary = run.event["options"][i]
@@ -439,7 +439,7 @@ func _refresh_modal() -> void:
 			for it in run.shop_items():
 				var id: String = it["id"]
 				var bought: bool = id in run.shop_bought
-				var text := tr("%s  (%d gold)\n%s") % [it["name"], run.price(it), tr("Sold") if bought else it["desc"]]
+				var text := tr("%s  (%d gold)\n%s") % [tr(it["name"]), run.price(it), tr("Sold") if bought else tr(it["desc"])]
 				_modal_box.add_child(UI.choice_button(text, func(): run.buy(id), UI.GOLD, run.can_buy(id)))
 			_modal_box.add_child(UI.button(tr("Leave"), func(): run.leave_shop()))
 		"rest":
@@ -471,7 +471,7 @@ func _end_buttons() -> void:
 	if not res.is_empty():
 		var t := tr("+%d Soul Embers, +%d Grave Dice") % [int(res["embers"]), int(res.get("dice", 0))]
 		for q in res["quests"]:
-			t += tr("\nQuest complete: %s") % q["name"]
+			t += tr("\nQuest complete: %s") % tr(q["name"])
 		_modal_text(t, Color("#e08a3c"))
 	_modal_box.add_child(UI.choice_button(tr("Return to Ashfall"), func(): get_tree().change_scene_to_file(TOWN_SCENE), UI.GOLD))
 

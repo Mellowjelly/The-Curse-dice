@@ -96,7 +96,7 @@ func bind(c: Combat, fight_title: String, background: String = "battle_early", t
 	_log.append_text("\n[color=#c9a227][b]== %s ==[/b][/color]\n" % fight_title)
 	_on_log(tr("--- Round %d ---") % combat.round_number)
 	if not combat.pet.is_empty() and combat.pet["passive"] in ["first_strike", "fate_start"]:
-		_on_log(tr("%s is ready.") % combat.pet["name"])
+		_on_log(tr("%s is ready.") % tr(combat.pet["name"]))
 	_refresh()
 
 
@@ -445,7 +445,7 @@ func _refresh() -> void:
 		_pet_label.text = ""
 	else:
 		var pf: Dictionary = combat.pet["faces"][combat.pet["face"]]
-		_pet_label.text = tr("Pet %s rolled: %s") % [combat.pet["name"], UI.face_short(pf)]
+		_pet_label.text = tr("Pet %s rolled: %s") % [tr(combat.pet["name"]), UI.face_short(pf)]
 
 	var combos := combat.compute_combos()
 	var parts: Array[String] = []
@@ -524,7 +524,7 @@ func _monster_card(m: Dictionary, index: int) -> Control:
 	panel.add_child(outer)
 	var box := VBoxContainer.new()
 	outer.add_child(_sprite_row("m%d" % index, m, box, false))
-	var name_text: String = (tr("[BOSS] ") if m["boss"] else "") + m["name"]
+	var name_text: String = (tr("[BOSS] ") if m["boss"] else "") + tr(m["name"])
 	if m.get("phased", false):
 		name_text += tr("  (enraged)")
 	var nl := UI.label(name_text, 17)
@@ -555,7 +555,7 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	box.add_theme_constant_override("separation", 4)
 	panel.add_child(box)
 	var info := VBoxContainer.new()
-	var nl := UI.label(h["name"], 16)
+	var nl := UI.label(tr(h["name"]), 16)
 	nl.clip_text = true
 	info.add_child(nl)
 	info.add_child(UI.hp_bar(h["hp"], h["max_hp"]))
@@ -624,7 +624,7 @@ func _skill_button(h: Dictionary, index: int) -> Control:
 	if is_ready and h["skill"]["id"] == "broken_oath" and not combat.monsters.any(
 			func(m): return Combat.is_alive(m) and Combat.current_face(m)["type"] == "attack"):
 		hint = tr("  (no single attacks incoming)")
-	b.text = "%s  %s%s\n%s" % [h["skill"]["name"], tr("READY!") if is_ready else "(%d/%d)" % [h["charge"], cost], hint, h["skill"]["desc"]]
+	b.text = "%s  %s%s\n%s" % [tr(h["skill"]["name"]), tr("READY!") if is_ready else "(%d/%d)" % [h["charge"], cost], hint, tr(h["skill"]["desc"])]
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.add_theme_font_size_override("font_size", 12)
 	b.disabled = not is_ready
