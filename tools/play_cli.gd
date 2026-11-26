@@ -556,6 +556,6 @@ func _reward_text(r: Dictionary) -> String:
 		"embers":
 			return "%d Soul Embers" % int(r["amount"])
 	var id: String = r.get("id", "")
-	var owned: bool = (r["kind"] == "hero" and id in profile.owned_heroes) or (r["kind"] == "pet" and id in profile.owned_pets) \
-		or (r["kind"] == "relic" and id in profile.unlocked_weapons)
-	return "%s %s%s" % [r["kind"], r.get("id", ""), " (already owned -> Star Dust)" if owned else ""]
+	if profile.owns(r["kind"], id):
+		return "%d Star Dust (you already have %s)" % [profile.duplicate_dust(r["kind"], id), id]
+	return "%s %s" % [r["kind"], id]

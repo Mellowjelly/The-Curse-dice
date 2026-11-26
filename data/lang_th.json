@@ -758,5 +758,8 @@
 	" A weapon lies among the bones.": " มีอาวุธวางอยู่ท่ามกลางกองกระดูก",
 	" Inside, a bone chisel.": " ข้างในมีสิ่วกระดูก",
 	" The Candle Moth mends your wounds (+%d HP).": " ผีเสื้อเทียนสมานแผลให้ (+%d HP)",
-	" The party catches its breath (+%d%% HP). The elite drops its arms.": " ทีมได้พักหายใจ (+%d%% HP) ศัตรูชั้นยอดทิ้งอาวุธไว้"
+	" The party catches its breath (+%d%% HP). The elite drops its arms.": " ทีมได้พักหายใจ (+%d%% HP) ศัตรูชั้นยอดทิ้งอาวุธไว้",
+	"Reward: %d Star Dust (you already have %s)": "รางวัล: ผงดาว %d (คุณมี %s แล้ว)",
+	"hero": "ฮีโร่",
+	"companion": "สัตว์คู่ใจ"
 }

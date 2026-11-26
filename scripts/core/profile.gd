@@ -23,7 +23,7 @@ var time_of_day := 1              # index into TIMES (starts at Day)
 var star_dust := 0                # upgrade material
 var stars := {}                   # "hero:varek" / "pet:ash_crow" / "relic:plague_lance" -> 1..5
 var last_bank_quests: Array = []  # quests completed by the last bank() (not saved)
-var npc_step := {}                # villager id -> index of their next request
+var npc_done := {}                # villager id -> ids of the requests already finished (order-independent)
 var npc_active := {}              # villager id -> { "base": int, "run_best": int } for the accepted request
 var villagers: Array
 var materials := {}               # banked materials from the open world
@@ -62,7 +62,15 @@ func _init(save_path: String = DEFAULT_PATH) -> void:
 # ---------------------------------------------------------------- save / load
 
 ## Bump when the save layout changes, and add a step to migrate().
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
+
+## Villager request order before 3.3 (saves stored a position in this list; 3.3 stores request ids instead).
+const _OLD_REQUEST_ORDER := {
+	"tobin": ["tobin_rats", "tobin_fields", "tobin_harvest", "tobin_iron"],
+	"marla": ["marla_camps", "marla_twist", "marla_bishop", "marla_hides"],
+	"pip": ["pip_events", "pip_carve", "pip_night", "pip_shard"],
+	"hesk": ["hesk_ghouls", "hesk_knight", "hesk_curse", "hesk_copper"],
+}
 
 
 ## Upgrades an older save, one version at a time, so old players never lose progress.
@@ -78,6 +86,21 @@ static func migrate(d: Dictionary) -> Dictionary:
 			st["isle_trips"] = 1
 		d["stats"] = st
 		v = 3
+	if v < 4:
+		# v4 (3.3): requests are tracked by id, so their order in villagers.json can change freely.
+		var done := {}
+		var active: Dictionary = d.get("npc_active", {})
+		var steps: Dictionary = d.get("npc_step", {})
+		for vid in steps:
+			var order: Array = _OLD_REQUEST_ORDER.get(vid, [])
+			var n: int = min(int(steps[vid]), order.size())
+			done[vid] = order.slice(0, n)
+			if active.has(vid) and n < order.size():
+				active[vid]["req"] = order[n]
+		d["npc_done"] = done
+		d["npc_active"] = active
+		d.erase("npc_step")
+		v = 4
 	d["version"] = v
 	return d
 
@@ -106,7 +129,7 @@ func load_profile() -> void:
 	time_of_day = d.get("time_of_day", 1)
 	star_dust = d.get("star_dust", 0)
 	stars = d.get("stars", {})
-	npc_step = d.get("npc_step", {})
+	npc_done = d.get("npc_done", {})
 	npc_active = d.get("npc_active", {})
 	materials = d.get("materials", {})
 	world_state = d.get("world_state", {})
@@ -121,7 +144,7 @@ func save() -> void:
 		"grave_dice": grave_dice, "owned_heroes": owned_heroes, "unlocked_weapons": unlocked_weapons,
 		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
-		"star_dust": star_dust, "stars": stars, "npc_step": npc_step, "npc_active": npc_active,
+		"star_dust": star_dust, "stars": stars, "npc_done": npc_done, "npc_active": npc_active,
 		"materials": materials, "world_state": world_state, "gear": gear, "equipped": equipped, "next_uid": next_uid,
 		"bestiary_claimed": bestiary_claimed})
 
@@ -353,8 +376,30 @@ func npc(id: String) -> Dictionary:
 ## The villager's current request, or {} when they have nothing more to ask.
 func npc_request(id: String) -> Dictionary:
 	var v := npc(id)
-	var i := int(npc_step.get(id, 0))
-	return v["requests"][i] if not v.is_empty() and i < v["requests"].size() else {}
+	if v.is_empty():
+		return {}
+	var active_id: String = npc_active.get(id, {}).get("req", "")
+	var done: Array = npc_done.get(id, [])
+	for r in v["requests"]:
+		if (active_id != "" and r["id"] == active_id) or (active_id == "" and not r["id"] in done):
+			return r
+	return {}
+
+
+## The request this villager most recently finished, or {} (for their thank-you line).
+func last_done_request(id: String) -> Dictionary:
+	var done: Array = npc_done.get(id, [])
+	if done.is_empty():
+		return {}
+	for r in npc(id).get("requests", []):
+		if r["id"] == done[done.size() - 1]:
+			return r
+	return {}
+
+
+## Marks requests as finished without rewards (tests and tools).
+func mark_requests_done(id: String, request_ids: Array) -> void:
+	npc_done[id] = request_ids.duplicate()
 
 
 func npc_is_out(id: String) -> bool:
@@ -392,7 +437,7 @@ func accept_request(id: String) -> bool:
 	if req.is_empty() or npc_active.has(id):
 		return false
 	var goal_stat: String = req["goal"].get("stat", "")
-	npc_active[id] = {"base": stat(goal_stat), "run_best": 0}
+	npc_active[id] = {"base": stat(goal_stat), "run_best": 0, "req": req["id"]}
 	save()
 	return true
 
@@ -409,7 +454,9 @@ func claim_request(id: String) -> Dictionary:
 		if materials[mat] <= 0:
 			materials.erase(mat)
 	npc_active.erase(id)
-	npc_step[id] = int(npc_step.get(id, 0)) + 1
+	if not npc_done.has(id):
+		npc_done[id] = []
+	npc_done[id].append(req["id"])
 	var result := grant(req["reward"])
 	save()
 	return result
@@ -432,13 +479,22 @@ func grant(r: Dictionary) -> Dictionary:
 	var def := item_def(kind, id)
 	var owned_list: Array = {"hero": owned_heroes, "pet": owned_pets, "relic": unlocked_weapons}[kind]
 	if id in owned_list:
-		var dust := 8 if def.get("grade", "SR") == "SSR" else 5
+		var dust := duplicate_dust(kind, id)
 		star_dust += dust
 		return {"kind": "dust", "id": id, "name": def.get("name", id), "new": false, "grade": def.get("grade", "SR"),
 			"text": tr("%s is already with you, so it turns into %d Star Dust.") % [tr(def.get("name", id)), dust]}
 	owned_list.append(id)
 	return {"kind": kind, "id": id, "name": def.get("name", id), "new": true, "grade": def.get("grade", "SR"),
 		"text": tr("%s joins you!") % tr(def.get("name", id))}
+
+
+func owns(kind: String, id: String) -> bool:
+	return id in {"hero": owned_heroes, "pet": owned_pets, "relic": unlocked_weapons}.get(kind, [])
+
+
+## Star Dust given instead of an item you already have (3.3: raised so a repeat reward still feels like a reward).
+func duplicate_dust(kind: String, id: String) -> int:
+	return 20 if item_def(kind, id).get("grade", "SR") == "SSR" else 12
 
 
 func item_def(kind: String, id: String) -> Dictionary:

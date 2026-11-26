@@ -51,6 +51,7 @@ func _init() -> void:
 	test_v31_isle_quests()
 	test_v32_translations()
 	test_v32_player_bugs()
+	test_v33_changes()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -552,9 +553,9 @@ func test_villager_requests() -> void:
 	var dust := p.star_dust
 	var r := p.claim_request("tobin")
 	check(r["kind"] == "dust" and p.star_dust == dust + 3, "reward handed over")
-	check(p.npc_request("tobin")["id"] == "tobin_fields", "the next request in the chain unlocks")
+	check(p.npc_request("tobin")["id"] == "tobin_iron", "the next request in the chain unlocks (the Isle errand comes second)")
 	# Run-scope request: needs it in ONE journey.
-	p.npc_step["pip"] = 1
+	p.mark_requests_done("pip", ["pip_events", "pip_shard"])
 	p.accept_request("pip")
 	var run := Run.new(80)
 	run.phase = "defeat"
@@ -572,7 +573,7 @@ func test_villager_requests() -> void:
 	# Owned rewards become Star Dust.
 	dust = p.star_dust
 	r = p.grant({"kind": "pet", "id": "ember_salamander"})
-	check(r["kind"] == "dust" and p.star_dust == dust + 8, "a duplicate SSR becomes 8 Star Dust")
+	check(r["kind"] == "dust" and p.star_dust == dust + 20, "a duplicate SSR becomes 20 Star Dust")
 	check(p.npc_is_out("hesk") == (p.time_name() in ["dusk", "night"]), "the night watch keeps its hours")
 
 
@@ -738,7 +739,7 @@ func test_v22_player_bugs() -> void:
 	c._damage(c.monsters[0], 2, "test", true, {"element": "light"})
 	check(c.monsters[0]["hp"] == hp - 3, "super effective adds at least 1 (2 -> 3)")
 	var p := _fresh_profile("test_bugs")
-	p.npc_step["hesk"] = 0
+	p.mark_requests_done("hesk", [])
 	p.time_of_day = 3
 	p.accept_request("hesk")
 	p.record_world_fight(["ghoul", "ghoul"], true, 2)
@@ -806,11 +807,11 @@ func test_v31_delivery_requests() -> void:
 	var World = load("res://scripts/core/world.gd")
 	var w = World.new()
 	for v in p.villagers:
-		var last: Dictionary = v["requests"][v["requests"].size() - 1]
-		check(last["goal"]["scope"] == "deliver", "%s's last request asks for Isle materials" % v["id"])
+		var last: Dictionary = v["requests"][1]
+		check(last["goal"]["scope"] == "deliver", "%s's second request asks for Isle materials" % v["id"])
 		check(w.material_value(last["goal"]["material"]) > 0, "%s asks for a real material: %s" % [v["id"], last["goal"]["material"]])
-	p.npc_step["tobin"] = 3
-	check(p.npc_request("tobin")["id"] == "tobin_iron", "Tobin's 4th request wants Grave Iron")
+	p.mark_requests_done("tobin", ["tobin_rats"])
+	check(p.npc_request("tobin")["id"] == "tobin_iron", "Tobin's 2nd request wants Grave Iron")
 	p.materials["grave_iron"] = 2
 	check(p.accept_request("tobin") and p.request_progress("tobin") == 2, "delivery progress counts what is in Storage")
 	check(not p.is_request_done("tobin") and p.claim_request("tobin").is_empty(), "not enough iron yet")
@@ -821,9 +822,9 @@ func test_v31_delivery_requests() -> void:
 	var r := p.claim_request("tobin")
 	check(r["kind"] == "dice" and p.grave_dice == dice + 2, "Tobin pays 2 Grave Dice")
 	check(int(p.materials.get("grave_iron", 0)) == 3, "claiming hands the 6 iron over")
-	check(p.npc_request("tobin").is_empty(), "Tobin's chain is finished")
+	check(p.npc_request("tobin")["id"] == "tobin_fields", "after the iron, Tobin's chain goes on")
 	# An exact amount leaves no empty entry behind, and old saves (step 3) simply see the new request.
-	p.npc_step["pip"] = 3
+	p.mark_requests_done("pip", ["pip_events"])
 	p.materials["ember_shard"] = 1
 	p.accept_request("pip")
 	p.claim_request("pip")
@@ -831,7 +832,7 @@ func test_v31_delivery_requests() -> void:
 	p.save()
 	var again := Profile.new(p.path)
 	again.load_profile()
-	check(int(again.npc_step.get("pip", 0)) == 4, "delivery progress is saved")
+	check("pip_shard" in again.npc_done.get("pip", []), "delivery progress is saved")
 
 
 func test_v31_bestiary() -> void:
@@ -1013,3 +1014,16 @@ func test_v32_player_bugs() -> void:
 	r.last_reward_text = "The Bone Carver sets to work on your dice."
 	r.choose_event_option(0)
 	check(not r.last_reward_text.contains("Bone Carver"), "an event that leads to carving shows its own text (got: %s)" % r.last_reward_text)
+
+
+## 3.3: villager requests are tracked by id; old saves keep their progress.
+func test_v33_changes() -> void:
+	var old := {"version": 3, "npc_step": {"tobin": 2, "marla": 4}, "npc_active": {"tobin": {"base": 0, "run_best": 0}}}
+	var m := Profile.migrate(old)
+	check(m["npc_done"]["tobin"] == ["tobin_rats", "tobin_fields"], "old progress becomes request ids")
+	check(m["npc_active"]["tobin"]["req"] == "tobin_harvest", "an accepted request stays accepted after the update")
+	var p := _fresh_profile("test_v33")
+	p.npc_done = m["npc_done"]
+	p.npc_active = m["npc_active"]
+	check(p.npc_request("tobin")["id"] == "tobin_harvest", "the active request is still the one shown")
+	check(p.npc_request("marla").is_empty(), "a finished chain stays finished")

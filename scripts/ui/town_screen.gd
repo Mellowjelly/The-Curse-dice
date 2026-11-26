@@ -679,7 +679,7 @@ func _render_dialog() -> void:
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 8)
 	if not _dialog_reveal.is_empty():
-		box.add_child(UI.wrap_label("\"%s\"" % profile.npc(_dialog_npc)["requests"][int(profile.npc_step.get(_dialog_npc, 1)) - 1]["done"], 14, UI.TEXT, 460))
+		box.add_child(UI.wrap_label("\"%s\"" % tr(profile.last_done_request(_dialog_npc).get("done", "")), 14, UI.TEXT, 460))
 		box.add_child(_reveal_card(_dialog_reveal))
 	elif req.is_empty():
 		box.add_child(UI.wrap_label(tr("\"You have done so much for us. Ashfall will not forget you.\""), 14, UI.TEXT, 460))
@@ -716,7 +716,9 @@ func _reward_line(r: Dictionary) -> Control:
 	if kind in ["hero", "pet", "relic"]:
 		var d := profile.item_def(kind, r["id"])
 		var grade: String = d.get("grade", "SR")
-		return UI.label(tr("Reward: [%s] %s (%s)") % [grade, tr(d.get("name", r["id"])), {"hero": "hero", "pet": "companion", "relic": tr("relic weapon")}[kind]], 15, UI.grade_color(grade))
+		if profile.owns(kind, r["id"]):
+			return UI.label(tr("Reward: %d Star Dust (you already have %s)") % [profile.duplicate_dust(kind, r["id"]), tr(d.get("name", r["id"]))], 15, Color("#d8c8f0"))
+		return UI.label(tr("Reward: [%s] %s (%s)") % [grade, tr(d.get("name", r["id"])), {"hero": tr("hero"), "pet": tr("companion"), "relic": tr("relic weapon")}[kind]], 15, UI.grade_color(grade))
 	var names := {"dust": tr("Star Dust"), "dice": tr("Grave Dice"), "embers": tr("Soul Embers")}
 	return UI.label(tr("Reward: %d %s") % [int(r["amount"]), names[kind]], 15, Color("#d8c8f0"))
 
