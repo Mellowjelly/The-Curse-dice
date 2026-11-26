@@ -43,6 +43,7 @@ func _init() -> void:
 	test_time_of_day()
 	test_villager_requests()
 	test_stars()
+	test_world()
 	test_new_pets()
 	test_tile_snapshot_reload()
 	print("\n%d checks, %d failed" % [_checks, _failures])
@@ -583,3 +584,54 @@ func test_stars() -> void:
 	check(pet["faces"][1]["type"] == "attack", "a 5-star pet loses its blank face")
 	var w := Run.apply_relic_stars({"name": "X", "faces": [{"type": "fire", "value": 3}, {"type": "guard", "value": 3}]}, 3)
 	check(w["faces"][0]["value"] == 4 and w["faces"][1]["value"] == 4 and w["name"] == "X +2", "relic stars raise both faces")
+
+
+func test_world() -> void:
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	check(w.countries.size() == 7, "the world has 7 countries")
+	var biomes := {}
+	for i in w.countries.size():
+		var c: Dictionary = w.countries[i]
+		biomes[c["biome"]] = true
+		check(w.cells_of(i).size() > 150, "%s has land (%d cells)" % [c["id"], w.cells_of(i).size()])
+		check(w.nodes.filter(func(n): return n["country"] == i).size() == int(w.data["nodes_per_country"]), "%s has mineral nodes" % c["id"])
+		for g in c["monsters"]:
+			for id in g:
+				check(w.monster_defs.has(id), "%s monster exists: %s" % [c["id"], id])
+	check(biomes.size() == 7, "every country has its own ecosystem")
+	check(w.country_at(w.player_cell)["id"] == "ashfall_vale", "the journey starts in Ashfall Vale")
+	check(not w.is_walkable(Vector2i(0, 0)), "the sea surrounds the land")
+	w.setup_party(["varek", "lys", "aldric"], {"hero:varek": 2}, "ash_crow")
+	check(w.party.size() == 3 and w.party[0]["max_hp"] == 30 and not w.pet.is_empty(), "the travelling party uses stars")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var n: Dictionary = w.nodes[0]
+	var got: Dictionary = w.gather(n["id"], rng)
+	check(not got.is_empty() and int(w.bag.get(got["id"], 0)) == got["amount"], "gathering fills the bag")
+	check(w.gather(n["id"], rng).is_empty(), "a gathered node is depleted")
+	w.clock += float(w.data["node_respawn_seconds"]) + 1
+	check(w.node_ready(n), "nodes grow back")
+	# Danger: falling in a safe country keeps the bag, in a dangerous one loses it.
+	var safe_enemy: Dictionary = w.enemies.filter(func(e): return w.countries[e["country"]]["tier"] <= 2)[0]
+	var deadly_enemy: Dictionary = w.enemies.filter(func(e): return w.countries[e["country"]]["tier"] >= 4)[0]
+	var r: Dictionary = w.finish_fight(safe_enemy, false, rng)
+	check(not r["lost_bag"] and not w.bag.is_empty(), "falling in a safe country keeps the bag")
+	r = w.finish_fight(deadly_enemy, false, rng)
+	check(r["lost_bag"] and w.bag.is_empty(), "falling in a dangerous country loses the bag")
+	check(w.country_at(w.player_cell)["id"] == "ashfall_vale", "the fallen wake up in Ashfall")
+	var weak: Array = w.fight_defs(safe_enemy)
+	var strong: Array = w.fight_defs(deadly_enemy)
+	check(strong[0]["hp"] >= w.monster_defs[deadly_enemy["group"][0]]["hp"], "tougher countries scale their monsters")
+	var c = w.start_fight(safe_enemy, 1)
+	check(c.monsters.size() == weak.size() and not c.finished, "a world fight uses the dice combat")
+	# Banking and trading.
+	var p := _fresh_profile("test_world")
+	w.bag = {"grave_iron": 10}
+	p.bank(w)
+	check(w.bag.is_empty() and p.materials["grave_iron"] == 10, "returning to town banks the bag")
+	var e0 := p.embers
+	check(p.trade_material("grave_iron", 5, "embers", w.material_value("grave_iron")) and p.embers == e0 + 10, "materials sell for embers")
+	var copy = World.new()
+	copy.load_dict(w.to_dict())
+	check(copy.player_cell == w.player_cell and copy.party.size() == 3, "the world session saves and loads")

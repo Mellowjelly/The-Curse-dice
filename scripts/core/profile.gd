@@ -25,6 +25,8 @@ var stars := {}                   # "hero:varek" / "pet:ash_crow" / "relic:plagu
 var npc_step := {}                # villager id -> index of their next request
 var npc_active := {}              # villager id -> { "base": int, "run_best": int } for the accepted request
 var villagers: Array
+var materials := {}               # banked materials from the open world
+var world_state := {}             # saved open-world session (see world.gd to_dict)
 var star_rules: Dictionary
 var curse := 0                    # chosen Curse level (opt-in difficulty, unlocked by wins)
 const MAX_CURSE := 4
@@ -80,6 +82,8 @@ func load_profile() -> void:
 	stars = d.get("stars", {})
 	npc_step = d.get("npc_step", {})
 	npc_active = d.get("npc_active", {})
+	materials = d.get("materials", {})
+	world_state = d.get("world_state", {})
 
 
 func save() -> void:
@@ -88,7 +92,8 @@ func save() -> void:
 		"grave_dice": grave_dice, "owned_heroes": owned_heroes, "unlocked_weapons": unlocked_weapons,
 		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
-		"star_dust": star_dust, "stars": stars, "npc_step": npc_step, "npc_active": npc_active})
+		"star_dust": star_dust, "stars": stars, "npc_step": npc_step, "npc_active": npc_active,
+		"materials": materials, "world_state": world_state})
 
 
 # ---------------------------------------------------------------- town
@@ -408,6 +413,38 @@ func upgrade_star(kind: String, id: String) -> bool:
 	embers -= int(c[0])
 	star_dust -= int(c[1])
 	stars["%s:%s" % [kind, id]] = star(kind, id) + 1
+	save()
+	return true
+
+
+# ---------------------------------------------------------------- materials (open world)
+
+## Moves everything in the world bag into the town's storage.
+func bank(world) -> Dictionary:
+	var moved: Dictionary = world.bag.duplicate()
+	for id in moved:
+		materials[id] = int(materials.get(id, 0)) + int(moved[id])
+	world.bag.clear()
+	save()
+	return moved
+
+
+## Sells `amount` of a banked material for Soul Embers ("embers") or Star Dust ("dust").
+func trade_material(id: String, amount: int, into: String, value: int) -> bool:
+	if int(materials.get(id, 0)) < amount or amount <= 0:
+		return false
+	var trade: Dictionary = GameData.load_json("res://data/world.json")["trade"]
+	var total := value * amount
+	if into == "dust":
+		var dust := int(floor(total * float(trade["dust_per_value"])))
+		if dust <= 0:
+			return false
+		star_dust += dust
+	else:
+		embers += int(total * float(trade["embers_per_value"]))
+	materials[id] = int(materials[id]) - amount
+	if materials[id] <= 0:
+		materials.erase(id)
 	save()
 	return true
 

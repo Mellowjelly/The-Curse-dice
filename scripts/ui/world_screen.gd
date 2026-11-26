@@ -1,0 +1,478 @@
+extends Node2D
+## The open world, drawn in 2.5D (isometric). Tap the ground to walk, tap a mineral vein to
+## gather it, walk into monsters to fight them with dice. All rules live in scripts/core/world.gd.
+
+const World = preload("res://scripts/core/world.gd")
+const Profile = preload("res://scripts/core/profile.gd")
+const Combat = preload("res://scripts/core/combat.gd")
+const CombatView = preload("res://scripts/ui/combat_view.gd")
+const UnitSprite = preload("res://scripts/ui/unit_sprite.gd")
+const UI = preload("res://scripts/ui/ui_kit.gd")
+const Sfx = preload("res://scripts/ui/sfx.gd")
+
+const TOWN_SCENE := "res://scenes/town.tscn"
+const BIOMES := ["deadwood", "swamp", "deepforest", "coast", "snow", "volcanic", "wasteland"]
+const BIOME_MAP_COLORS := {
+	"deadwood": Color("#5a524a"), "swamp": Color("#3e5a3c"), "deepforest": Color("#2f6e36"), "coast": Color("#b8a478"),
+	"snow": Color("#dfe6ee"), "volcanic": Color("#5a2e2a"), "wasteland": Color("#8a7a6a"),
+}
+const TIER_COLORS := [Color("#7fd07f"), Color("#7fd07f"), Color("#e8d66a"), Color("#f09a4a"), Color("#e0504a"), Color("#b070f0")]
+const DECOR_DENSITY := 0.13
+const SPEED := 95.0
+const GATHER_TIME := 1.2
+const BATTLE_SCENES := {
+	"deadwood": ["battle_early", Color(1, 1, 1)], "swamp": ["battle_mid", Color(0.8, 1.0, 0.8)],
+	"deepforest": ["battle_early", Color(0.75, 1.15, 0.8)], "coast": ["battle_mid", Color(0.85, 0.95, 1.2)],
+	"snow": ["battle_early", Color(1.3, 1.35, 1.5)], "volcanic": ["battle_late", Color(1, 1, 1)],
+	"wasteland": ["battle_boss", Color(1.1, 0.95, 0.85)],
+}
+
+var world: World
+var profile: Profile
+var rng := RandomNumberGenerator.new()
+
+var _ground: TileMapLayer
+var _objects: Node2D
+var _player: AnimatedSprite2D
+var _camera: Camera2D
+var _target := Vector2.ZERO
+var _moving := false
+var _pending_node := ""
+var _gathering := 0.0
+var _node_sprites := {}     # node id -> Sprite2D
+var _enemy_nodes := {}      # enemy id -> Node2D
+var _regen := 0.0
+var _save_timer := 0.0
+var _in_combat := false
+var _fight_enemy: Dictionary = {}
+
+# HUD
+var _hud: CanvasLayer
+var _country_label: Label
+var _tier_label: Label
+var _desc_label: Label
+var _party_box: HBoxContainer
+var _bag_label: Label
+var _minimap: TextureRect
+var _mini_dot: ColorRect
+var _big_map: Control
+var _toast: Label
+var _gather_bar: ProgressBar
+var _combat_view: CombatView
+var _last_country := -1
+
+
+func _ready() -> void:
+	rng.randomize()
+	profile = Profile.new()
+	profile.load_profile()
+	world = World.new()
+	if profile.world_state.is_empty():
+		var pet_id: String = profile.owned_pets[0] if not profile.owned_pets.is_empty() else ""
+		world.setup_party(profile.party, profile.stars, pet_id)
+	else:
+		world.load_dict(profile.world_state)
+	_build_world()
+	_build_hud()
+	_player.position = _ground.map_to_local(world.player_cell)
+	_target = _player.position
+	_camera.position = _player.position
+	_camera.reset_smoothing()
+	Sfx.music(self)
+	_refresh_hud()
+
+
+# ---------------------------------------------------------------- building the world
+
+func _build_world() -> void:
+	var ts := TileSet.new()
+	ts.tile_shape = TileSet.TILE_SHAPE_ISOMETRIC
+	ts.tile_layout = TileSet.TILE_LAYOUT_DIAMOND_DOWN
+	ts.tile_size = Vector2i(64, 32)
+	var src := TileSetAtlasSource.new()
+	src.texture = load("res://assets/world/tiles.png")
+	src.texture_region_size = Vector2i(64, 32)
+	var count: int = src.texture.get_width() / 64
+	for i in count:
+		src.create_tile(Vector2i(i, 0))
+	ts.add_source(src, 0)
+	_ground = TileMapLayer.new()
+	_ground.tile_set = ts
+	_ground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_ground)
+	var water_base := BIOMES.size() * 3
+	var deco_rng := RandomNumberGenerator.new()
+	deco_rng.seed = 77
+	_objects = Node2D.new()
+	_objects.y_sort_enabled = true
+	_objects.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_objects)
+	var decor_tex := {}
+	for b in BIOMES:
+		decor_tex[b] = [load("res://assets/world/decor_%s_0.png" % b), load("res://assets/world/decor_%s_1.png" % b)]
+	var margin := 12
+	for y in range(-margin, world.size + margin):
+		for x in range(-margin, world.size + margin):
+			var cell := Vector2i(x, y)
+			var ci := world.country_index_at(cell)
+			if ci == 255:
+				_ground.set_cell(cell, 0, Vector2i(water_base + ((x + y) & 1), 0))
+				continue
+			var biome: String = world.countries[ci]["biome"]
+			_ground.set_cell(cell, 0, Vector2i(BIOMES.find(biome) * 3 + deco_rng.randi_range(0, 2), 0))
+			if deco_rng.randf() < DECOR_DENSITY and Vector2(cell).distance_to(Vector2(world.player_cell)) > 2.5:
+				var spr := Sprite2D.new()
+				spr.texture = decor_tex[biome][deco_rng.randi_range(0, 1)]
+				spr.offset = Vector2(0, -20)
+				spr.position = _ground.map_to_local(cell) + Vector2(deco_rng.randf_range(-10, 10), deco_rng.randf_range(-4, 4))
+				_objects.add_child(spr)
+	# Mineral veins
+	for n in world.nodes:
+		var c: Dictionary = world.countries[n["country"]]
+		var spr := Sprite2D.new()
+		spr.set_meta("ore", c["mineral"]["id"])
+		spr.offset = Vector2(0, -10)
+		spr.position = _ground.map_to_local(n["cell"])
+		_objects.add_child(spr)
+		_node_sprites[n["id"]] = spr
+	# Roaming monsters
+	for e in world.enemies:
+		var holder := Node2D.new()
+		holder.position = _ground.map_to_local(e["cell"])
+		var a := AnimatedSprite2D.new()
+		a.sprite_frames = UnitSprite.frames_for(e["group"][0])
+		a.flip_h = true
+		a.offset = Vector2(0, -16) if e["group"][0] != "rotting_bishop" else Vector2(0, -24)
+		a.speed_scale = rng.randf_range(0.8, 1.2)
+		a.play("idle")
+		holder.add_child(a)
+		if e["group"].size() > 1:
+			var l := Label.new()
+			l.text = "x%d" % e["group"].size()
+			l.add_theme_font_size_override("font_size", 8)
+			l.add_theme_color_override("font_color", Color("#e05050"))
+			l.position = Vector2(6, -34)
+			holder.add_child(l)
+		_objects.add_child(holder)
+		_enemy_nodes[e["id"]] = holder
+		# Lazy wandering around their spot.
+		var tw := holder.create_tween().set_loops()
+		var home := holder.position
+		tw.tween_property(holder, "position", home + Vector2(rng.randf_range(-24, 24), rng.randf_range(-12, 12)), rng.randf_range(2.0, 4.0))
+		tw.tween_property(holder, "position", home, rng.randf_range(2.0, 4.0))
+	# The party leader
+	_player = AnimatedSprite2D.new()
+	_player.sprite_frames = UnitSprite.frames_for(world.party[0]["id"] if not world.party.is_empty() else "varek")
+	_player.offset = Vector2(0, -16)
+	_player.play("idle")
+	_objects.add_child(_player)
+	_camera = Camera2D.new()
+	_camera.zoom = Vector2(2.5, 2.5)
+	_camera.position_smoothing_enabled = true
+	_camera.position_smoothing_speed = 6.0
+	add_child(_camera)
+	_refresh_world_objects()
+
+
+func _refresh_world_objects() -> void:
+	for n in world.nodes:
+		var spr: Sprite2D = _node_sprites[n["id"]]
+		spr.texture = load("res://assets/world/ore_%s.png" % spr.get_meta("ore")) if world.node_ready(n) else load("res://assets/world/ore_depleted.png")
+	for e in world.enemies:
+		_enemy_nodes[e["id"]].visible = world.enemy_active(e)
+
+
+# ---------------------------------------------------------------- HUD
+
+func _build_hud() -> void:
+	_hud = CanvasLayer.new()
+	add_child(_hud)
+	var top := UI.panel()
+	top.position = Vector2(16, 12)
+	top.size = Vector2(430, 0)
+	_hud.add_child(top)
+	var tb := VBoxContainer.new()
+	top.add_child(tb)
+	_country_label = UI.label("", 24, UI.TEXT)
+	tb.add_child(_country_label)
+	_tier_label = UI.label("", 15, UI.GOLD)
+	tb.add_child(_tier_label)
+	_desc_label = UI.wrap_label("", 13, UI.DIM, 400)
+	tb.add_child(_desc_label)
+
+	# Minimap (tap it for the big world map)
+	var img := Image.create(world.size, world.size, false, Image.FORMAT_RGBA8)
+	for y in world.size:
+		for x in world.size:
+			var ci := world.country_index_at(Vector2i(x, y))
+			img.set_pixel(x, y, Color("#1e324a") if ci == 255 else BIOME_MAP_COLORS[world.countries[ci]["biome"]])
+	var map_tex := ImageTexture.create_from_image(img)
+	_minimap = TextureRect.new()
+	_minimap.texture = map_tex
+	_minimap.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_minimap.stretch_mode = TextureRect.STRETCH_SCALE
+	_minimap.size = Vector2(192, 192)
+	_minimap.position = Vector2(1072, 16)
+	_minimap.tooltip_text = "Tap for the world map"
+	_minimap.gui_input.connect(func(ev): if ev is InputEventMouseButton and ev.pressed: _big_map.visible = not _big_map.visible)
+	_hud.add_child(_minimap)
+	_mini_dot = ColorRect.new()
+	_mini_dot.color = Color.WHITE
+	_mini_dot.size = Vector2(6, 6)
+	_minimap.add_child(_mini_dot)
+	_big_map = _build_big_map(map_tex)
+
+	# Bottom bar: party, bag, actions
+	var bottom := UI.panel()
+	bottom.position = Vector2(16, 600)
+	bottom.size = Vector2(1248, 104)
+	_hud.add_child(bottom)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	bottom.add_child(row)
+	_party_box = HBoxContainer.new()
+	_party_box.add_theme_constant_override("separation", 10)
+	row.add_child(_party_box)
+	_bag_label = UI.wrap_label("", 13, UI.TEXT, 330)
+	_bag_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_bag_label)
+	var col := VBoxContainer.new()
+	row.add_child(col)
+	var map_btn := UI.button("World Map", func(): _big_map.visible = not _big_map.visible, 14)
+	map_btn.custom_minimum_size = Vector2(200, 36)
+	col.add_child(map_btn)
+	var home := UI.choice_button("Return to Ashfall", _return_to_town, UI.GOLD)
+	home.autowrap_mode = TextServer.AUTOWRAP_OFF
+	home.custom_minimum_size = Vector2(200, 44)
+	col.add_child(home)
+
+	_toast = UI.label("", 20, UI.GOLD)
+	_toast.add_theme_color_override("font_shadow_color", Color.BLACK)
+	_toast.add_theme_constant_override("shadow_offset_x", 2)
+	_toast.add_theme_constant_override("shadow_offset_y", 2)
+	_toast.position = Vector2(440, 520)
+	_toast.size = Vector2(400, 30)
+	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast.modulate.a = 0.0
+	_hud.add_child(_toast)
+	_gather_bar = ProgressBar.new()
+	_gather_bar.show_percentage = false
+	_gather_bar.size = Vector2(120, 12)
+	_gather_bar.position = Vector2(580, 300)
+	_gather_bar.max_value = GATHER_TIME
+	_gather_bar.hide()
+	_hud.add_child(_gather_bar)
+	_hud.add_child(_big_map)  # last, so it covers the rest of the HUD
+	_big_map.hide()
+
+	var combat_layer := CanvasLayer.new()
+	combat_layer.layer = 10
+	add_child(combat_layer)
+	_combat_view = CombatView.new()
+	combat_layer.add_child(UI.full_rect(_combat_view))
+	_combat_view.hide()
+	_combat_view.finished.connect(_on_combat_finished)
+
+
+func _build_big_map(tex: Texture2D) -> Control:
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.8)
+	dim.size = Vector2(1280, 720)
+	dim.gui_input.connect(func(ev): if ev is InputEventMouseButton and ev.pressed: dim.hide())
+	var map := TextureRect.new()
+	map.texture = tex
+	map.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	map.stretch_mode = TextureRect.STRETCH_SCALE
+	map.size = Vector2(560, 560)
+	map.position = Vector2(360, 100)
+	map.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dim.add_child(map)
+	var title := UI.label("The Cursed Isle  -  tap anywhere to close", 24, UI.GOLD)
+	title.position = Vector2(360, 52)
+	dim.add_child(title)
+	var scale := 560.0 / world.size
+	for c in world.countries:
+		var l := UI.label("%s\nTier %s" % [c["name"], ["I", "II", "III", "IV", "V"][int(c["tier"]) - 1]], 15, TIER_COLORS[int(c["tier"])])
+		l.add_theme_color_override("font_shadow_color", Color.BLACK)
+		l.add_theme_constant_override("shadow_offset_x", 2)
+		l.add_theme_constant_override("shadow_offset_y", 2)
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.size = Vector2(180, 40)
+		l.position = map.position + Vector2(c["center"][0], c["center"][1]) * scale - Vector2(90, 20)
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dim.add_child(l)
+		var mineral := UI.label(c["mineral"]["name"], 11, Color("#d8c8f0"))
+		mineral.position = l.position + Vector2(40, 38)
+		mineral.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dim.add_child(mineral)
+	return dim
+
+
+func _refresh_hud() -> void:
+	var ci := world.country_index_at(world.player_cell)
+	if ci != 255:
+		var c: Dictionary = world.countries[ci]
+		var tier := int(c["tier"])
+		_country_label.text = c["name"]
+		_tier_label.text = "Tier %s   -   %s   -   Mineral: %s" % [["I", "II", "III", "IV", "V"][tier - 1],
+			"Danger: fall here and you lose your bag" if world.is_dangerous(c) else "Safe: your bag is kept if you fall", c["mineral"]["name"]]
+		_tier_label.add_theme_color_override("font_color", TIER_COLORS[tier])
+		_desc_label.text = c["desc"]
+		if ci != _last_country and _last_country != -1:
+			_show_toast("Entering %s" % c["name"], TIER_COLORS[tier])
+		_last_country = ci
+	var scale := 192.0 / world.size
+	_mini_dot.position = Vector2(world.player_cell) * scale - Vector2(3, 3)
+	for ch in _party_box.get_children():
+		ch.queue_free()
+	for h in world.party:
+		var v := VBoxContainer.new()
+		v.custom_minimum_size = Vector2(150, 0)
+		v.add_child(UI.label(Combat.short_name(h), 13, UI.TEXT if Combat.is_alive(h) else UI.DIM))
+		v.add_child(UI.hp_bar(h["hp"], h["max_hp"], 16))
+		_party_box.add_child(v)
+	var parts: Array[String] = []
+	for id in world.bag:
+		parts.append("%s x%d" % [world.material_name(id), int(world.bag[id])])
+	_bag_label.text = "Bag: " + (", ".join(parts) if not parts.is_empty() else "empty (tap a glowing vein to gather)")
+
+
+func _show_toast(text: String, color: Color = UI.GOLD) -> void:
+	_toast.text = text
+	_toast.add_theme_color_override("font_color", color)
+	_toast.modulate.a = 1.0
+	var tw := _toast.create_tween()
+	tw.tween_interval(1.6)
+	tw.tween_property(_toast, "modulate:a", 0.0, 0.6)
+
+
+# ---------------------------------------------------------------- input and movement
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _in_combat or _big_map.visible:
+		return
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var p := get_global_mouse_position()
+		_pending_node = ""
+		# Tapped a vein? Walk there and gather.
+		for n in world.nodes:
+			var spr: Sprite2D = _node_sprites[n["id"]]
+			if spr.position.distance_to(p + Vector2(0, 8)) < 18 and world.node_ready(n):
+				_pending_node = n["id"]
+				p = spr.position + Vector2(0, 7)  # stand just in front of the vein
+				break
+		_target = p
+		_moving = true
+		_gathering = 0.0
+		_gather_bar.hide()
+
+
+func _process(delta: float) -> void:
+	if _in_combat:
+		return
+	world.clock += delta
+	_regen += delta
+	if _regen >= 4.0:
+		_regen = 0.0
+		world.regenerate(1)
+		_refresh_world_objects()
+		_refresh_hud()
+	_save_timer += delta
+	if _save_timer >= 10.0:
+		_save_timer = 0.0
+		_save()
+	if _moving:
+		var to := _target - _player.position
+		if to.length() < 3.0:
+			_moving = false
+		else:
+			var step := to.normalized() * SPEED * delta
+			var next := _player.position + (step if step.length() < to.length() else to)
+			if world.is_walkable(_ground.local_to_map(next)):
+				_player.position = next
+				_player.flip_h = to.x < 0
+				_player.offset.y = -16 - abs(sin(world.clock * 12.0)) * 2.0  # walking bob
+			else:
+				_moving = false
+		var cell := _ground.local_to_map(_player.position)
+		if cell != world.player_cell:
+			world.player_cell = cell
+			_refresh_hud()
+	else:
+		_player.offset.y = -16
+	_camera.position = _player.position
+	# Gathering
+	if _pending_node != "" and not _moving:
+		_gathering += delta
+		_gather_bar.show()
+		_gather_bar.value = _gathering
+		if _gathering >= GATHER_TIME:
+			var got := world.gather(_pending_node, rng)
+			_pending_node = ""
+			_gathering = 0.0
+			_gather_bar.hide()
+			if not got.is_empty():
+				Sfx.play(self, "triple" if got["rare"] else "fate")
+				_show_toast(("RARE! " if got["rare"] else "") + "+%d %s" % [got["amount"], got["name"]], Color("#b07cf0") if got["rare"] else UI.GOLD)
+				_refresh_world_objects()
+				_refresh_hud()
+				_save()
+	# Bumping into monsters starts a fight.
+	for e in world.enemies:
+		if not world.enemy_active(e):
+			continue
+		var node: Node2D = _enemy_nodes[e["id"]]
+		if node.position.distance_to(_player.position) < 14.0:
+			_start_fight(e)
+			break
+
+
+# ---------------------------------------------------------------- combat
+
+func _start_fight(e: Dictionary) -> void:
+	_in_combat = true
+	_moving = false
+	_fight_enemy = e
+	var c: Dictionary = world.countries[e["country"]]
+	var look: Array = BATTLE_SCENES[c["biome"]]
+	var combat := world.start_fight(e, rng.randi())
+	_combat_view.show()
+	_combat_view.bind(combat, "%s - Tier %d" % [c["name"], int(c["tier"])], look[0], look[1])
+
+
+func _on_combat_finished(victory: bool) -> void:
+	_combat_view.hide()
+	_in_combat = false
+	var r := world.finish_fight(_fight_enemy, victory, rng)
+	if victory:
+		profile.embers += int(r["embers"])
+		profile.star_dust += int(r["dust"])
+		_show_toast("Victory! +%d Soul Embers%s" % [r["embers"], (", +%d Star Dust" % r["dust"]) if r["dust"] > 0 else ""])
+	else:
+		_player.position = _ground.map_to_local(world.player_cell)
+		_target = _player.position
+		_show_toast("Your party was carried back to Ashfall%s" % (" - your bag is lost!" if r["lost_bag"] else "."), UI.BLOOD)
+	_refresh_world_objects()
+	_refresh_hud()
+	_save()
+
+
+# ---------------------------------------------------------------- town
+
+func _save() -> void:
+	profile.world_state = world.to_dict()
+	profile.save()
+
+
+func _return_to_town() -> void:
+	var moved := profile.bank(world)
+	world.rest_in_town()
+	world.player_cell = Vector2i(int(world.countries[0]["center"][0]), int(world.countries[0]["center"][1]))
+	_save()
+	if not moved.is_empty():
+		var TownScreen = load("res://scripts/ui/town_screen.gd")
+		var parts: Array[String] = []
+		for id in moved:
+			parts.append("%s x%d" % [world.material_name(id), int(moved[id])])
+		TownScreen.last_result = {"embers": 0, "dice": 0, "quests": [], "banked": ", ".join(parts)}
+	get_tree().change_scene_to_file(TOWN_SCENE)

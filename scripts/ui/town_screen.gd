@@ -49,6 +49,7 @@ const IDLE_SPOTS := [Vector2(444, 584), Vector2(544, 584), Vector2(10, 590)]
 
 var _scene_layer: Control
 var _collection: VBoxContainer
+var _storage: VBoxContainer
 var _dialog: PanelContainer
 var _dialog_npc := ""
 var _dialog_reveal: Dictionary = {}
@@ -127,6 +128,7 @@ func _build() -> void:
 	_buildings = _tab("Buildings")
 	_summon_box = _tab("Summon")
 	_quests = _tab("Quests")
+	_storage = _tab("Storage")
 
 	# Dialogue box for talking to villagers (over the town scene).
 	_dialog = UI.panel(UI.GOLD, 2)
@@ -137,8 +139,13 @@ func _build() -> void:
 
 	_go = UI.choice_button("", _set_out, UI.GOLD)
 	_go.position = Vector2(664, 648)
-	_go.size = Vector2(596, 56)
+	_go.size = Vector2(292, 56)
 	add_child(_go)
+	var explore := UI.choice_button("Explore the Cursed Isle", func(): last_result = {}; get_tree().change_scene_to_file("res://scenes/world.tscn"), Color("#7fd0c0"))
+	explore.position = Vector2(968, 648)
+	explore.size = Vector2(292, 56)
+	explore.tooltip_text = "The open world: 7 countries, minerals to gather, monsters roaming."
+	add_child(explore)
 
 
 func _shadow(l: Label) -> void:
@@ -363,6 +370,8 @@ func _refresh() -> void:
 	_clear(_result_box)
 	if not last_result.is_empty():
 		var t := "Your last journey earned %d Soul Embers and %d Grave Dice." % [int(last_result["embers"]), int(last_result.get("dice", 0))]
+		if last_result.has("banked"):
+			t = "Back from the Cursed Isle. Stored: " + last_result["banked"]
 		for q in last_result["quests"]:
 			t += "   Quest complete: %s (+%d)" % [q["name"], int(q["reward"])]
 		_result_box.add_child(UI.wrap_label(t, 14, UI.GOLD, 560))
@@ -371,6 +380,7 @@ func _refresh() -> void:
 	_go.disabled = not saved and profile.party.size() != 3
 	_refresh_party()
 	_refresh_collection()
+	_refresh_storage()
 	_refresh_buildings()
 	if _dialog.visible:
 		_render_dialog()
@@ -708,3 +718,47 @@ func _refresh_collection() -> void:
 				btn.custom_minimum_size = Vector2(150, 44)
 				row.add_child(btn)
 			_collection.add_child(row)
+
+
+# ---------------------------------------------------------------- storage: materials from the open world
+
+func _refresh_storage() -> void:
+	_clear(_storage)
+	_storage.add_child(UI.wrap_label("Minerals you brought back from the Cursed Isle. Sell them at the Night Market for Soul Embers, or grind them into Star Dust.", 13, UI.DIM, 540))
+	if profile.materials.is_empty():
+		_storage.add_child(UI.label("Empty. Explore the Cursed Isle and gather minerals.", 15, UI.DIM))
+		return
+	var wdata: Dictionary = GameData.load_json("res://data/world.json")
+	var info := {}
+	for c in wdata["countries"]:
+		info[c["mineral"]["id"]] = [c["mineral"]["name"], int(c["mineral"]["value"]), c["name"], false]
+		info[c["rare"]["id"]] = [c["rare"]["name"], int(c["rare"]["value"]), c["name"], true]
+	for id in profile.materials:
+		var meta: Array = info.get(id, [id, 1, "?", false])
+		var amount: int = int(profile.materials[id])
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var pic := TextureRect.new()
+		var ore_path := "res://assets/world/ore_%s.png" % id
+		pic.texture = load(ore_path) if ResourceLoader.exists(ore_path) else load("res://assets/world/ore_depleted.png")
+		pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		pic.stretch_mode = TextureRect.STRETCH_SCALE
+		pic.custom_minimum_size = Vector2(40, 40)
+		if meta[3]:
+			pic.modulate = Color(1.3, 0.9, 1.4)
+		row.add_child(pic)
+		var lab := VBoxContainer.new()
+		lab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lab.add_child(UI.label("%s x%d%s" % [meta[0], amount, "   (rare)" if meta[3] else ""], 15, Color("#b07cf0") if meta[3] else UI.TEXT))
+		lab.add_child(UI.label("from %s   -   worth %d each" % [meta[2], meta[1]], 12, UI.DIM))
+		row.add_child(lab)
+		var sell_n: int = min(amount, 5)
+		var sell := UI.button("Sell %d\n+%d Embers" % [sell_n, sell_n * meta[1]], func(): profile.trade_material(id, sell_n, "embers", meta[1]); Sfx.play(self, "click"); _refresh(), 12)
+		sell.custom_minimum_size = Vector2(110, 40)
+		row.add_child(sell)
+		var dust_amount := int(floor(sell_n * meta[1] * float(wdata["trade"]["dust_per_value"])))
+		var grind := UI.button("Grind %d\n+%d Dust" % [sell_n, dust_amount], func(): profile.trade_material(id, sell_n, "dust", meta[1]); Sfx.play(self, "fate"); _refresh(), 12)
+		grind.custom_minimum_size = Vector2(100, 40)
+		grind.disabled = dust_amount <= 0
+		row.add_child(grind)
+		_storage.add_child(row)
