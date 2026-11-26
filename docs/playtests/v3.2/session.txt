@@ -1,0 +1,497 @@
+help
+status
+talk tobin
+talk marla
+talk pip
+talk hesk
+recipes
+bestiary
+accept tobin
+accept marla
+accept pip
+explore
+summon heroes
+road
+pick 1
+roll
+move 1
+rest carve
+pick 0
+roll
+move 0
+lock 0
+reroll
+reroll
+end
+end
+lock 1
+reroll
+end
+pick 0
+roll
+move 0
+equip_loot 0 2
+roll
+move 1
+buy carving
+pick 1
+leave
+roll
+move 1
+pick 0
+pick 1
+roll
+move 0
+lock 0
+lock 1
+reroll
+end
+lock 2
+reroll
+end
+lock 2
+reroll
+end
+skill 0
+end
+pick 2
+roll
+reroll_move
+move 1
+twist 1 4
+target 1
+end
+lock 0
+reroll
+lock 1
+reroll
+end
+end
+skill 2
+lock 1
+reroll
+end
+skill 1
+end
+pick 1
+roll
+move 0
+buy tonic
+leave
+roll
+move 1
+rest carve
+pick 0
+roll
+move 0
+target 1
+lock 0
+lock 2
+reroll
+end
+twist 0 1
+end
+lock 0
+reroll
+lock 1
+reroll
+target 0
+end
+skill 0
+skill 2
+end
+lock 1
+lock 2
+reroll
+end
+end
+pick 2
+roll
+move 0
+rest heal
+roll
+move 0
+pick 1
+roll
+pick 0
+roll
+move 0
+roll
+move 0
+target 1
+twist 1 4
+end
+lock 0
+reroll
+end
+end
+equip_loot 1 1
+roll
+pick 1
+roll
+move 1
+pick 0
+pick 0
+roll
+move 0
+rest carve
+pick 2
+roll
+move 0
+reroll
+lock 0
+lock 1
+reroll
+end
+lock 0
+lock 2
+reroll
+end
+lock 0
+lock 1
+reroll
+twist 0 5
+end
+skill 2
+skill 0
+lock 0
+lock 1
+end
+lock 0
+lock 2
+reroll
+end
+skill 1
+end
+status
+claim marla
+claim pip
+talk tobin
+talk hesk
+accept hesk
+summon heroes
+status
+summon relics
+summon pets
+build chapel
+build market
+build smithy
+status
+talk marla
+accept marla
+explore
+look
+goto 19 46
+gather
+goto 21 41
+gather
+goto 19 40
+gather
+goto 21 39
+gather
+goto 18 42
+gather
+goto 31 48
+fight
+reroll
+end
+end
+look
+goto 20 56
+reroll
+end
+reroll
+end
+goto 26 45
+fight
+lock 0
+reroll
+end
+flee
+look
+goto 24 52
+gather
+goto 28 54
+gather
+home
+status
+recipes
+talk tobin
+talk hesk
+talk pip
+craft iron_hatchet
+status
+equip aldric weapon 1
+party varek lys vael
+party varek lys aldric
+wait
+status
+claim pip
+talk pip
+upgrade hero varek
+bestiary
+trophy rotting_bishop
+accept pip
+upgrade hero lys
+status
+summon heroes
+road
+pick 1
+roll
+equip_loot 0 0
+roll
+move 0
+lock 0
+lock 1
+reroll
+end
+lock 1
+reroll
+end
+target 1
+lock 0
+lock 2
+reroll
+end
+twist 0 1
+end
+pick 0
+roll
+move 1
+lock 1
+lock 2
+reroll
+end
+twist 1 4
+reroll
+end
+end
+pick 0
+roll
+move 1
+rest carve
+pick 1
+roll
+move 0
+lock 0
+reroll
+end
+lock 2
+reroll
+end
+pick 0
+roll
+move 1
+roll
+equip_loot 0 1
+roll
+move 0
+rest carve
+pick 2
+roll
+move 1
+roll
+move 1
+twist 0 3
+lock 2
+reroll
+end
+lock 2
+reroll
+end
+end
+lock 0
+lock 1
+reroll
+end
+pick 1
+roll
+move 0
+buy tonic
+buy carving
+pick 2
+buy fate_shard
+leave
+roll
+move 1
+twist 1 3
+reroll
+end
+lock 0
+reroll
+end
+reroll
+lock 1
+reroll
+end
+end
+end
+pick 1
+roll
+move 0
+rest heal
+roll
+move 0
+buy carving
+pick 0
+leave
+roll
+move 1
+pick 1
+pick 0
+roll
+move 0
+target 2
+lock 1
+reroll
+end
+target 1
+lock 1
+reroll
+end
+lock 1
+lock 2
+reroll
+end
+twist 0 1
+lock 1
+reroll
+end
+skill 1
+lock 2
+reroll
+end
+pick 2
+roll
+move 1
+rest carve
+pick 1
+roll
+move 0
+lock 0
+lock 2
+reroll
+end
+twist 0 1
+end
+lock 2
+reroll
+lock 0
+reroll
+end
+lock 2
+reroll
+lock 1
+reroll
+end
+skill 2
+skill 1
+lock 1
+reroll
+end
+status
+claim tobin
+claim marla
+claim pip
+talk hesk
+talk tobin
+talk marla
+talk pip
+accept tobin
+accept marla
+accept pip
+quests
+sell grave_iron 1
+build kennel
+summon heroes
+status
+party varek mordecai aldric
+explore
+goto 40 30
+goto 40 30
+look
+goto 30 42
+goto 40 30
+look
+goto 39 28
+lock 1
+reroll
+end
+lock 0
+lock 2
+reroll
+end
+goto 41 25
+gather
+goto 42 25
+gather
+goto 42 24
+gather
+goto 40 24
+gather
+goto 39 24
+gather
+goto 45 23
+gather
+goto 45 30
+gather
+goto 44 20
+look
+fight
+lock 0
+lock 1
+reroll
+end
+lock 1
+reroll
+end
+skill 1
+twist 2 4
+end
+lock 1
+reroll
+lock 2
+reroll
+end
+skill 0
+lock 0
+lock 1
+reroll
+end
+skill 2
+skill 1
+twist 2 4
+reroll
+end
+reroll
+end
+goto 53 25
+end
+lock 0
+lock 2
+reroll
+end
+end
+end
+home
+status
+recipes
+talk hesk
+talk tobin
+talk marla
+craft amber_honeycake
+status
+feed ash_crow 2
+grind amberheart 4
+sell amberheart 4
+upgrade pet ash_crow
+upgrade hero aldric
+status
+wait
+talk hesk
+wait
+wait
+status
+talk tobin
+talk pip
+talk marla
