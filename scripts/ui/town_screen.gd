@@ -978,3 +978,17 @@ func _refresh_armory() -> void:
 			btns.add_child(off)
 		row.add_child(btns)
 		_forge.add_child(row)
+
+
+# ---------------------------------------------------------------- phone Back button / app pause (see app_events.gd)
+
+func on_back() -> bool:
+	if _dialog.visible:
+		_dialog.hide()
+		_refresh()
+		return true
+	return false
+
+
+func save_state() -> void:
+	profile.save()

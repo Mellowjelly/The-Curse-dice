@@ -47,6 +47,7 @@ func _init() -> void:
 	test_elements()
 	test_v22_player_bugs()
 	test_v30_changes()
+	test_v31_safe_saves()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -348,8 +349,7 @@ func test_pets() -> void:
 
 func test_profile_and_quests() -> void:
 	var path := "user://test_profile.save"
-	if FileAccess.file_exists(path):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	GameData.safe_delete(path)
 	var p := Profile.new(path)
 	var run := Run.new(20)
 	run.pos = 20
@@ -400,8 +400,7 @@ func test_town_upgrades_apply() -> void:
 
 func test_summon_roll() -> void:
 	var path := "user://test_summon.save"
-	if FileAccess.file_exists(path):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	GameData.safe_delete(path)
 	var p := Profile.new(path)
 	check(p.owned_heroes.size() == 3 and p.owned_pets.size() == 4, "3 starter heroes and 4 starter pets are owned")
 	check(not p.can_summon("heroes"), "summoning needs Grave Dice")
@@ -444,8 +443,7 @@ func test_time_of_day() -> void:
 	check(dawn.rest_percent() > plain.rest_percent(), "Dawn: better camps")
 	check(dusk.combat.bonus_fate_start == plain.combat.bonus_fate_start + 1, "Dusk: +1 Fate each fight")
 	var path := "user://test_time.save"
-	if FileAccess.file_exists(path):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	GameData.safe_delete(path)
 	var p := Profile.new(path)
 	var t := p.time_name()
 	p.advance_time()
@@ -529,8 +527,7 @@ func test_ui_scripts_compile() -> void:
 
 func _fresh_profile(name: String) -> Profile:
 	var path := "user://%s.save" % name
-	if FileAccess.file_exists(path):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	GameData.safe_delete(path)
 	return Profile.new(path)
 
 
@@ -907,3 +904,30 @@ func test_v31_pet_treats() -> void:
 	var again := Profile.new(p.path)
 	again.load_profile()
 	check(again.pet_treat("grave_pup")["id"] == "boar_jerky", "treats are saved")
+
+
+## 3.1: saves survive a broken file, old saves are upgraded, cached data cannot be changed by callers.
+func test_v31_safe_saves() -> void:
+	var p := _fresh_profile("test_safe")
+	p.embers = 11
+	p.save()
+	p.embers = 22
+	p.save()
+	check(FileAccess.file_exists("user://test_safe.save.bak"), "saving keeps a backup of the previous save")
+	var f := FileAccess.open("user://test_safe.save", FileAccess.WRITE)
+	f.store_string("garbage")
+	f.close()
+	var p2 := Profile.new("user://test_safe.save")
+	p2.load_profile()
+	check(p2.embers == 11, "a broken save falls back to the backup (got %d)" % p2.embers)
+	var old := {"version": 2, "embers": 5, "materials": {"grave_iron": 3}, "stats": {"runs": 2}}
+	var m := Profile.migrate(old)
+	check(int(m["version"]) == Profile.SAVE_VERSION and int(m["stats"]["isle_trips"]) == 1, "v2 saves are upgraded to the current version")
+	var a: Array = GameData.load_json("res://data/heroes.json")
+	a[0]["hp"] = 999
+	var b: Array = GameData.load_json("res://data/heroes.json")
+	check(int(b[0]["hp"]) != 999, "the data cache hands out copies")
+	Profile.save_run_data({"x": 1})
+	check(Profile.has_saved_run(), "run save exists")
+	Profile.delete_saved_run()
+	check(not Profile.has_saved_run(), "deleting a run save also removes its backup")

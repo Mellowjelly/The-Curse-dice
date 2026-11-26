@@ -538,3 +538,16 @@ func _return_to_town() -> void:
 			parts.append("%s x%d" % [world.material_name(id), int(moved[id])])
 		TownScreen.last_result = {"embers": 0, "dice": 0, "quests": [], "banked": ", ".join(parts)}
 	get_tree().change_scene_to_file(TOWN_SCENE)
+
+
+# ---------------------------------------------------------------- phone Back button / app pause (see app_events.gd)
+
+func on_back() -> bool:
+	if _big_map.visible:
+		_big_map.hide()
+		return true
+	return false
+
+
+func save_state() -> void:
+	_save()

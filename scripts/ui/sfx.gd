@@ -43,9 +43,9 @@ static func play(node: Node, sound: String, volume_db: float = VOLUME_DB) -> voi
 	var p := AudioStreamPlayer.new()
 	p.stream = stream
 	p.volume_db = volume_db
-	node.get_tree().root.add_child(p)
+	p.autoplay = true
 	p.finished.connect(p.queue_free)
-	p.play()
+	node.get_tree().root.add_child.call_deferred(p)  # deferred: the root may be busy while a scene starts
 
 
 ## Plays the tune for a place (see MOODS), cross-fading from the previous one.
@@ -65,8 +65,8 @@ static func music(node: Node, mood: String = "town") -> void:
 			_music_cache[mood] = _compose(mood)
 		_music_player.stream = _music_cache[mood]
 	_music_player.volume_db = -40.0
-	root.add_child(_music_player)
-	_music_player.play()
+	_music_player.autoplay = true
+	root.add_child.call_deferred(_music_player)  # deferred: the root is busy while the first scene starts
 	var tw := root.create_tween()
 	tw.tween_property(_music_player, "volume_db", -13.0, 1.5)
 	if old != null and is_instance_valid(old):

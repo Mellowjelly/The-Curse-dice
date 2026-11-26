@@ -1,4 +1,5 @@
 extends SceneTree
+const GameData = preload("res://scripts/core/game_data.gd")
 ## Text interface to play the whole game (for AI playtesters and quick checks).
 ##
 ## The game is deterministic, so a session is just a list of commands that is REPLAYED from the start
@@ -45,8 +46,7 @@ func _init() -> void:
 		return
 	var tail := int(args[1]) if args.size() > 1 else 60
 	var path := "user://cli_profile.save"
-	if FileAccess.file_exists(path):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	GameData.safe_delete(path)
 	profile = Profile.new(path)
 	rng_summon.seed = 7
 	rng_world.seed = 11

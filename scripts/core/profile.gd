@@ -60,13 +60,32 @@ func _init(save_path: String = DEFAULT_PATH) -> void:
 
 # ---------------------------------------------------------------- save / load
 
+## Bump when the save layout changes, and add a step to migrate().
+const SAVE_VERSION := 3
+
+
+## Upgrades an older save, one version at a time, so old players never lose progress.
+static func migrate(d: Dictionary) -> Dictionary:
+	var v := int(d.get("version", 1))
+	if v < 2:
+		# v1 (before the Isle): no materials, gear or stars yet; the loader's defaults cover them.
+		v = 2
+	if v < 3:
+		# v3 (3.1): isle_trips joined stats for staged unlocks. Players who already banked items have been to the Isle.
+		var st: Dictionary = d.get("stats", {})
+		if not st.has("isle_trips") and (not d.get("materials", {}).is_empty() or not d.get("gear", []).is_empty()):
+			st["isle_trips"] = 1
+		d["stats"] = st
+		v = 3
+	d["version"] = v
+	return d
+
+
 func load_profile() -> void:
-	if not FileAccess.file_exists(path):
+	var raw := GameData.safe_load(path)
+	if raw.is_empty():
 		return
-	var f := FileAccess.open(path, FileAccess.READ)
-	var d: Variant = f.get_var()
-	if typeof(d) != TYPE_DICTIONARY:
-		return
+	var d := migrate(raw)
 	embers = d.get("embers", 0)
 	levels = d.get("levels", {})
 	stats = d.get("stats", {})
@@ -97,8 +116,7 @@ func load_profile() -> void:
 
 
 func save() -> void:
-	var f := FileAccess.open(path, FileAccess.WRITE)
-	f.store_var({"version": 2, "embers": embers, "levels": levels, "stats": stats, "quests_done": quests_done,
+	GameData.safe_store(path, {"version": SAVE_VERSION, "embers": embers, "levels": levels, "stats": stats, "quests_done": quests_done,
 		"grave_dice": grave_dice, "owned_heroes": owned_heroes, "unlocked_weapons": unlocked_weapons,
 		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
@@ -692,22 +710,16 @@ func quest_progress(q: Dictionary) -> int:
 # ---------------------------------------------------------------- run save
 
 static func has_saved_run() -> bool:
-	return FileAccess.file_exists(RUN_SAVE_PATH)
+	return FileAccess.file_exists(RUN_SAVE_PATH) or FileAccess.file_exists(RUN_SAVE_PATH + ".bak")
 
 
 static func save_run_data(data: Dictionary) -> void:
-	var f := FileAccess.open(RUN_SAVE_PATH, FileAccess.WRITE)
-	f.store_var(data)
+	GameData.safe_store(RUN_SAVE_PATH, data)
 
 
 static func load_run_data() -> Dictionary:
-	if not has_saved_run():
-		return {}
-	var f := FileAccess.open(RUN_SAVE_PATH, FileAccess.READ)
-	var d: Variant = f.get_var()
-	return d if typeof(d) == TYPE_DICTIONARY else {}
+	return GameData.safe_load(RUN_SAVE_PATH)
 
 
 static func delete_saved_run() -> void:
-	if has_saved_run():
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(RUN_SAVE_PATH))
+	GameData.safe_delete(RUN_SAVE_PATH)

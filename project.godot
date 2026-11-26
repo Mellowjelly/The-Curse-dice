@@ -10,6 +10,11 @@ config/version="3.0.0"
 config/description="Dark fantasy dice adventure (prototype)"
 run/main_scene="res://scenes/title.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
+config/quit_on_go_back=false
+
+[autoload]
+
+AppEvents="*res://scripts/ui/app_events.gd"
 
 [display]
 

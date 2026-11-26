@@ -1,4 +1,5 @@
 extends SceneTree
+const GameData = preload("res://scripts/core/game_data.gd")
 ## Automated playtest: every bot style plays many full runs of the region,
 ## then we write a report (numbers + one full annotated transcript per style)
 ## for the playtester panel (.claude/agents/playtester.md) to critique.
@@ -212,8 +213,7 @@ func _campaign(style: String) -> Array[String]:
 	var curse_total := 0.0
 	for cmp in CAMPAIGNS:
 		var path := "user://bot_campaign.save"
-		if FileAccess.file_exists(path):
-			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+		GameData.safe_delete(path)
 		var prof := Profile.new(path)
 		var first := -1
 		for i in CAMPAIGN_RUNS:
