@@ -299,6 +299,48 @@ func run_options() -> Dictionary:
 	return o
 
 
+# ---------------------------------------------------------------- Isle dungeons (3.5)
+# A dungeon is a short board (run.gd) entered from the Isle. The party walks in fresh from town;
+# a win sends its spoils (rare ore) into the Isle bag, so they still have to be carried home.
+
+static func dungeon_path(dungeon_id: String) -> String:
+	return "res://data/dungeon_%s.json" % dungeon_id
+
+
+## Run options for a dungeon: town levels, gear and stars as on the road, but no Curse.
+func dungeon_options(dungeon_id: String) -> Dictionary:
+	var o := run_options()
+	o["region"] = dungeon_path(dungeon_id)
+	o["curse"] = 0
+	return o
+
+
+## After a dungeon run. Returns { "victory", "embers", "dust", "materials" }.
+func record_dungeon(run) -> Dictionary:
+	var won: bool = run.phase == "victory"
+	var s: Dictionary = run.stats
+	for id in s.get("kills", {}):
+		_add("kills_" + id, s["kills"][id])
+	_add("fate_twists", run.combat.twists)
+	var out := {"victory": won, "embers": 0, "dust": 0, "materials": {}}
+	if won:
+		var reward: Dictionary = run.region.get("reward", {})
+		out["embers"] = int(reward.get("embers", 0))
+		out["dust"] = int(reward.get("dust", 0))
+		out["materials"] = Dictionary(reward.get("materials", {})).duplicate()
+		embers += out["embers"]
+		star_dust += out["dust"]
+		_add("dungeon_" + String(run.region["id"]), 1)
+		# The spoils go into the Isle bag (or straight to Storage if there is no Isle trip).
+		var bag: Dictionary = world_state.get("bag", {}) if world_state.has("bag") else materials
+		for id in out["materials"]:
+			bag[id] = int(bag.get(id, 0)) + int(out["materials"][id])
+		if world_state.has("bag"):
+			world_state["bag"] = bag
+	save()
+	return out
+
+
 # ---------------------------------------------------------------- summon roll (fair gacha, 3 banners)
 # Paid only with Grave Dice earned by playing. Each banner shows its odds and its own pity counter:
 # a roll gives something NEW from that banner with new_chance %, and is guaranteed every `pity` rolls.

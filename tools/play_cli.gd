@@ -34,6 +34,7 @@ const HELP := """COMMANDS
  ROAD (map): roll | move 0|1 | reroll_move | pick <n> (pet/carving/event option/close event) | skip
        equip_loot <weapon#> <hero#> | buy <item> | leave | rest heal|carve
  WORLD: look | goto <x> <y> | gather | fight | home | sharpen <n>|skip (after a win: pick 1 of 3 sharpenings)
+       dungeon (next to a dungeon entrance: play its short board; spoils go into your bag)
  COMBAT (road or world): lock <hero#> | reroll | fate_reroll | twist <hero#> <face#> | skill <hero#>
        target <enemy#> | end | flee (Isle only, from round 2)"""
 
@@ -296,6 +297,15 @@ func _road_cmd(c: String, p: PackedStringArray) -> void:
 
 
 func _after_road() -> void:
+	if run.is_over() and run.is_dungeon():
+		var dres := profile.record_dungeon(run)
+		say("DUNGEON OVER: %s at tile %d. +%d Soul Embers, +%d Star Dust, into your bag: %s" % [run.phase.to_upper(), run.pos,
+			int(dres["embers"]), int(dres["dust"]), str(dres["materials"])])
+		world.load_dict(profile.world_state)
+		mode = "world"
+		run = null
+		say(_world_look())
+		return
 	if run.is_over():
 		var res := profile.record_run(run)
 		say("JOURNEY OVER: %s at tile %d. +%d Soul Embers, +%d Grave Dice%s" % [run.phase.to_upper(), run.pos, int(res["embers"]), int(res.get("dice", 0)),
@@ -462,6 +472,18 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 				return
 			var msg := world.choose_sharpening(int(p[1]) if p.size() > 1 else -1)
 			say(msg if msg != "" else "sharpen <0-%d> or sharpen skip" % (world.sharpen_offers.size() - 1))
+		"dungeon":
+			var dg: Dictionary = world.dungeon_near(world.player_cell)
+			if dg.is_empty():
+				say("No dungeon entrance within 1 cell. `look` lists the entrances.")
+				return
+			profile.world_state = world.to_dict()
+			profile.save()
+			runs_started += 1
+			run = Run.new(1000 + runs_started, profile.dungeon_options(dg["id"]), profile.party)
+			mode = "road"
+			say("You go down into %s. A short board with a boss at the end; its spoils go into your bag." % dg["name"])
+			say(_road_state())
 		"home":
 			var moved := profile.bank(world)
 			profile.advance_time()
@@ -531,6 +553,7 @@ func _world_look() -> String:
 	for n in near.slice(0, 14):
 		s.append(n[1])
 	s.append("  countries: " + "; ".join(world.countries.map(func(x): return "%s T%d centre %s" % [x["name"], int(x["tier"]), str(x["center"])])))
+	s.append("  dungeons: " + "; ".join(world.dungeons.map(func(d): return "%s (T%d) entrance %s - stand next to it and type `dungeon`" % [d["name"], int(world.countries[d["country"]]["tier"]), str(d["cell"])])))
 	return "\n".join(s)
 
 

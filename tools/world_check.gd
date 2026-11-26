@@ -26,7 +26,33 @@ func _init():
 	for ci in [0, 2]:
 		for style in ["newbie", "tactician"]:
 			print(_trip_economy(ci, style))
+	for style in ["newbie", "tactician"]:
+		print(_dungeon_check("sunken_abbey", style))
 	quit()
+
+
+## 3.5: win rate of an Isle dungeon run (starter party, no town upgrades; and with a mid-game town).
+func _dungeon_check(id: String, style: String) -> String:
+	const Run = preload("res://scripts/core/run.gd")
+	var out: Array[String] = []
+	for town in [{}, {"chapel": 2, "smithy": 1, "carver": 2, "fortune": 1, "kennel": 1}]:
+		var wins := 0
+		var boss := 0
+		var n := 120
+		for i in n:
+			var o: Dictionary = town.duplicate()
+			o["region"] = "res://data/dungeon_%s.json" % id
+			o["time"] = "day"
+			var run := Run.new(5000 + i, o)
+			var bot = PlayerBot.new(style, 5000 + i)
+			var steps := 0
+			while not run.is_over() and steps < 2000:
+				bot.play_run_step(run)
+				steps += 1
+			wins += int(run.phase == "victory")
+			boss += int(run.pos == run.board.size() - 1)
+		out.append("%s %d%% (reached the boss %d%%)" % ["starter town" if town.is_empty() else "mid town", wins * 100 / n, boss * 100 / n])
+	return "Dungeon %-13s %-9s: %s" % [id, style, ", ".join(out)]
 
 
 ## 3.5: what one Isle trip pays (to compare with a road run): a fresh starter party walks into a country,

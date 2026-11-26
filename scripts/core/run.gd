@@ -62,7 +62,8 @@ func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []
 		rng.seed = seed_value
 	else:
 		rng.randomize()
-	region = GameData.load_json("res://data/region1.json")
+	# 3.5: an Isle dungeon is a short board with its own data file (upgrades["region"]); the road is region1.json.
+	region = GameData.load_json(String(upgrades.get("region", "res://data/region1.json")))
 	monster_defs = GameData.load_monsters()
 	events = GameData.load_json("res://data/events.json")
 	var defs: Array = GameData.load_heroes()
@@ -138,6 +139,11 @@ func _weighted_pick(weights: Dictionary) -> String:
 func tier_at(index: int) -> String:
 	var length: int = region["board_length"]
 	return "early" if index < length / 3 else ("mid" if index < 2 * length / 3 else "late")
+
+
+## 3.5: true for an Isle dungeon run (rewards go to the Isle bag, not the road's embers and quests).
+func is_dungeon() -> bool:
+	return String(region.get("kind", "")) == "dungeon"
 
 
 ## Where a move of `steps` would land (stops early at a gate tile).

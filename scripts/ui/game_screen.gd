@@ -4,6 +4,7 @@ extends Control
 ## All rules live in scripts/core/run.gd; this file only displays and forwards clicks.
 
 const Run = preload("res://scripts/core/run.gd")
+const GameData = preload("res://scripts/core/game_data.gd")
 const Combat = preload("res://scripts/core/combat.gd")
 const CombatView = preload("res://scripts/ui/combat_view.gd")
 const UI = preload("res://scripts/ui/ui_kit.gd")
@@ -20,6 +21,10 @@ const NODE := 52                     # diameter of a tile node on the world map
 const COL_STEP := 112.0
 const ROW_STEP := 80.0
 const BOARD_ORIGIN := Vector2(76, 120)  # centre of tile 0
+
+const WORLD_SCENE := "res://scenes/world.tscn"
+static var pending_dungeon := ""     # 3.5: set by the Isle screen when the party enters a dungeon
+var _dungeon_result: Dictionary = {}
 
 var run: Run
 var profile: Profile
@@ -51,6 +56,10 @@ func _ready() -> void:
 	var saved := Profile.load_run_data()
 	if not saved.is_empty():
 		_attach(Run.from_dict(saved))
+	elif pending_dungeon != "":
+		var id := pending_dungeon
+		pending_dungeon = ""
+		_attach(Run.new(-1, profile.dungeon_options(id), profile.party))
 	else:
 		new_run()
 
@@ -271,11 +280,16 @@ func _on_run_changed() -> void:
 	elif run.is_over() and not _recorded:
 		_recorded = true
 		Profile.delete_saved_run()
-		TownScreen.last_result = profile.record_run(run)
+		if run.is_dungeon():
+			_dungeon_result = profile.record_dungeon(run)  # 3.5: spoils go into the Isle bag
+		else:
+			TownScreen.last_result = profile.record_run(run)
 	_header.text = tr("%s  -  tile %d / %d") % [tr(run.region["name"]), run.pos, run.board.size() - 1]
 	if run.time_of_day() != "":
-		_header.text += "   (%s)" % run.time_of_day().capitalize()
+		_header.text += "   (%s)" % tr(run.time_of_day().capitalize())
 	_map_art.modulate = UI.TIME_TINT.get(run.time_of_day(), Color.WHITE)
+	if run.is_dungeon():
+		_map_art.modulate *= Color(0.7, 0.85, 1.1)  # 3.5: the Sunken Abbey is under water
 	_stats.text = tr("Gold %d    Fate %d/%d") % [run.gold, run.combat.fate, Combat.MAX_FATE]
 	if not run.combat.pet.is_empty():
 		_stats.text += tr("    Pet: ") + tr(run.combat.pet["name"])
@@ -459,7 +473,7 @@ func _refresh_modal() -> void:
 			_end_buttons()
 		"defeat":
 			_modal_title(tr("Your party has fallen"), UI.BLOOD)
-			_modal_text(tr("The Hollow Road claims three more souls. The dice keep rolling without you."))
+			_modal_text(tr(String(run.boss_info().get("defeat_text", "The Hollow Road claims three more souls. The dice keep rolling without you."))))
 			_modal_text(_run_summary(), UI.DIM)
 			_end_buttons()
 		_:
@@ -469,6 +483,16 @@ func _refresh_modal() -> void:
 
 
 func _end_buttons() -> void:
+	if run.is_dungeon():
+		var dr := _dungeon_result
+		if dr.get("victory", false):
+			var names := GameData.material_names()
+			var parts: Array[String] = []
+			for id in dr["materials"]:
+				parts.append("%s x%d" % [tr(names.get(id, id)), int(dr["materials"][id])])
+			_modal_text(tr("+%d Soul Embers, +%d Star Dust. Into your bag: %s") % [int(dr["embers"]), int(dr["dust"]), ", ".join(parts)], Color("#e08a3c"))
+		_modal_box.add_child(UI.choice_button(tr("Return to the Isle"), func(): get_tree().change_scene_to_file(WORLD_SCENE), UI.GOLD))
+		return
 	var res: Dictionary = TownScreen.last_result
 	if not res.is_empty():
 		var t := tr("+%d Soul Embers, +%d Grave Dice") % [int(res["embers"]), int(res.get("dice", 0))]

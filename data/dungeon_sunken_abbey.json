@@ -1,0 +1,197 @@
+{
+	"id": "sunken_abbey",
+	"kind": "dungeon",
+	"name": "The Sunken Abbey",
+	"country": "drowned_coast",
+	"entrance": [
+		-5,
+		3
+	],
+	"desc": "Half an abbey stands in the shallows. The bell still rings at low tide, though no one is left to pull the rope.",
+	"board_length": 12,
+	"tile_weights": {
+		"early": {
+			"fight": 55,
+			"event": 25,
+			"chest": 20
+		},
+		"mid": {
+			"fight": 40,
+			"elite": 20,
+			"event": 20,
+			"chest": 10,
+			"shop": 10
+		},
+		"late": {
+			"fight": 40,
+			"elite": 20,
+			"event": 15,
+			"rest": 10,
+			"shop": 15
+		}
+	},
+	"encounters": {
+		"early": [
+			[
+				"weeping_nun",
+				"ghoul"
+			],
+			[
+				"sand_crab",
+				"plague_rat",
+				"plague_rat"
+			],
+			[
+				"marsh_serpent",
+				"ghoul"
+			]
+		],
+		"mid": [
+			[
+				"weeping_nun",
+				"sand_crab",
+				"cultist"
+			],
+			[
+				"marsh_serpent",
+				"marsh_serpent",
+				"ghoul"
+			],
+			[
+				"grave_knight",
+				"plague_rat"
+			]
+		],
+		"late": [
+			[
+				"weeping_nun",
+				"weeping_nun",
+				"sand_crab"
+			],
+			[
+				"grave_knight",
+				"marsh_serpent"
+			],
+			[
+				"sand_crab",
+				"sand_crab",
+				"cultist"
+			]
+		],
+		"elite": [
+			[
+				"grave_knight",
+				"weeping_nun"
+			],
+			[
+				"bone_colossus"
+			]
+		],
+		"boss": [
+			[
+				"drowned_abbot"
+			]
+		]
+	},
+	"gold": {
+		"fight": [
+			8,
+			14
+		],
+		"elite": [
+			22,
+			30
+		],
+		"chest": [
+			15,
+			30
+		]
+	},
+	"shop": [
+		{
+			"id": "tonic",
+			"name": "Bitter Tonic",
+			"desc": "Heal all heroes 8 HP.",
+			"cost": 20
+		},
+		{
+			"id": "carving",
+			"name": "Bone Carver",
+			"desc": "Choose 1 of 3 die carvings.",
+			"cost": 35
+		},
+		{
+			"id": "weapon",
+			"name": "Weapon Rack",
+			"desc": "Choose 1 of 2 weapons.",
+			"cost": 40
+		},
+		{
+			"id": "fate_shard",
+			"name": "Fate Shard",
+			"desc": "+3 Fate.",
+			"cost": 15
+		},
+		{
+			"id": "resurrect",
+			"name": "Grave Candle",
+			"desc": "Revive all fallen heroes at half HP.",
+			"cost": 25
+		}
+	],
+	"rest_heal_percent": 30,
+	"revive_after_fight_percent": 40,
+	"fixed_tiles": {
+		"6": "rest"
+	},
+	"gate_tiles": [],
+	"scaling": {
+		"early": {
+			"hp": 1.6,
+			"damage": 2
+		},
+		"mid": {
+			"hp": 1.8,
+			"damage": 2
+		},
+		"late": {
+			"hp": 1.9,
+			"damage": 2
+		},
+		"elite": {
+			"hp": 1.6,
+			"damage": 2
+		},
+		"boss": {
+			"hp": 1.3,
+			"damage": 2
+		}
+	},
+	"elite_heal_percent": 35,
+	"bosses": [
+		{
+			"id": "drowned_abbot",
+			"times": [
+				"dawn",
+				"day",
+				"dusk",
+				"night"
+			],
+			"after_wins": 0,
+			"lair": "The Flooded Nave",
+			"scene": "battle_mid",
+			"gate_text": "Water to the knees, then to the waist. Beyond the last dry stair, someone is still saying mass.",
+			"victory_title": "The Abbot is laid to rest",
+			"victory_text": "The bell stops. In the silt of the altar, black coral grows around a shard of the Dice of Fate.",
+			"defeat_text": "The tide comes in over three more pilgrims. Something carries you back to the shore."
+		}
+	],
+	"reward": {
+		"materials": {
+			"black_coral": 3,
+			"sea_pearl": 6
+		},
+		"embers": 60,
+		"dust": 4
+	}
+}

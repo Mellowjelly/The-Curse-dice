@@ -60,6 +60,7 @@ func _init() -> void:
 	test_v35_road_bonus()
 	test_v35_villagers()
 	test_v35_pet_clarity()
+	test_v35_isle_dungeon()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1180,6 +1181,67 @@ func test_v34_isle_sharpening() -> void:
 	check(faces.size() == w.sharpen_offers.size() and w.sharpen_offers.size() >= 2, "offers never repeat a face (%d offers)" % w.sharpen_offers.size())
 	w.finish_fight(e, false, rng)
 	check(w.sharpen_offers.is_empty(), "a lost fight leaves no sharpening")
+
+
+## 3.5: the Sunken Abbey, a short Isle dungeon board with a boss and rare ore.
+func test_v35_isle_dungeon() -> void:
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	check(w.dungeons.size() >= 1, "the Isle has a dungeon entrance")
+	for d in w.dungeons:
+		var c: Dictionary = w.countries[d["country"]]
+		check(int(c["tier"]) >= 3, "%s is in a tier 3+ country" % d["id"])
+		check(w.country_index_at(d["cell"]) == d["country"] and w.is_walkable(d["cell"]), "%s entrance is on walkable land in its country" % d["id"])
+		check(not w.enemies.any(func(e): return e["cell"] == d["cell"]), "%s entrance is not on a monster" % d["id"])
+		check(not w.nodes.any(func(n): return n["cell"] == d["cell"]), "%s entrance is not on a vein or tree" % d["id"])
+		check(not w.dungeon_near(d["cell"]).is_empty() and w.dungeon_near(d["cell"] + Vector2i(5, 5)).is_empty(), "the entrance is found only nearby")
+	var p := _fresh_profile("test_v35_dungeon")
+	var o := p.dungeon_options("sunken_abbey")
+	check(o["region"] == "res://data/dungeon_sunken_abbey.json" and o["curse"] == 0, "dungeon options point at its data, no Curse")
+	var run := Run.new(77, o)
+	check(run.is_dungeon() and not Run.new(77).is_dungeon(), "a dungeon run knows it is one")
+	check(run.board.size() == 13 and run.board[12]["type"] == "boss" and run.boss_id == "drowned_abbot", "a 12-tile board with the Drowned Abbot at the end")
+	check(GameData.load_monsters()["drowned_abbot"].get("boss", false), "the Abbot is a boss")
+	check(ResourceLoader.exists("res://assets/sprites/drowned_abbot.png") and ResourceLoader.exists("res://assets/world/dungeon_entrance.png"), "the Abbot and the entrance have art")
+	var copy = Run.from_dict(run.to_dict())
+	check(copy.is_dungeon() and copy.board.size() == 13 and copy.boss_id == "drowned_abbot", "a saved dungeon run loads as the dungeon")
+	# A bot can play it to the end.
+	var PlayerBot = load("res://tools/bots/player_bot.gd")
+	var won_run: Run = null
+	var lost_run: Run = null
+	for i in 30:
+		var r := Run.new(700 + i, p.dungeon_options("sunken_abbey"))
+		var bot = PlayerBot.new("tactician", 700 + i)
+		var steps := 0
+		while not r.is_over() and steps < 2000:
+			bot.play_run_step(r)
+			steps += 1
+		check(r.is_over(), "dungeon run %d ends" % i)
+		if r.phase == "victory" and won_run == null:
+			won_run = r
+		if r.phase == "defeat" and lost_run == null:
+			lost_run = r
+	check(won_run != null and lost_run != null, "the dungeon can be won and lost")
+	# Spoils go to the Isle bag; a loss gives nothing.
+	p.world_state = {"bag": {"sea_pearl": 2}, "on_trip": true}
+	var e0 := p.embers
+	var road_runs := p.stat("runs")
+	var res := p.record_dungeon(won_run)
+	check(res["victory"] and int(res["materials"]["black_coral"]) == 3, "the Abbot leaves 3 Black Coral")
+	check(int(p.world_state["bag"]["black_coral"]) == 3 and int(p.world_state["bag"]["sea_pearl"]) == 8, "the spoils go into the Isle bag")
+	check(p.embers == e0 + 60 and p.stat("dungeon_sunken_abbey") == 1 and p.stat("kills_drowned_abbot") == 1, "embers, clears and kills are counted")
+	check(p.stat("runs") == road_runs, "a dungeon is not a road journey (no road quests or time)")
+	var lost := p.record_dungeon(lost_run)
+	check(not lost["victory"] and lost["materials"].is_empty() and int(p.world_state["bag"]["black_coral"]) == 3, "a lost dungeon gives nothing and takes nothing")
+	var home := _fresh_profile("test_v35_dungeon_home")
+	home.record_dungeon(won_run)
+	check(int(home.materials.get("black_coral", 0)) == 3, "with no Isle trip the spoils go to Storage")
+	var th: Dictionary = GameData.load_json("res://data/lang_th.json")
+	var dd: Dictionary = GameData.load_json("res://data/dungeon_sunken_abbey.json")
+	for k in ["name", "desc"]:
+		check(th.has(dd[k]), "dungeon %s has Thai" % k)
+	for k in ["lair", "gate_text", "victory_title", "victory_text", "defeat_text"]:
+		check(th.has(dd["bosses"][0][k]), "dungeon boss %s has Thai" % k)
 
 
 ## 3.5: pets show their die and passive on two lines; Ash Crow's +2 Fate is logged at the start of a fight.

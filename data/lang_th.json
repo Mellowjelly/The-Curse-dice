@@ -844,5 +844,20 @@
 	"+50% gold from fights and chests.": "ทองจากไฟต์และหีบ +50%",
 	"Die (d4): %s": "เต๋า (d4): %s",
 	"Passive: %s": "ติดตัว: %s",
-	"%s caws:": "%s ร้องกา:"
+	"%s caws:": "%s ร้องกา:",
+	"The Sunken Abbey": "อารามจมน้ำ",
+	"Half an abbey stands in the shallows. The bell still rings at low tide, though no one is left to pull the rope.": "อารามครึ่งหลังตั้งอยู่ในน้ำตื้น ระฆังยังดังทุกครั้งที่น้ำลง แม้ไม่เหลือใครดึงเชือกแล้ว",
+	"The Flooded Nave": "โถงสวดที่น้ำท่วม",
+	"Water to the knees, then to the waist. Beyond the last dry stair, someone is still saying mass.": "น้ำถึงเข่า แล้วถึงเอว เลยบันไดขั้นสุดท้ายที่ยังแห้ง ใครบางคนยังสวดมิสซาอยู่",
+	"The Abbot is laid to rest": "เจ้าอาวาสได้หลับพักเสียที",
+	"The bell stops. In the silt of the altar, black coral grows around a shard of the Dice of Fate.": "ระฆังเงียบลง ในโคลนบนแท่นบูชา ปะการังดำงอกรอบเศษลูกเต๋าแห่งโชคชะตา",
+	"The tide comes in over three more pilgrims. Something carries you back to the shore.": "น้ำขึ้นท่วมผู้แสวงบุญอีกสามคน มีบางสิ่งพาพวกท่านกลับขึ้นฝั่ง",
+	"The Drowned Abbot": "เจ้าอาวาสจมน้ำ",
+	"The Drowned Abbot opens his mouth to sing, and the sea pours out instead.": "เจ้าอาวาสจมน้ำอ้าปากจะร้องเพลงสวด แต่ทะเลทะลักออกมาแทน",
+	"He sinks without a sound. For the first time in a hundred years, the bell is still.": "เขาจมลงอย่างไร้เสียง เป็นครั้งแรกในร้อยปีที่ระฆังนิ่งสนิท",
+	"He led the morning mass the day the sea came in. He has not noticed it is over.": "เขาเป็นผู้นำสวดมิสซาเช้าในวันที่ทะเลบุกเข้ามา เขายังไม่รู้ตัวว่ามันจบไปแล้ว",
+	"%s: tap the door to go down (Tier %d). A short board and a boss; the spoils go into your bag.": "%s: แตะประตูเพื่อลงไป (ระดับ %d) กระดานสั้นๆ กับบอส ของที่ได้จะเข้ากระเป๋า",
+	"Finish your journey on the Hollow Road first.": "เดินทางบน Hollow Road ที่ค้างอยู่ให้จบก่อน",
+	"+%d Soul Embers, +%d Star Dust. Into your bag: %s": "เถ้าวิญญาณ +%d, ผงดาว +%d ใส่กระเป๋า: %s",
+	"Return to the Isle": "กลับสู่เกาะ"
 }

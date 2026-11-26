@@ -46,6 +46,9 @@ var _save_timer := 0.0
 var _in_combat := false
 var _fight_enemy: Dictionary = {}
 var _challenge_boss := ""      # bosses only fight when you tap them on purpose
+var _enter_dungeon := ""       # 3.5: dungeons are entered by tapping their door
+var _dungeon_warned := ""
+var _dungeon_nodes := {}       # dungeon id -> Sprite2D
 var _boss_warned := ""
 
 # HUD
@@ -129,7 +132,8 @@ func _build_world() -> void:
 				continue
 			var biome: String = world.countries[ci]["biome"]
 			_ground.set_cell(cell, 0, Vector2i(BIOMES.find(biome) * 3 + deco_rng.randi_range(0, 2), 0))
-			if deco_rng.randf() < DECOR_DENSITY and Vector2(cell).distance_to(Vector2(world.player_cell)) > 2.5:
+			if deco_rng.randf() < DECOR_DENSITY and Vector2(cell).distance_to(Vector2(world.player_cell)) > 2.5 \
+					and world.dungeon_near(cell, 2.0).is_empty():
 				var spr := Sprite2D.new()
 				spr.texture = decor_tex[biome][deco_rng.randi_range(0, 1)]
 				spr.offset = Vector2(0, -20)
@@ -189,6 +193,23 @@ func _build_world() -> void:
 		var home := holder.position
 		tw.tween_property(holder, "position", home + Vector2(rng.randf_range(-24, 24), rng.randf_range(-12, 12)), rng.randf_range(2.0, 4.0))
 		tw.tween_property(holder, "position", home, rng.randf_range(2.0, 4.0))
+	# 3.5: dungeon entrances
+	for d in world.dungeons:
+		var door := Sprite2D.new()
+		door.texture = load("res://assets/world/dungeon_entrance.png")
+		door.offset = Vector2(0, -28)
+		door.position = _ground.map_to_local(d["cell"])
+		var sign_label := Label.new()
+		sign_label.text = tr(d["name"])
+		sign_label.add_theme_font_size_override("font_size", 8)
+		sign_label.add_theme_color_override("font_color", Color("#7fd0c0"))
+		sign_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+		sign_label.position = Vector2(-50, -72)
+		sign_label.size = Vector2(100, 10)
+		sign_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		door.add_child(sign_label)
+		_objects.add_child(door)
+		_dungeon_nodes[d["id"]] = door
 	# The party leader
 	_player = AnimatedSprite2D.new()
 	_player.sprite_frames = UnitSprite.frames_for(world.party[0]["id"] if not world.party.is_empty() else "varek")
@@ -399,6 +420,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		var p := get_global_mouse_position()
 		_pending_node = ""
 		_challenge_boss = ""
+		_enter_dungeon = ""
+		# Tapped a dungeon door? Walk up and go in.
+		for d in world.dungeons:
+			if _dungeon_nodes[d["id"]].position.distance_to(p + Vector2(0, 24)) < 30:
+				_enter_dungeon = d["id"]
+				p = _dungeon_nodes[d["id"]].position
+				break
 		# Tapped a boss? Walk up and challenge it.
 		for e in world.enemies:
 			if e.get("boss", false) and world.enemy_active(e) and _enemy_nodes[e["id"]].position.distance_to(p + Vector2(0, 20)) < 30:
@@ -469,6 +497,17 @@ func _process(delta: float) -> void:
 				_refresh_world_objects()
 				_refresh_hud()
 				_save()
+	# 3.5: dungeon doors
+	for d in world.dungeons:
+		var dd := _dungeon_nodes[d["id"]].position.distance_to(_player.position) as float
+		if dd < 70.0 and _dungeon_warned != d["id"]:
+			_dungeon_warned = d["id"]
+			_show_toast(tr("%s: tap the door to go down (Tier %d). A short board and a boss; the spoils go into your bag.") % [
+				tr(d["name"]), int(world.countries[d["country"]]["tier"])], Color("#7fd0c0"))
+		if dd < 16.0 and _enter_dungeon == d["id"]:
+			_enter_dungeon = ""
+			_go_into_dungeon(d)
+			return
 	# Bumping into monsters starts a fight.
 	for e in world.enemies:
 		if not world.enemy_active(e):
@@ -555,6 +594,19 @@ func _pick_sharpen(index: int) -> void:
 		Sfx.play(self, "fate")
 	_refresh_hud()
 	_save()
+
+
+# ---------------------------------------------------------------- dungeons (3.5)
+
+func _go_into_dungeon(d: Dictionary) -> void:
+	if Profile.has_saved_run():
+		_show_toast(tr("Finish your journey on the Hollow Road first."), UI.BLOOD)
+		return
+	_moving = false
+	_save()
+	var GameScreen = load("res://scripts/ui/game_screen.gd")
+	GameScreen.pending_dungeon = d["id"]
+	get_tree().change_scene_to_file("res://scenes/game.tscn")
 
 
 # ---------------------------------------------------------------- town

@@ -95,3 +95,16 @@ static func load_region() -> Dictionary:
 
 static func load_events() -> Array:
 	return load_json(EVENTS_PATH)
+
+
+## 3.5: material id -> English name, from data/world.json (minerals, rare ores, wood and hides).
+static func material_names() -> Dictionary:
+	var w: Dictionary = load_json("res://data/world.json")
+	var out := {}
+	for id in w.get("hides", {}):
+		out[id] = w["hides"][id][0]
+	for c in w["countries"]:
+		for k in ["mineral", "rare", "wood"]:
+			if c.has(k):
+				out[c[k]["id"]] = c[k]["name"]
+	return out

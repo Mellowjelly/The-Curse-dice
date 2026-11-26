@@ -171,6 +171,24 @@ def ribcage():
     return outline(img)
 
 
+def dungeon_entrance():
+    """3.5: the Sunken Abbey: a drowned stone arch with a dark doorway and a bell (48x64)."""
+    img = Image.new("RGBA", (48, 64), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
+    d.ellipse([4, 54, 44, 62], fill=(30, 50, 74, 200))                               # tide pool around the steps
+    stone, stone_d = (120, 124, 120, 255), (84, 88, 88, 255)
+    d.rectangle([8, 22, 16, 58], fill=stone); d.rectangle([32, 22, 40, 58], fill=stone)   # pillars
+    d.pieslice([8, 6, 40, 38], 180, 360, fill=stone)                                  # the arch
+    d.pieslice([16, 14, 32, 30], 180, 360, fill=K + (255,))
+    d.rectangle([16, 22, 32, 58], fill=K + (255,))                                   # the dark doorway
+    d.rectangle([22, 2, 26, 8], fill=stone_d); d.ellipse([20, 6, 28, 14], fill=(176, 140, 70, 255))  # bell
+    for y in (30, 40, 50):
+        d.line([(8, y), (16, y)], fill=stone_d); d.line([(32, y + 3), (40, y + 3)], fill=stone_d)
+    for x, y in ((10, 46), (36, 36), (12, 28)):
+        d.point((x, y), fill=(60, 120, 90, 255)); d.point((x + 1, y + 1), fill=(60, 120, 90, 255))  # weed
+    d.rectangle([14, 56, 34, 58], fill=(110, 150, 170, 255))                          # water at the door
+    return outline(img)
+
+
 DECOR = {
     "deadwood": [dead_tree, dead_bush], "swamp": [reeds, mossy_stump], "deepforest": [green_tree, mushroom],
     "coast": [driftwood, coast_rock], "snow": [snow_pine, ice_rock], "volcanic": [obsidian_spike, lava_vent],
@@ -253,4 +271,5 @@ if __name__ == "__main__":
     for t, (trunk, crown) in TREES.items():
         chop_tree(trunk, crown).save(f"assets/world/tree_{t}.png")
     stump().save("assets/world/tree_stump.png")
+    dungeon_entrance().save("assets/world/dungeon_entrance.png")
     print("world art done")

@@ -26,6 +26,7 @@ var trip_carvings := 0            # Isle wins sharpen the party's dice until the
 const MAX_TRIP_CARVINGS := 3
 const SHARPEN_OFFERS := 3         # 3.4: after an Isle win the player picks 1 of 3 sharpenings
 var sharpen_offers: Array = []    # [{ "hero": int, "face": int, "new": Dictionary, "text": String }]
+var dungeons: Array = []          # 3.5: { "id", "name", "cell": Vector2i, "country": int } Isle dungeon entrances
 var on_trip := false              # 3.5: true from setting out until the party is home (a closed app resumes the trip)
 
 
@@ -36,6 +37,39 @@ func _init(world_seed: int = -1) -> void:
 	monster_defs = GameData.load_monsters()
 	_generate(int(data["seed"]) if world_seed < 0 else world_seed)
 	player_cell = Vector2i(int(countries[0]["center"][0]), int(countries[0]["center"][1]))
+	_place_dungeons()
+
+
+## 3.5: a country with "dungeon" in world.json has an entrance near its centre (data/dungeon_<id>.json).
+func _place_dungeons() -> void:
+	dungeons = []
+	for ci in countries.size():
+		var id := String(countries[ci].get("dungeon", ""))
+		if id == "":
+			continue
+		var d: Dictionary = GameData.load_json("res://data/dungeon_%s.json" % id)
+		var centre := Vector2i(int(countries[ci]["center"][0]), int(countries[ci]["center"][1]))
+		var off: Array = d.get("entrance", [0, 0])
+		var want := centre + Vector2i(int(off[0]), int(off[1]))
+		var cell := centre
+		var best := INF
+		for dy in range(-4, 5):  # the nearest free cell in the country: no vein, tree or monster on it
+			for dx in range(-4, 5):
+				var c := want + Vector2i(dx, dy)
+				var dist := Vector2(c).distance_to(Vector2(want))
+				if dist < best and country_index_at(c) == ci and not nodes.any(func(n): return n["cell"] == c) \
+						and not enemies.any(func(e): return Vector2(e["cell"]).distance_to(Vector2(c)) < 2.0):
+					best = dist
+					cell = c
+		dungeons.append({"id": id, "name": d["name"], "cell": cell, "country": ci})
+
+
+## The dungeon entrance within `reach` cells of `cell`, or {}.
+func dungeon_near(cell: Vector2i, reach: float = 1.5) -> Dictionary:
+	for d in dungeons:
+		if Vector2(d["cell"]).distance_to(Vector2(cell)) <= reach:
+			return d
+	return {}
 
 
 # ---------------------------------------------------------------- generation

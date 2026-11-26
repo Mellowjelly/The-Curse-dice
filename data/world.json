@@ -217,7 +217,8 @@
 					"sand_crab"
 				]
 			],
-			"boss": "tidecrusher"
+			"boss": "tidecrusher",
+			"dungeon": "sunken_abbey"
 		},
 		{
 			"id": "frosthold",

@@ -376,5 +376,29 @@
 		"phase2": {"at": 0.5, "text": "The Cinder Drake drinks the lava. Its scales glow white.", "faces": [{"type": "sweep", "value": 6}, {"type": "attack", "value": 11}, {"type": "attack", "value": 12}, {"type": "sweep", "value": 5}, {"type": "attack", "value": 9}, {"type": "heal", "value": 6}]},
 		"death_line": "The Drake cools into black glass.",
 		"element": "fire"
+	},
+	{
+		"id": "drowned_abbot",
+		"name": "The Drowned Abbot",
+		"hp": 58,
+		"boss": true,
+		"faces": [
+			{ "type": "attack", "value": 7 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "heal", "value": 5 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "shield", "value": 6 },
+			{ "type": "sweep", "value": 4 }
+		],
+		"phase2": {"at": 0.5, "text": "The Drowned Abbot opens his mouth to sing, and the sea pours out instead.", "faces": [
+			{ "type": "sweep", "value": 5 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "sweep", "value": 6 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "heal", "value": 4 },
+			{ "type": "attack", "value": 10 }
+		]},
+		"death_line": "He sinks without a sound. For the first time in a hundred years, the bell is still.",
+		"element": "water"
 	}
 ]
