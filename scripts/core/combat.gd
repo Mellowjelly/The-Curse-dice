@@ -289,8 +289,8 @@ func use_skill(hero_index: int) -> bool:
 			h["face"] = best
 			h["locked"] = true
 			_log(tr("%s's die lands on %s.") % [who, String(h["faces"][best]["type"]).to_upper()])
-			gain_fate(2, "Loaded Dice:")
-			_pay_hp(h, 3, "Luck is never free for %s" % who)
+			gain_fate(2, tr("Loaded Dice") + ":")
+			_pay_hp(h, 3, tr("Luck is never free for %s") % who)
 		_:
 			push_error("Unknown skill id: %s" % h["skill"]["id"])
 	if _all_dead(monsters):
@@ -308,13 +308,13 @@ func end_turn() -> void:
 	var fate_gain := 0
 	for t in combos:
 		if combos[t] >= 3:
-			_log(tr("COMBO! Triple %s - values doubled") % t.to_upper())
+			_log(tr("COMBO! Triple %s - values doubled") % tr(t.to_upper()))
 			fate_gain += FATE_PER_PAIR
 		elif combos[t] >= 2:
-			_log(tr("Combo: pair of %s - +1 each") % t.to_upper())
+			_log(tr("Combo: pair of %s - +1 each") % tr(t.to_upper()))
 			fate_gain += FATE_PER_PAIR
 	if fate_gain > 0:
-		gain_fate(fate_gain, "The combo feeds your Fate")
+		gain_fate(fate_gain, tr("The combo feeds your Fate"))
 
 	for h in heroes:
 		if not is_alive(h):
@@ -461,7 +461,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 			var t := _get_target()
 			if t.is_empty():
 				return
-			_spill(_damage(t, value, who + " (blood magic)", false, h), who, h)
+			_spill(_damage(t, value, who + tr(" (blood magic)"), false, h), who, h)
 			# Dark price: blood magic hurts the caster, but never kills them.
 			var cost: int = min(BLOOD_SELF_DAMAGE, h["hp"] - 1)
 			if cost > 0:
@@ -491,7 +491,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 				ally["shield"] += extra
 				_log(tr("%s's prayer wards %s (+%d shield)") % [who, short_name(ally), extra])
 		"blank":
-			gain_fate(1, "%s rolls nothing..." % who)
+			gain_fate(1, tr("%s rolls nothing...") % who)
 
 
 func _apply_pet_battle_start() -> void:
@@ -642,7 +642,7 @@ func _damage(unit: Dictionary, amount: int, source: String, pierce := false, att
 	var dealt := amount - absorbed
 	var overkill: int = max(0, dealt - int(unit["hp"]))
 	unit["hp"] = max(0, unit["hp"] - dealt)
-	var text := tr("%s hits %s for %d") % [tr(source), tr(unit["name"]), dealt]
+	var text := tr("%s hits %s for %d") % [tr(source), short_name(unit) if heroes.has(unit) else tr(unit["name"]), dealt]
 	if mult > 1.0 and dealt > 0:
 		text += tr(" (super effective!)")
 	elif mult < 1.0 and dealt > 0:
