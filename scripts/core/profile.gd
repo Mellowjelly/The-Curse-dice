@@ -22,6 +22,7 @@ var owned_pets: Array = []        # pet ids; starter pets are always owned
 var time_of_day := 1              # index into TIMES (starts at Day)
 var star_dust := 0                # upgrade material
 var stars := {}                   # "hero:varek" / "pet:ash_crow" / "relic:plague_lance" -> 1..5
+var last_bank_quests: Array = []  # quests completed by the last bank() (not saved)
 var npc_step := {}                # villager id -> index of their next request
 var npc_active := {}              # villager id -> { "base": int, "run_best": int } for the accepted request
 var villagers: Array
@@ -206,15 +207,9 @@ func record_run(run) -> Dictionary:
 	star_dust += int(star_rules["dust_per_run"]) + (int(star_rules["dust_per_victory"]) if won else 0)
 	# Per-run quest stats are checked against this run only.
 	var run_stats := {"run_elites": s["elites"], "run_carves": s["carves"]}
-	var completed: Array = []
-	for q in quests:
-		if q["id"] in quests_done:
-			continue
-		var value: int = run_stats[q["stat"]] if run_stats.has(q["stat"]) else stat(q["stat"])
-		if value >= int(q["goal"]):
-			quests_done.append(q["id"])
-			earned += int(q["reward"])
-			completed.append(q)
+	var completed := _complete_quests(run_stats)
+	for q in completed:
+		earned += int(q["reward"])
 	embers += earned
 	var dice: int = int(summon["dice_per_run"]) + s["elites"] * int(summon["dice_per_elite"])
 	dice += (int(summon["dice_per_victory"]) if won else 0) + completed.size() * int(summon["dice_per_quest"])
@@ -321,11 +316,25 @@ func summon_roll(rng: RandomNumberGenerator, banner: String = "heroes") -> Dicti
 	return result
 
 
+## Marks every quest whose goal is met as done and returns them (rewards are paid by the caller).
+func _complete_quests(run_stats: Dictionary = {}) -> Array:
+	var completed: Array = []
+	for q in quests:
+		if q["id"] in quests_done:
+			continue
+		var value: int = run_stats[q["stat"]] if run_stats.has(q["stat"]) else stat(q["stat"])
+		if value >= int(q["goal"]):
+			quests_done.append(q["id"])
+			completed.append(q)
+	return completed
+
+
 ## Open-world fights count for lifetime stats and villagers' requests too.
 func record_world_fight(group: Array, victory: bool, twists: int, boss: bool = false) -> void:
 	if victory:
 		for id in group:
 			_add("kills_" + id, 1)
+		_add("isle_kills", group.size())
 		if boss:
 			grave_dice += 1  # Isle bosses pay a Grave Die
 	_add("fate_twists", twists)
@@ -527,6 +536,15 @@ func bank(world) -> Dictionary:
 		materials[id] = int(materials.get(id, 0)) + int(moved[id])
 	world.bag.clear()
 	_add("isle_trips", 1)
+	var total := 0
+	for id in moved:
+		total += int(moved[id])
+	_add("isle_banked", total)
+	# Isle quests finish on the way home; they pay Embers and Grave Dice like road quests.
+	last_bank_quests = _complete_quests()
+	for q in last_bank_quests:
+		embers += int(q["reward"])
+		grave_dice += int(summon["dice_per_quest"])
 	save()
 	return moved
 

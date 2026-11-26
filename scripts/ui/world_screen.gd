@@ -531,12 +531,12 @@ func _return_to_town() -> void:
 	world.rest_in_town()
 	world.player_cell = Vector2i(int(world.countries[0]["center"][0]), int(world.countries[0]["center"][1]))
 	_save()
-	if not moved.is_empty():
+	if not moved.is_empty() or not profile.last_bank_quests.is_empty():
 		var TownScreen = load("res://scripts/ui/town_screen.gd")
 		var parts: Array[String] = []
 		for id in moved:
 			parts.append("%s x%d" % [world.material_name(id), int(moved[id])])
-		TownScreen.last_result = {"embers": 0, "dice": 0, "quests": [], "banked": ", ".join(parts)}
+		TownScreen.last_result = {"embers": 0, "dice": 0, "quests": profile.last_bank_quests, "banked": ", ".join(parts) if not parts.is_empty() else "nothing"}
 	get_tree().change_scene_to_file(TOWN_SCENE)
 
 

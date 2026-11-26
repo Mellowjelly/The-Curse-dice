@@ -392,7 +392,7 @@ func _start_round() -> void:
 const BACKSTAB_DAMAGE := 9
 const BOSS_HARDEN_HIT := 12
 const BOSS_HARDEN_SHIELD := 6
-const OVERKILL_SPILL := 0.34
+const OVERKILL_SPILL := 0.0  # 3.1: off - bots showed it rewarded careless targeting more than careful play
 
 
 ## Pays an HP price for a skill; never kills the hero.

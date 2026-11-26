@@ -48,6 +48,7 @@ func _init() -> void:
 	test_v22_player_bugs()
 	test_v30_changes()
 	test_v31_safe_saves()
+	test_v31_isle_quests()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -758,7 +759,10 @@ func test_v30_changes() -> void:
 	var ghoul: Dictionary = c.monsters[1]
 	c.target_index = 0
 	c._apply_hero_face(c.heroes[0], {"type": "attack", "value": 15}, 15)
-	check(not Combat.is_alive(rat) and ghoul["hp"] < ghoul["max_hp"], "overkill spills onto the next enemy")
+	if Combat.OVERKILL_SPILL > 0.0:
+		check(not Combat.is_alive(rat) and ghoul["hp"] < ghoul["max_hp"], "overkill spills onto the next enemy")
+	else:
+		check(not Combat.is_alive(rat) and ghoul["hp"] == ghoul["max_hp"], "no spill while OVERKILL_SPILL is 0")
 	var c2 := Combat.new(131)
 	c2.start_battle(_heroes(), [_monster("rotting_bishop")])
 	c2._damage(c2.monsters[0], 14, "test", true, c2.heroes[0])
@@ -931,3 +935,20 @@ func test_v31_safe_saves() -> void:
 	check(Profile.has_saved_run(), "run save exists")
 	Profile.delete_saved_run()
 	check(not Profile.has_saved_run(), "deleting a run save also removes its backup")
+
+
+## 3.1: Isle quests pull new players to the Isle and finish when they come home.
+func test_v31_isle_quests() -> void:
+	var p := _fresh_profile("test_isle_quests")
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	w.bag = {"grave_iron": 3}
+	var dice := p.grave_dice
+	p.bank(w)
+	check("isle_landfall" in p.quests_done and p.embers == 20, "the first trip home completes Landfall (+20)")
+	check(p.grave_dice == dice + int(p.summon["dice_per_quest"]), "Isle quests also pay a Grave Die")
+	p.record_world_fight(["dire_wolf", "dire_wolf"], true, 0)
+	check(p.stat("isle_kills") == 2, "Isle kills are counted")
+	w.bag = {}
+	p.bank(w)
+	check(p.last_bank_quests.is_empty(), "no quest twice")

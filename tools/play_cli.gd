@@ -432,6 +432,8 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 			profile.save()
 			mode = "town"
 			say("Back in Ashfall. Stored: %s" % str(moved))
+			for q in profile.last_bank_quests:
+				say("Quest complete: %s (+%d embers)" % [q["name"], int(q["reward"])])
 		_:
 			say("Unknown world command. Type help.")
 
