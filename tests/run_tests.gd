@@ -44,6 +44,7 @@ func _init() -> void:
 	test_villager_requests()
 	test_stars()
 	test_world()
+	test_elements()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -685,3 +686,26 @@ func test_crafting_and_hunting() -> void:
 	check(p.gear_owner(hatchet) == "lys" and not p.equipped["varek"].has("weapon"), "one item, one hero")
 	w.setup_party(["varek"], {}, "", p.gear_bonuses())
 	check(w.party[0]["max_hp"] == 28 + 4, "crafted gear is worn in the open world")
+
+
+func test_elements() -> void:
+	check(Combat.element_multiplier("fire", "wind") == 1.2, "fire beats wind")
+	check(Combat.element_multiplier("wind", "earth") == 1.2 and Combat.element_multiplier("earth", "water") == 1.2 and Combat.element_multiplier("water", "fire") == 1.2, "the elemental cycle")
+	check(Combat.element_multiplier("wind", "fire") == 0.8, "wind is weak against fire")
+	check(Combat.element_multiplier("light", "dark") == 1.2 and Combat.element_multiplier("dark", "light") == 1.2, "light and dark beat each other")
+	check(Combat.element_multiplier("fire", "fire") == 1.0 and Combat.element_multiplier("", "dark") == 1.0, "same element or none: normal damage")
+	for d in GameData.load_heroes() + GameData.load_monsters().values():
+		check(Combat.elements()["elements"].has(d.get("element", "")), "%s has an element" % d["id"])
+	# In a real fight: Lys (fire) hitting a Lava Lizard (fire) vs a Dire Wolf (wind).
+	var c := Combat.new(100)
+	c.start_battle(_heroes(), [_monster("dire_wolf"), _monster("lava_lizard")])
+	var lys: Dictionary = c.heroes[1]
+	c._damage(c.monsters[0], 10, "test", true, lys)
+	check(c.monsters[0]["hp"] == c.monsters[0]["max_hp"] - 12, "fire on wind deals +20%")
+	c._damage(c.monsters[1], 10, "test", true, lys)
+	check(c.monsters[1]["hp"] == c.monsters[1]["max_hp"] - 10, "fire on fire deals normal damage")
+	var wolf: Dictionary = c.monsters[0]
+	var varek: Dictionary = c.heroes[0]
+	var hp: int = varek["hp"]
+	c._damage(varek, 10, "test", true, wolf)
+	check(varek["hp"] == hp - 12, "wind wolves hit earth Varek +20%")

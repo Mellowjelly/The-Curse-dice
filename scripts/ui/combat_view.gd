@@ -288,7 +288,7 @@ func _on_battle_ended(victory: bool) -> void:
 func _on_damaged(unit: Dictionary, amount: int, blocked: int) -> void:
 	if not _pending_numbers.any(func(e): return e[0] == "hit"):
 		Sfx.play(self, "hit", -10.0)
-	_pending_numbers.append(["hit", unit, amount, blocked])
+	_pending_numbers.append(["hit", unit, amount, blocked, float(unit.get("last_eff", 1.0))])
 
 
 func _on_acted(unit: Dictionary) -> void:
@@ -358,8 +358,18 @@ func _spawn_numbers() -> void:
 		var count: int = combat.heroes.size() if is_hero else combat.monsters.size()
 		var slot := int(key.substr(1))
 		var slot_w: float = row.size.x / float(max(count, 1))
+		var eff: float = item[4] if item.size() > 4 else 1.0
 		var text := "-%d" % item[2] if item[2] > 0 else "blocked"
-		var l := UI.label(text, 30, UI.BLOOD if item[2] > 0 else Color("#7fa7d1"))
+		var color := UI.BLOOD if item[2] > 0 else Color("#7fa7d1")
+		var size := 30
+		if item[2] > 0 and eff > 1.0:
+			text += "!"
+			color = Color("#ff9a3c")  # super effective
+			size = 36
+		elif item[2] > 0 and eff < 1.0:
+			color = Color("#9a9aa8")  # resisted
+			size = 24
+		var l := UI.label(text, size, color)
 		l.add_theme_color_override("font_shadow_color", Color.BLACK)
 		l.add_theme_constant_override("shadow_offset_x", 2)
 		l.add_theme_constant_override("shadow_offset_y", 2)
@@ -500,6 +510,8 @@ func _monster_card(m: Dictionary, index: int) -> Control:
 	nl.clip_text = true
 	box.add_child(nl)
 	box.add_child(UI.hp_bar(m["hp"], m["max_hp"]))
+	var weak := UI.element_weakness(m.get("element", ""))
+	box.add_child(UI.element_badge(m.get("element", ""), ("  -  weak to %s" % weak) if weak != "" else ""))
 	box.add_child(UI.label(_status_text(m), 14, UI.DIM))
 	box = outer
 	if alive:
@@ -526,7 +538,10 @@ func _hero_card(h: Dictionary, index: int, combos: Dictionary) -> Control:
 	nl.clip_text = true
 	info.add_child(nl)
 	info.add_child(UI.hp_bar(h["hp"], h["max_hp"]))
-	info.add_child(UI.label(_status_text(h), 14, UI.DIM))
+	var status_row := HBoxContainer.new()
+	status_row.add_child(UI.element_badge(h.get("element", "")))
+	status_row.add_child(UI.label("  " + _status_text(h), 13, UI.DIM))
+	info.add_child(status_row)
 	box.add_child(_sprite_row("h%d" % index, h, info, true))
 	if not alive:
 		box.add_child(UI.label("Fallen", 18, UI.DIM))

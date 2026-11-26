@@ -128,6 +128,39 @@ static func stars_text(star: int, max_star: int = 5) -> String:
 	return "★".repeat(star) + "☆".repeat(max_star - star)
 
 
+static var _elements: Dictionary = {}
+
+
+## Small row with the element icon and its name, e.g. [fire] Fire.
+static func element_badge(element: String, extra: String = "") -> Control:
+	if _elements.is_empty():
+		var f := FileAccess.open("res://data/elements.json", FileAccess.READ)
+		_elements = JSON.parse_string(f.get_as_text())
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 3)
+	if element == "" or not _elements["elements"].has(element):
+		return row
+	var e: Dictionary = _elements["elements"][element]
+	var ic := TextureRect.new()
+	ic.texture = load("res://assets/icons/element_%s.png" % element)
+	ic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	ic.stretch_mode = TextureRect.STRETCH_SCALE
+	ic.custom_minimum_size = Vector2(16, 16)
+	row.add_child(ic)
+	row.add_child(label(e["name"] + extra, 12, Color(e["color"])))
+	return row
+
+
+## The element that beats this one (what it is weak to).
+static func element_weakness(element: String) -> String:
+	if _elements.is_empty():
+		element_badge("")
+	for k in _elements["elements"]:
+		if element in _elements["elements"][k]["strong"]:
+			return _elements["elements"][k]["name"]
+	return ""
+
+
 static var _icons := {}
 
 ## 16x16 pixel icon for a face type (assets/icons/face_<type>.png), or null.

@@ -8,6 +8,8 @@ extends RefCounted
 ##   2. Player locks dice / rerolls / picks a target.
 ##   3. end_turn(): hero faces resolve, then monsters act, then a new round starts.
 
+const GameData = preload("res://scripts/core/game_data.gd")
+
 signal log_added(text: String)
 signal state_changed
 signal battle_ended(victory: bool)
@@ -78,6 +80,7 @@ static func make_unit(def: Dictionary) -> Dictionary:
 		"locked": false,
 		"target": -1,     # monsters only: which hero they intend to hit
 		"boss": def.get("boss", false),
+		"element": def.get("element", ""),
 		"skill": def.get("skill", {}),  # heroes only, see data/heroes.json
 		"phase2": def.get("phase2", {}),  # monsters only: { "at": 0.5, "faces": [...], "text": "..." }
 		"phased": false,
@@ -236,7 +239,7 @@ func use_skill(hero_index: int) -> bool:
 		"hollow_flame":
 			for m in monsters:
 				if is_alive(m):
-					_damage(m, HOLLOW_FLAME_DAMAGE, who, true)
+					_damage(m, HOLLOW_FLAME_DAMAGE, who, true, h)
 					if is_alive(m):
 						m["burn"] = min(MAX_BURN, m["burn"] + HOLLOW_FLAME_BURN)
 			var cost: int = min(HOLLOW_FLAME_HP_COST, h["hp"] - 1)
@@ -263,7 +266,7 @@ func use_skill(hero_index: int) -> bool:
 				_log("%s's faith is paid in blood (-%d HP)" % [who, rite_cost])
 		"backstab":
 			var t := _get_target()
-			_damage(t, BACKSTAB_DAMAGE, who, true)
+			_damage(t, BACKSTAB_DAMAGE, who, true, h)
 			_pay_hp(h, 2, "The grave takes its due from %s" % who)
 		"miasma":
 			for m in monsters:
@@ -410,16 +413,16 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 	match face["type"]:
 		"attack":
 			var t := _get_target()
-			_damage(t, value, who)
+			_damage(t, value, who, false, h)
 		"fire":
 			var t := _get_target()
-			_damage(t, value, who)
+			_damage(t, value, who, false, h)
 			if is_alive(t):
 				t["burn"] = min(MAX_BURN, t["burn"] + BURN_PER_FIRE)
 				_log("%s is burning (%d)" % [t["name"], t["burn"]])
 		"blood":
 			var t := _get_target()
-			_damage(t, value, who + " (blood magic)")
+			_damage(t, value, who + " (blood magic)", false, h)
 			# Dark price: blood magic hurts the caster, but never kills them.
 			var cost: int = min(BLOOD_SELF_DAMAGE, h["hp"] - 1)
 			if cost > 0:
@@ -428,7 +431,7 @@ func _apply_hero_face(h: Dictionary, face: Dictionary, value: int) -> void:
 		"cleave":
 			for m in monsters:
 				if is_alive(m):
-					_damage(m, value, who)
+					_damage(m, value, who, false, h)
 		"shield":
 			h["shield"] += value
 			_log("%s raises a shield (%d)" % [who, value])
@@ -537,12 +540,12 @@ func _monster_phase() -> void:
 				var t: int = m["target"]
 				if t < 0 or not is_alive(heroes[t]):
 					t = _random_alive_index(heroes)
-				_damage(heroes[t], v, m["name"])
+				_damage(heroes[t], v, m["name"], false, m)
 			"sweep":
 				_log("%s sweeps the whole party!" % m["name"])
 				for h in heroes:
 					if is_alive(h):
-						_damage(h, v, m["name"])
+						_damage(h, v, m["name"], false, m)
 			"shield":
 				m["shield"] += v
 				_log("%s shields itself (%d)" % [m["name"], v])
@@ -562,14 +565,45 @@ func _monster_phase() -> void:
 			return
 
 
-func _damage(unit: Dictionary, amount: int, source: String, pierce := false) -> void:
+## Elements: fire > wind > earth > water > fire, light <-> dark (see data/elements.json).
+static var _elements: Dictionary = {}
+
+
+static func elements() -> Dictionary:
+	if _elements.is_empty():
+		_elements = GameData.load_json("res://data/elements.json")
+	return _elements
+
+
+## 1.2 when the attacker's element beats the target's, 0.8 when it is the other way round, else 1.0.
+static func element_multiplier(attacker: String, target: String) -> float:
+	if attacker == "" or target == "":
+		return 1.0
+	var e := elements()
+	var table: Dictionary = e["elements"]
+	if table.has(attacker) and target in table[attacker]["strong"]:
+		return float(e["multiplier_strong"])
+	if table.has(target) and attacker in table[target]["strong"]:
+		return float(e["multiplier_weak"])
+	return 1.0
+
+
+func _damage(unit: Dictionary, amount: int, source: String, pierce := false, attacker: Dictionary = {}) -> void:
 	if unit.is_empty() or not is_alive(unit):
 		return
+	var mult := element_multiplier(attacker.get("element", ""), unit.get("element", ""))
+	unit["last_eff"] = mult
+	if mult != 1.0:
+		amount = max(1, int(round(amount * mult)))
 	var absorbed: int = 0 if pierce else min(unit["shield"], amount)
 	unit["shield"] -= absorbed
 	var dealt := amount - absorbed
 	unit["hp"] = max(0, unit["hp"] - dealt)
 	var text := "%s hits %s for %d" % [source, unit["name"], dealt]
+	if mult > 1.0:
+		text += " (super effective!)"
+	elif mult < 1.0:
+		text += " (resisted)"
 	if absorbed > 0:
 		text += " (%d blocked)" % absorbed
 	_log(text)

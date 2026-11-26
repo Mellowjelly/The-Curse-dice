@@ -150,8 +150,13 @@ func _pick_target(c: Combat) -> void:
 		if f["type"] == "heal":
 			threat += 3  # healers drag fights out
 		var ehp: int = m["hp"] + m["shield"]
-		# Prefer enemies we can finish, then dangerous ones.
+		# Prefer enemies we can finish, then dangerous ones, then ones our elements beat.
 		var score := threat * 2.0 - ehp * 0.5 + (15.0 if ehp <= 6 else 0.0)
+		var elem := 0.0
+		for h in c.heroes:
+			if Combat.is_alive(h):
+				elem += Combat.element_multiplier(h.get("element", ""), m.get("element", "")) - 1.0
+		score += elem * 25.0
 		if style == "berserker":
 			score = -ehp  # just hit the weakest
 		if score > best_score:

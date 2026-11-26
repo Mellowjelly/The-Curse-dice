@@ -23,7 +23,8 @@
 		],
 		"starter": true,
 		"lore": "He swore to protect a king. The king is dead; the oath is not.",
-		"grade": "SR"
+		"grade": "SR",
+		"element": "earth"
 	},
 	{
 		"id": "lys",
@@ -49,7 +50,8 @@
 		],
 		"starter": true,
 		"lore": "She traded her soul for fire. Now she is hollow, and always cold.",
-		"grade": "SR"
+		"grade": "SR",
+		"element": "fire"
 	},
 	{
 		"id": "aldric",
@@ -75,7 +77,8 @@
 		],
 		"starter": true,
 		"lore": "He prayed for thirty years. On the thirty-first, nothing answered.",
-		"grade": "SR"
+		"grade": "SR",
+		"element": "light"
 	},
 	{
 		"id": "rook",
@@ -101,7 +104,8 @@
 			{ "type": "cleave", "value": 2 },
 			{ "type": "attack", "value": 2 }
 		],
-		"grade": "SR"
+		"grade": "SR",
+		"element": "dark"
 	},
 	{
 		"id": "vael",
@@ -127,7 +131,8 @@
 			{ "type": "shield", "value": 2 },
 			{ "type": "fire", "value": 1 }
 		],
-		"grade": "SSR"
+		"grade": "SSR",
+		"element": "water"
 	},
 	{
 		"id": "mordecai",
@@ -153,6 +158,7 @@
 			{ "type": "heal", "value": 2 },
 			{ "type": "attack", "value": 3 }
 		],
-		"grade": "SSR"
+		"grade": "SSR",
+		"element": "wind"
 	}
 ]

@@ -30,6 +30,9 @@ Spend 2 Fate for an extra reroll, or 4 Fate to TWIST a die to any face you want.
 [b]The road[/b]   Roll two dice, move with one. Carve your dice after every win; elites drop weapons
 (a weapon replaces die faces 5 and 6). Your pet rolls a small d4 every round.
 
+[b]Elements[/b]   Fire > Wind > Earth > Water > Fire, and Light <-> Dark.
+Hitting an element you beat deals +20% damage; hitting one that beats you deals -20%. Build your party for the foe!
+
 [b]Skills[/b]   Heroes charge every round (faster with combos).
 When charged, press the skill button. Every power has a price."""
 
@@ -95,7 +98,7 @@ func _build() -> void:
 	if OS.get_name() != "Web":
 		box.add_child(_menu_button("Quit", func(): get_tree().quit()))
 
-	var version := _label("Version 2.1", 14, COL_DIM)
+	var version := _label("Version 2.2", 14, COL_DIM)
 	version.position = Vector2(1150, 690)
 	add_child(version)
 

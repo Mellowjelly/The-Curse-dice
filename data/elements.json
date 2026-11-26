@@ -1,0 +1,48 @@
+{
+	"multiplier_strong": 1.2,
+	"multiplier_weak": 0.8,
+	"elements": {
+		"fire": {
+			"name": "Fire",
+			"color": "#e8743a",
+			"strong": [
+				"wind"
+			]
+		},
+		"wind": {
+			"name": "Wind",
+			"color": "#8fd4c4",
+			"strong": [
+				"earth"
+			]
+		},
+		"earth": {
+			"name": "Earth",
+			"color": "#b08a52",
+			"strong": [
+				"water"
+			]
+		},
+		"water": {
+			"name": "Water",
+			"color": "#4a8fe0",
+			"strong": [
+				"fire"
+			]
+		},
+		"light": {
+			"name": "Light",
+			"color": "#f4e08a",
+			"strong": [
+				"dark"
+			]
+		},
+		"dark": {
+			"name": "Dark",
+			"color": "#9a6ad0",
+			"strong": [
+				"light"
+			]
+		}
+	}
+}

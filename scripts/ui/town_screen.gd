@@ -425,7 +425,7 @@ func _refresh_party() -> void:
 		var text := "%s  (%s)\nHP %d   Skill: %s\n%s" % [h["name"], h["role"], int(h["hp"]), h["skill"]["name"],
 			" ".join(h["faces"].map(UI.face_short))] if owned else "???\nNot yet summoned\n(Summon Roll tab)"
 		if owned:
-			text = "[%s] %s\n%s" % [h.get("grade", "SR"), UI.stars_text(profile.star("hero", id)), text]
+			text = "[%s] %s  %s\n%s" % [h.get("grade", "SR"), UI.stars_text(profile.star("hero", id)), String(h.get("element", "")).capitalize(), text]
 		var b := UI.choice_button(text, func(): _toggle_party(id), UI.GOLD if chosen else UI.grade_color(h.get("grade", "SR")) if owned else UI.BORDER, owned)
 		b.custom_minimum_size = Vector2(276, 140)
 		if owned:
