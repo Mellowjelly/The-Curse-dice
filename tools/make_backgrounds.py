@@ -399,6 +399,104 @@ def map_marrow_vault():
     return _finish(img)
 
 
+
+# ---------------------------------------------------------------- region 2: the Ash Desert (3.7)
+
+def _dunes(d, rng, base, rough, color, step=6):
+    pts = [(0, H)]
+    for x in range(0, W + step, step):
+        pts.append((x, base + rough * math.sin(x / 37 + base) + rough / 2 * math.sin(x / 13)))
+    pts.append((W, H))
+    d.polygon(pts, fill=color)
+
+
+def battle_desert():
+    """Ash dunes under a dying coal of a sun; the bones of a caravan."""
+    rng = random.Random(61)
+    img = Image.new("RGBA", (W, H))
+    sky(img, (40, 22, 20), (150, 96, 60), 0, 120)
+    d = ImageDraw.Draw(img)
+    d.ellipse([200, 30, 250, 80], fill=(120, 40, 24)); d.ellipse([206, 36, 244, 74], fill=(200, 80, 36))   # the dying sun
+    d.ellipse([214, 44, 236, 66], fill=(240, 150, 70))
+    _dunes(d, rng, 104, 6, (96, 70, 56))
+    _dunes(d, rng, 118, 5, (78, 58, 48))
+    for x in (40, 70, 250):                                             # caravan bones
+        d.arc([x, 112, x + 18, 132], 180, 360, fill=(214, 204, 184), width=2)
+        for k in range(4):
+            d.line([(x + 3 + k * 4, 116), (x + 3 + k * 4, 124)], fill=(200, 190, 170))
+    d.line([(150, 120), (160, 104)], fill=(60, 44, 36), width=2); d.line([(160, 104), (172, 108)], fill=(60, 44, 36))  # a broken cart pole
+    d.rectangle([0, 136, W, H], fill=(62, 46, 40))
+    for _ in range(80):                                                 # drifting ash
+        d.point((rng.randint(0, W - 1), rng.randint(10, 135)), fill=(180, 170, 160))
+    fog(img, rng, 122, (160, 120, 90), 50, 14)
+    return img
+
+
+def battle_glass():
+    """The crater of the fallen sun: glass spires, white light from below."""
+    rng = random.Random(62)
+    img = Image.new("RGBA", (W, H))
+    sky(img, (24, 16, 22), (90, 60, 70), 0, 132)
+    d = ImageDraw.Draw(img)
+    glow = Image.new("RGBA", img.size, (0, 0, 0, 0))                    # the fallen sun glowing in the pit
+    gd = ImageDraw.Draw(glow)
+    for r_, a in ((120, 40), (90, 70), (60, 110), (34, 170)):
+        gd.ellipse([160 - r_, 140 - r_ // 2, 160 + r_, 140 + r_ // 2], fill=(255, 230, 180, a))
+    img.alpha_composite(glow)
+    d = ImageDraw.Draw(img)
+    for i in range(11):                                                 # glass spires
+        x = 8 + i * 30 + rng.randint(-6, 6)
+        h = rng.randint(30, 70)
+        col = rng.choice([(120, 170, 180), (150, 190, 200), (100, 140, 170), (170, 150, 190)])
+        d.polygon([(x - 6, 132), (x, 132 - h), (x + 6, 132)], fill=col)
+        d.line([(x, 132 - h), (x + 6, 132)], fill=(230, 240, 250))
+    d.rectangle([0, 132, W, H], fill=(70, 60, 64))
+    for _ in range(50):                                                 # glints in the glass sand
+        d.point((rng.randint(0, W - 1), rng.randint(133, H - 1)), fill=rng.choice([(220, 240, 250), (250, 220, 160)]))
+    return img
+
+
+def map_ash_desert():
+    """The Ash Desert board (37 tiles, 4 rows of the road): dunes, bones, a caravan track, the crater at the end."""
+    rng = random.Random(63)
+    img = Image.new("RGBA", (W, H))
+    sky(img, (34, 20, 22), (70, 44, 38), 0, 24, 4)
+    d = ImageDraw.Draw(img)
+    px = img.load()
+    for y in range(22, 132):                                            # sand, redder towards the crater
+        t = (y - 22) / 110
+        c = lerp((104, 84, 66), (92, 58, 46), t)
+        for x in range(W):
+            n = (math.sin(x * 0.21 + y * 0.9) + math.sin(x * 0.07 - y * 0.33)) * 4
+            px[x, y] = tuple(max(0, min(255, int(v + n))) for v in c) + (255,)
+    for i in range(9):                                                  # far dunes on the horizon and a dying sun
+        x = i * 40 + rng.randint(-10, 10)
+        d.ellipse([x - 30, 14, x + 30, 34], fill=(84, 60, 50))
+    d.ellipse([260, 2, 282, 24], fill=(170, 70, 36)); d.ellipse([264, 6, 278, 20], fill=(220, 120, 60))
+    for _ in range(70):                                                 # ripples in the sand
+        x, y = rng.randint(0, W - 10), rng.randint(26, 128)
+        d.line([(x, y), (x + rng.randint(4, 9), y)], fill=(120, 98, 76))
+    for _ in range(16):                                                 # bones and skulls
+        x, y = rng.randint(4, W - 8), rng.randint(28, 126)
+        if rng.random() < 0.5:
+            d.line([(x, y), (x + 4, y + 1)], fill=(214, 204, 184))
+        else:
+            d.ellipse([x, y, x + 3, y + 3], fill=(214, 204, 184)); d.point((x + 1, y + 2), fill=(30, 26, 26))
+    for x, y in ((24, 110), (290, 60), (180, 120)):                     # cacti made of glass
+        d.rectangle([x, y - 10, x + 2, y], fill=(140, 180, 190)); d.rectangle([x - 3, y - 7, x - 2, y - 3], fill=(140, 180, 190))
+        d.rectangle([x + 4, y - 8, x + 5, y - 4], fill=(140, 180, 190))
+    for x in (12, 230):                                                 # a ruined watchtower and a dead caravan
+        d.rectangle([x, 72, x + 10, 98], fill=(66, 50, 44)); d.polygon([(x - 2, 72), (x + 5, 64), (x + 12, 72)], fill=(66, 50, 44))
+        d.point((x + 5, 80), fill=(250, 170, 70))
+    cx, cy = 104, 112                                                   # the crater of the fallen sun under the boss tile (tile 36)
+    d.ellipse([cx - 34, cy - 8, cx + 34, cy + 16], fill=(54, 34, 34))
+    d.ellipse([cx - 22, cy - 2, cx + 22, cy + 12], fill=(200, 90, 40)); d.ellipse([cx - 12, cy + 1, cx + 12, cy + 9], fill=(255, 210, 140))
+    for k in (0, 1, 4, 5):                                              # glass spikes, clear of the BOSS label
+        gx = cx - 30 + k * 12
+        d.polygon([(gx - 2, cy - 4), (gx, cy - 14 - (k % 3) * 3), (gx + 2, cy - 4)], fill=(160, 200, 210))
+    return _finish(img)
+
+
 # ---------------------------------------------------------------- the town of Ashfall
 # Building rectangles (art pixels, x4 on screen). town_screen.gd uses the same numbers for hotspots.
 TOWN_BUILDINGS = {
@@ -570,7 +668,8 @@ if __name__ == "__main__":
     for name, fn in {"battle_early": battle_early, "battle_mid": battle_mid, "battle_late": battle_late,
                      "battle_boss": battle_boss, "map": world_map, "town": town, "town_day": lambda: town(True),
                      "map_sunken_abbey": map_sunken_abbey, "map_slag_cathedral": map_slag_cathedral,
-                     "map_marrow_vault": map_marrow_vault}.items():
+                     "map_marrow_vault": map_marrow_vault, "map_ash_desert": map_ash_desert,
+                     "battle_desert": battle_desert, "battle_glass": battle_glass}.items():
         fn().convert("RGB").save(f"assets/backgrounds/{name}.png")
         print("wrote", name)
     for name, fn in TILE_ICONS.items():

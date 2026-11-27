@@ -63,5 +63,22 @@
 	"road_boss_daily": {
 		"embers": 40,
 		"dice": 1
-	}
+	},
+	"roads": [
+		{
+			"id": "hollow_road",
+			"name": "The Hollow Road",
+			"file": "res://data/region1.json",
+			"after_wins": 0,
+			"desc": "The old road east of Ashfall: dead forest, graveyards, a chapel of rot."
+		},
+		{
+			"id": "ash_desert",
+			"name": "The Ash Desert",
+			"file": "res://data/region2.json",
+			"after_wins": 1,
+			"no_curse": true,
+			"desc": "South, where a god's die fell and burned a kingdom to ash. Harder foes, no Curse, +25% Soul Embers."
+		}
+	]
 }

@@ -314,7 +314,7 @@ func _enter_combat() -> void:
 	_combat_view.show()
 	var boss: Dictionary = run.boss_info()
 	var names := {"fight": tr("Fight"), "elite": tr("ELITE"), "boss": tr("BOSS: %s") % tr(String(boss.get("lair", "The Chapel of Rot")))}
-	var scene: String = String(boss.get("scene", "battle_boss")) if run.combat_kind == "boss" else "battle_" + run.tier_at(run.pos)
+	var scene: String = String(boss.get("scene", "battle_boss")) if run.combat_kind == "boss" else String(run.region.get("battle_scene", "battle_" + run.tier_at(run.pos)))
 	var tint: Color = UI.TIME_TINT.get(run.time_of_day(), Color.WHITE)
 	_combat_view.bind(run.combat, names.get(run.combat_kind, tr("Fight")), scene, tint)
 
@@ -452,7 +452,7 @@ func _refresh_modal() -> void:
 				_modal_text(run.event_result, UI.GOLD)
 				_modal_box.add_child(UI.choice_button(tr("Continue"), func(): run.close_event(), UI.GOLD))
 		"shop":
-			_modal_title(tr("The Bone Market"))
+			_modal_title(tr(String(run.region.get("shop_name", "The Bone Market"))))
 			_modal_text(tr("A hooded figure spreads its wares on a burial cloth. Gold: %d") % run.gold, UI.DIM)
 			if run.price_note() != "":
 				_modal_text(tr("Discounts: %s") % run.price_note(), UI.GREEN)

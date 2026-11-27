@@ -622,6 +622,29 @@ BOSSES = {
     "drowned_abbot": (weeping_nun, lambda r, g, b: (r // 2, g + 30, b + 70)),           # 3.5: drowned, sea-green
     "slag_saint": (grave_knight, lambda r, g, b: (r + 90, g // 2 + 20, b // 4)),        # 3.7: iron saint, still glowing
     "tithe_taker": (bone_colossus, lambda r, g, b: (r * 2 // 3, g * 3 // 5, b * 3 // 4 + 10)),  # 3.7: ledger-grey bones, a little violet
+    "glass_pilgrim": (aldric, lambda r, g, b: (r // 2 + 110, g // 2 + 130, b // 2 + 140)),        # 3.7: a pilgrim turned to glass
+}
+
+
+def tint(strip, mapping):
+    """3.7: a recoloured monster at normal size (Ash Desert creatures)."""
+    out = strip.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if a and (r, g, b) != K:
+                nr, ng, nb = mapping(r, g, b)
+                px[x, y] = (max(0, min(255, nr)), max(0, min(255, ng)), max(0, min(255, nb)), a)
+    return out
+
+
+TINTED = {  # 3.7: the Ash Desert
+    "ash_jackal": (dire_wolf, lambda r, g, b: (r + 50, g + 40, b + 25)),                  # ash-grey jackal
+    "salt_mummy": (ghoul, lambda r, g, b: ((r + g + b) // 3 + 110, (r + g + b) // 3 + 102, (r + g + b) // 3 + 86)),  # crusted with salt
+    "cinder_scarab": (giant_spider, lambda r, g, b: (r + 90, g // 2 + 10, b // 3)),      # glowing embers
+    "dune_wraith": (weeping_nun, lambda r, g, b: (r * 3 // 5 + 50, g * 3 // 5 + 36, b * 2 // 5 + 14)),  # sand-coloured shade
+    "glass_sentinel": (grave_knight, lambda r, g, b: (r // 2 + 100, g // 2 + 130, b // 2 + 140)),     # fused glass
 }
 
 
@@ -649,3 +672,6 @@ if __name__ == "__main__":
     for name, (fn, mapping) in BOSSES.items():
         recolor(fn(), mapping).save(f"assets/sprites/{name}.png")
         print("wrote boss", name)
+    for name, (fn, mapping) in TINTED.items():
+        tint(fn(), mapping).save(f"assets/sprites/{name}.png")
+        print("wrote", name)

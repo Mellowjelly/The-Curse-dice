@@ -448,5 +448,100 @@
 		]},
 		"death_line": "The borrowed bones fall away from him. Under them there was almost nothing at all.",
 		"element": "dark"
+	},
+	{
+		"id": "ash_jackal",
+		"name": "Ash Jackal",
+		"hp": 11,
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "sweep", "value": 2 },
+			{ "type": "blank", "value": 0 }
+		],
+		"element": "wind"
+	},
+	{
+		"id": "salt_mummy",
+		"name": "Salt Mummy",
+		"hp": 16,
+		"faces": [
+			{ "type": "attack", "value": 3 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "shield", "value": 4 },
+			{ "type": "heal", "value": 3 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "blank", "value": 0 }
+		],
+		"element": "earth"
+	},
+	{
+		"id": "cinder_scarab",
+		"name": "Cinder Scarab",
+		"hp": 8,
+		"faces": [
+			{ "type": "attack", "value": 2 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "sweep", "value": 2 },
+			{ "type": "attack", "value": 3 },
+			{ "type": "shield", "value": 2 },
+			{ "type": "blank", "value": 0 }
+		],
+		"element": "fire"
+	},
+	{
+		"id": "dune_wraith",
+		"name": "Dune Wraith",
+		"hp": 13,
+		"faces": [
+			{ "type": "sweep", "value": 2 },
+			{ "type": "attack", "value": 4 },
+			{ "type": "attack", "value": 5 },
+			{ "type": "heal", "value": 3 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "blank", "value": 0 }
+		],
+		"element": "dark"
+	},
+	{
+		"id": "glass_sentinel",
+		"name": "Glass Sentinel",
+		"hp": 30,
+		"elite": true,
+		"faces": [
+			{ "type": "attack", "value": 6 },
+			{ "type": "attack", "value": 7 },
+			{ "type": "shield", "value": 6 },
+			{ "type": "sweep", "value": 3 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "blank", "value": 0 }
+		],
+		"element": "light"
+	},
+	{
+		"id": "glass_pilgrim",
+		"name": "The Glass Pilgrim",
+		"hp": 66,
+		"boss": true,
+		"faces": [
+			{ "type": "attack", "value": 7 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "shield", "value": 6 },
+			{ "type": "attack", "value": 8 },
+			{ "type": "heal", "value": 5 },
+			{ "type": "sweep", "value": 5 }
+		],
+		"phase2": {"at": 0.5, "text": "Cracks race across the Glass Pilgrim. The fallen sun's light pours out of him, white and terrible.", "faces": [
+			{ "type": "sweep", "value": 6 },
+			{ "type": "attack", "value": 10 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "sweep", "value": 5 },
+			{ "type": "attack", "value": 11 },
+			{ "type": "heal", "value": 4 }
+		]},
+		"death_line": "He shatters into a thousand pieces of coloured glass. Each one holds a different sunrise.",
+		"element": "light"
 	}
 ]

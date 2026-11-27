@@ -30,7 +30,7 @@ const HELP := """COMMANDS
        talk <villager> | accept <villager> | claim <villager> | isle_pet <pet> | upgrade hero|pet|relic <id>
        bestiary | trophy <monster> (claim a Bestiary kill milestone)
        recipes | craft <recipe> | equip <hero> <weapon|armor> <uid> | feed <pet> <treat uid> | sell <material> <n> | grind <material> <n>
-       road (start a Hollow Road journey) | explore (go out to the Cursed Isle)
+       road [hollow|desert] (start a journey; the Ash Desert opens after the first road win) | explore (go out to the Cursed Isle)
  ROAD (map): roll | move 0|1 | reroll_move | pick <n> (pet/carving/event option/close event) | skip
        equip_loot <weapon#> <hero#> | buy <item> | leave | rest heal|carve
  WORLD: look | goto <x> <y> | gather | fight | home | sharpen <n>|skip (after a win: pick 1 of 3 sharpenings)
@@ -220,10 +220,16 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 				else:
 					say("Too little to grind: %d x value %d gives less than 1 Star Dust (needs total value 10)." % [int(p[2]), w.material_value(p[1])])
 		"road":
+			# 3.7: `road desert` / `road hollow` picks the journey (the Ash Desert opens after the first road win).
+			if p.size() > 1:
+				var want := "ash_desert" if p[1].begins_with("desert") or p[1].begins_with("ash") else "hollow_road"
+				if not profile.set_road(want):
+					say("The Ash Desert opens after your first win on the Hollow Road.")
+					return
 			runs_started += 1
 			run = Run.new(1000 + runs_started, profile.run_options(), profile.party)
 			mode = "road"
-			say("You set out on the Hollow Road (%s)." % profile.time_name())
+			say("You set out on %s (%s)." % [tr(run.region["name"]), profile.time_name()])
 			say(_road_state())
 		"explore":
 			world = World.new()
@@ -593,6 +599,7 @@ func _status() -> String:
 		return _world_look()
 	var s: Array[String] = []
 	s.append("[TOWN of Ashfall] time %s (%s)" % [profile.time_name(), Profile.TIME_EFFECTS[profile.time_name()]])
+	s.append("  road: %s%s" % [tr(profile.current_road()["name"]), "" if profile.road_unlocked("ash_desert") else " (the Ash Desert opens after the first road win)"])
 	s.append("  embers %d, grave dice %d, star dust %d" % [profile.embers, profile.grave_dice, profile.star_dust])
 	s.append("  party %s | owned heroes %s | pets %s" % [str(profile.party), str(profile.owned_heroes), str(profile.owned_pets)])
 	s.append("  stars %s | gear %s | equipped %s" % [str(profile.stars), str(profile.gear), str(profile.equipped)])

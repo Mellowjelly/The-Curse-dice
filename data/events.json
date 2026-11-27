@@ -700,5 +700,353 @@
 				]
 			}
 		]
+	},
+	{
+		"id": "dry_well",
+		"region": "ash_desert",
+		"title": "The Dry Well",
+		"text": "A well, its rope still tied. Far below, something glints. Or someone.",
+		"options": [
+			{
+				"label": "Lower a hero on the rope (a random hero loses 4 HP). Maybe gold.",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "random",
+						"value": -4
+					},
+					{
+						"op": "chance",
+						"p": 0.6,
+						"win": [
+							{
+								"op": "gold",
+								"value": 35
+							}
+						],
+						"lose": []
+					}
+				]
+			},
+			{
+				"label": "Leave the well to whatever is at the bottom.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "salt_merchant",
+		"region": "ash_desert",
+		"title": "The Salt Merchant",
+		"text": "A merchant sits under a tattered awning, selling salt by the spoonful. \"Salt keeps the dead from walking,\" he says. \"Mostly.\"",
+		"options": [
+			{
+				"label": "Buy his salt (-20 gold). All heroes heal 8.",
+				"require_gold": 20,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -20
+					},
+					{
+						"op": "hp",
+						"who": "all",
+						"value": 8
+					}
+				]
+			},
+			{
+				"label": "Rob him. He is not alone.",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 30
+					},
+					{
+						"op": "fight",
+						"pool": "early",
+						"text": "His bodyguards climb out of the sand."
+					}
+				]
+			},
+			{
+				"label": "Nod and walk on.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "sundial_shrine",
+		"region": "ash_desert",
+		"title": "The Sundial Shrine",
+		"text": "A shrine to the god who fell. Its sundial casts no shadow at all.",
+		"options": [
+			{
+				"label": "Bleed on the dial (the lowest hero loses 3 HP). +3 Fate.",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "lowest",
+						"value": -3
+					},
+					{
+						"op": "fate",
+						"value": 3
+					}
+				]
+			},
+			{
+				"label": "Do not pray to a god who fell.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "bone_caravan",
+		"region": "ash_desert",
+		"title": "The Bone Caravan",
+		"text": "A caravan stands in the dunes, camels and drivers all bleached to bone. The carts are still loaded.",
+		"options": [
+			{
+				"label": "Search the carts. Something may still guard them.",
+				"effects": [
+					{
+						"op": "chance",
+						"p": 0.55,
+						"win": [
+							{
+								"op": "weapon",
+								"count": 2
+							}
+						],
+						"lose": [
+							{
+								"op": "fight",
+								"pool": "mid",
+								"text": "The drivers turn their heads."
+							}
+						]
+					}
+				]
+			},
+			{
+				"label": "Bury them in the sand (+1 Fate, all heroes lose 1 HP).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "all",
+						"value": -1
+					},
+					{
+						"op": "fate",
+						"value": 1
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "mirage_oasis",
+		"region": "ash_desert",
+		"title": "The Mirage Oasis",
+		"text": "Palm trees, blue water, a woman singing. The jackals will not go near it.",
+		"options": [
+			{
+				"label": "Drink. It might be real.",
+				"effects": [
+					{
+						"op": "chance",
+						"p": 0.5,
+						"win": [
+							{
+								"op": "hp",
+								"who": "all",
+								"value": 10
+							}
+						],
+						"lose": [
+							{
+								"op": "hp",
+								"who": "all",
+								"value": -3
+							}
+						]
+					}
+				]
+			},
+			{
+				"label": "Trust the jackals and walk on.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "glassblower",
+		"region": "ash_desert",
+		"title": "The Glassblower",
+		"text": "An old woman blows glass over a crack in the earth where the fallen sun still burns. \"Give me a die,\" she says. \"I will give it back better.\"",
+		"options": [
+			{
+				"label": "Give her a drop of blood with it (the healthiest hero loses 4 HP). Carve a die.",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "healthiest",
+						"value": -4
+					},
+					{
+						"op": "carve"
+					}
+				]
+			},
+			{
+				"label": "Pay her (-30 gold). Carve a die.",
+				"require_gold": 30,
+				"effects": [
+					{
+						"op": "gold",
+						"value": -30
+					},
+					{
+						"op": "carve"
+					}
+				]
+			},
+			{
+				"label": "Keep your dice.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "buried_knight",
+		"region": "ash_desert",
+		"title": "The Buried Knight",
+		"text": "A gauntlet sticks out of the sand, still gripping a sword. The fingers twitch.",
+		"options": [
+			{
+				"label": "Pull the sword free.",
+				"effects": [
+					{
+						"op": "chance",
+						"p": 0.5,
+						"win": [
+							{
+								"op": "weapon",
+								"count": 2
+							}
+						],
+						"lose": [
+							{
+								"op": "fight",
+								"pool": "mid",
+								"text": "The knight comes up with it."
+							}
+						]
+					}
+				]
+			},
+			{
+				"label": "Cover the hand with sand and go.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "sandstorm",
+		"region": "ash_desert",
+		"title": "The Sandstorm",
+		"text": "A wall of black sand rolls towards you. There is a half-buried chest in its path.",
+		"options": [
+			{
+				"label": "Push through and grab the chest (all heroes lose 4 HP, +40 gold).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "all",
+						"value": -4
+					},
+					{
+						"op": "gold",
+						"value": 40
+					}
+				]
+			},
+			{
+				"label": "Shelter behind a dune (the lowest hero loses 2 HP).",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "lowest",
+						"value": -2
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "ash_prophet",
+		"region": "ash_desert",
+		"title": "The Ash Prophet",
+		"text": "A man buried to his neck in ash calls to you by name. \"I have seen how this ends,\" he says. \"Do you want to know?\"",
+		"options": [
+			{
+				"label": "Listen (+2 Fate, a random hero loses 2 max HP).",
+				"effects": [
+					{
+						"op": "fate",
+						"value": 2
+					},
+					{
+						"op": "max_hp",
+						"who": "random",
+						"value": -2
+					}
+				]
+			},
+			{
+				"label": "Dig him out (+15 gold he had in his mouth).",
+				"effects": [
+					{
+						"op": "gold",
+						"value": 15
+					}
+				]
+			},
+			{
+				"label": "Do not listen.",
+				"effects": []
+			}
+		]
+	},
+	{
+		"id": "thirsting_child",
+		"region": "ash_desert",
+		"title": "The Thirsting Child",
+		"text": "A child sits alone on the road with an empty cup. She does not ask. She only holds the cup out.",
+		"options": [
+			{
+				"label": "Give her your water (all heroes lose 2 HP). The fallen rise, and she smiles.",
+				"effects": [
+					{
+						"op": "hp",
+						"who": "all",
+						"value": -2
+					},
+					{
+						"op": "revive",
+						"percent": 50
+					},
+					{
+						"op": "fate",
+						"value": 1
+					}
+				]
+			},
+			{
+				"label": "Walk past. She does not cry.",
+				"effects": []
+			}
+		]
 	}
 ]

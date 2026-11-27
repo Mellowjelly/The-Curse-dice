@@ -1,0 +1,453 @@
+TRANSCRIPT - bot style: berserker, seed 7
+Lines starting with [BERSERKER] are the player's own reasoning; '>> STATE' is what the screen shows at the start of a combat round.
+[BERSERKER] adopts pet Grave Pup
+Grave Pup follows you.
+[BERSERKER] equips Choir Bell on Aldric (gain 5.0)
+Aldric takes up Choir Bell.
+[BERSERKER] moves 6 -> tile 6 (fight). Options: ["fight", "fight"]
+== Fight ==
+Grave Pup hits Salt Mummy for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [attack 3] chg 0/4, Lys 21/21hp [shield 2] chg 0/5, Aldric 23/23hp [heal 3] chg 0/5 | enemies: Salt Mummy 18/21hp (Hesitates), Cinder Scarab 10/10hp (Attack 4 -> Varek) | fate 1
+[BERSERKER] ends turn with: Varek attack 3, Lys fire 3, Aldric heal 3
+Varek hits Cinder Scarab for 3
+Lys hits Cinder Scarab for 3
+Cinder Scarab is burning (2)
+Aldric's prayer wards Varek (+3 shield)
+Grave Pup hits Cinder Scarab for 3
+Cinder Scarab burns for 2
+Cinder Scarab is reduced to ash!
+Salt Mummy hesitates
+--- Round 2 ---
+>> STATE R2  heroes: Varek 29/29hp [blank 0] chg 1/4, Lys 21/21hp [fire 3] chg 1/5, Aldric 23/23hp [heal 4] chg 1/5 | enemies: Salt Mummy 18/21hp (Attack 4 -> Lys) | fate 1
+[BERSERKER] ends turn with: Varek attack 3, Lys fire 3, Aldric heal 4
+Varek hits Salt Mummy for 3
+Lys hits Salt Mummy for 3
+Salt Mummy is burning (2)
+Aldric's prayer wards Varek (+4 shield)
+Grave Pup hits Salt Mummy for 2
+Salt Mummy burns for 2
+Salt Mummy hits Lys for 4
+--- Round 3 ---
+>> STATE R3  heroes: Varek 29/29hp [attack 2] chg 2/4, Lys 17/21hp [fire 2] chg 2/5, Aldric 23/23hp [guard 1] chg 2/5 | enemies: Salt Mummy 8/21hp (Attack 4 -> Lys) | fate 1
+[BERSERKER] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 3
+Varek hits Salt Mummy for 2
+Lys (blood magic) hits Salt Mummy for 6
+Salt Mummy falls!
+Lys pays 2 HP in blood
+VICTORY!
+[BERSERKER] carves: Lys: blank -> BLOOD 7
+Carved: Lys: blank -> BLOOD 7
+[BERSERKER] moves 1 -> tile 7 (event). Options: ["rest", "event"]
+[BERSERKER] event 'The Bone Caravan': picks "Search the carts. Something may still guard them."
+You move on.
+[BERSERKER] equips Censer of Embers on Lys (gain 1.5)
+Lys takes up Censer of Embers.
+[BERSERKER] moves 6 -> tile 13 (elite). Options: ["fight", "elite"]
+== Elite fight ==
+Grave Pup hits Dune Wraith for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [guard 2] chg 0/4, Lys 15/21hp [fire 3] chg 0/5, Aldric 23/23hp [heal 3] chg 0/5 | enemies: Salt Mummy 19/19hp (Hesitates), Salt Mummy 19/19hp (Attack 6 -> Aldric), Dune Wraith 13/16hp (Hesitates) | fate 3
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 3
+Varek hits Dune Wraith for 3
+Lys (blood magic) hits Dune Wraith for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Dune Wraith for 2
+Salt Mummy hesitates
+Salt Mummy hits Aldric for 6
+Dune Wraith hesitates
+--- Round 2 ---
+>> STATE R2  heroes: Varek 29/29hp [blank 0] chg 1/4, Lys 16/21hp [fire 2] chg 1/5, Aldric 17/23hp [blank 0] chg 1/5 | enemies: Salt Mummy 19/19hp (Attack 5 -> Lys), Salt Mummy 19/19hp (Attack 4 -> Aldric), Dune Wraith 2/16hp (Hesitates) | fate 3
+Fate bends: +1 reroll (-2 Fate)
+[BERSERKER] spends Fate for an extra reroll
+[BERSERKER] ends turn with: Varek guard 2, Lys blood 7, Aldric heal 3
+Varek guards the party (+2 shield all)
+Lys (blood magic) hits Dune Wraith for 7
+Dune Wraith falls!
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Salt Mummy for 2
+Salt Mummy hits Lys for 3 (2 of 5 blocked by shield)
+Salt Mummy hits Aldric for 2 (2 of 4 blocked by shield)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 29/29hp [attack 2] chg 2/4, Lys 14/21hp [fire 2] chg 2/5, Aldric 15/23hp [blank 0] chg 2/5 | enemies: Salt Mummy 17/19hp (Hesitates), Salt Mummy 19/19hp (Heal 3) | fate 1
+[BERSERKER] ends turn with: Varek attack 2, Lys fire 2, Aldric heal 3
+Varek hits Salt Mummy for 2
+Lys hits Salt Mummy for 2
+Salt Mummy is burning (2)
+Aldric heals Aldric for 3
+Grave Pup hits Salt Mummy for 3
+Salt Mummy burns for 2
+Salt Mummy hesitates
+Salt Mummy heals Salt Mummy for 3
+--- Round 4 ---
+>> STATE R4  heroes: Varek 29/29hp [blank 0] chg 3/4, Lys 14/21hp [guard 2] chg 3/5, Aldric 18/23hp [heal 3] chg 3/5 | enemies: Salt Mummy 11/19hp (Shield 4), Salt Mummy 19/19hp (Hesitates) | fate 1
+[BERSERKER] ends turn with: Varek attack 2, Lys blood 7, Aldric heal 3
+Varek hits Salt Mummy for 2
+Lys (blood magic) hits Salt Mummy for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Salt Mummy for 2
+Salt Mummy falls!
+Salt Mummy hesitates
+--- Round 5 ---
+>> STATE R5  heroes: Varek 29/29hp [attack 2] chg 4/4, Lys 15/21hp [fire 2] chg 4/5, Aldric 18/23hp [heal 3] chg 4/5 | enemies: Salt Mummy 19/19hp (Attack 6 -> Lys) | fate 1
+[BERSERKER] uses broken_oath (incoming 6, party missing 11 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[BERSERKER] ends turn with: Varek attack 2, Lys fire 2, Aldric heal 3
+Varek hits Salt Mummy for 2
+Lys hits Salt Mummy for 2
+Salt Mummy is burning (2)
+Aldric heals Lys for 3
+Grave Pup hits Salt Mummy for 3
+Salt Mummy burns for 2
+Salt Mummy hits Varek for 1 (5 of 6 blocked by shield)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 26/29hp [guard 2] chg 1/4, Lys 18/21hp [blood 6] chg 5/5, Aldric 18/23hp [guard 1] chg 5/5 | enemies: Salt Mummy 10/19hp (Hesitates) | fate 1
+[BERSERKER] uses hollow_flame (incoming 0, party missing 11 HP)
+* Lys uses Hollow Flame!
+Lys hits Salt Mummy for 4
+The flame feeds on Lys (-3 HP)
+[BERSERKER] uses last_rite (incoming 0, party missing 14 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[BERSERKER] ends turn with: Varek guard 2, Lys blood 6, Aldric heal 3
+Varek guards the party (+2 shield all)
+Lys (blood magic) hits Salt Mummy for 6
+Salt Mummy falls!
+Lys pays 2 HP in blood
+VICTORY!
+[BERSERKER] skips the weapons
+[BERSERKER] carves: Aldric: blank -> HEAL 3
+Carved: Aldric: blank -> HEAL 3
+[BERSERKER] moves 1 -> tile 14 (chest). Options: ["rest", "chest"]
+You pry open a rotten chest: +17 gold.
+[BERSERKER] skips the weapons
+[BERSERKER] moves 2 -> tile 16 (event). Options: ["event", "shop"]
+[BERSERKER] event 'The Buried Knight': picks "Pull the sword free."
+You move on.
+[BERSERKER] equips Tower Shield of Dunmere on Lys (gain 1.5)
+Lys takes up Tower Shield of Dunmere.
+[BERSERKER] moves 1 -> tile 17 (fight). Options: ["fight", "shop"]
+== Fight ==
+Grave Pup hits Cinder Scarab for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [attack 2] chg 0/4, Lys 21/21hp [guard 2] chg 0/5, Aldric 23/23hp [heal 3] chg 0/5 | enemies: Dune Wraith 18/18hp (Attack 5 -> Varek), Cinder Scarab 11/11hp (Shield 2), Cinder Scarab 8/11hp (Sweep 3 -> ALL) | fate 3
+Fate bends: +1 reroll (-2 Fate)
+[BERSERKER] spends Fate for an extra reroll
+[BERSERKER] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 3
+Varek hits Cinder Scarab for 2
+Lys (blood magic) hits Cinder Scarab for 6
+Cinder Scarab falls!
+Lys pays 2 HP in blood
+Aldric heals Lys for 2
+Aldric's prayer wards Lys (+1 shield)
+Grave Pup hits Dune Wraith for 2
+Dune Wraith hits Varek for 5
+Cinder Scarab shields itself (2)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 24/29hp [attack 2] chg 1/4, Lys 21/21hp [shield 5] chg 1/5, Aldric 23/23hp [heal 3] chg 1/5 | enemies: Dune Wraith 16/18hp (Heal 3), Cinder Scarab 11/11hp shield 2 (Attack 4 -> Varek) | fate 1
+[BERSERKER] ends turn with: Varek attack 2, Lys blood 7, Aldric heal 3
+Varek hits Cinder Scarab for 0 (2 of 2 blocked by shield)
+Lys (blood magic) hits Cinder Scarab for 7
+Lys pays 2 HP in blood
+Aldric heals Varek for 3
+Grave Pup's die shows nothing this round.
+Dune Wraith heals Cinder Scarab for 3
+Cinder Scarab hits Varek for 4
+--- Round 3 ---
+>> STATE R3  heroes: Varek 23/29hp [shield 4] chg 2/4, Lys 19/21hp [blood 7] chg 2/5, Aldric 23/23hp [guard 1] chg 2/5 | enemies: Dune Wraith 16/18hp (Heal 3), Cinder Scarab 7/11hp (Attack 4 -> Aldric) | fate 1
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 4
+Varek hits Cinder Scarab for 3
+Lys (blood magic) hits Cinder Scarab for 7
+Cinder Scarab falls!
+Lys pays 2 HP in blood
+Aldric heals Varek for 4
+Grave Pup hits Dune Wraith for 3
+Dune Wraith heals Dune Wraith for 3
+--- Round 4 ---
+>> STATE R4  heroes: Varek 27/29hp [blank 0] chg 3/4, Lys 17/21hp [guard 2] chg 3/5, Aldric 23/23hp [guard 3] chg 3/5 | enemies: Dune Wraith 16/18hp (Attack 6 -> Varek) | fate 1
+[BERSERKER] ends turn with: Varek attack 2, Lys fire 3, Aldric guard 3
+Varek hits Dune Wraith for 2
+Lys hits Dune Wraith for 3
+Dune Wraith is burning (2)
+Aldric guards the party (+3 shield all)
+Grave Pup hits Dune Wraith for 2
+Dune Wraith burns for 2
+Dune Wraith hits Varek for 3 (3 of 6 blocked by shield)
+--- Round 5 ---
+>> STATE R5  heroes: Varek 24/29hp [shield 4] chg 4/4, Lys 17/21hp [fire 2] chg 4/5, Aldric 23/23hp [heal 4] chg 4/5 | enemies: Dune Wraith 7/18hp (Heal 3) | fate 1
+[BERSERKER] uses broken_oath (incoming 0, party missing 9 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[BERSERKER] ends turn with: Varek attack 2, Lys blood 7, Aldric heal 4
+Varek hits Dune Wraith for 2
+Lys (blood magic) hits Dune Wraith for 7
+Dune Wraith falls!
+Lys pays 2 HP in blood
+VICTORY!
+[BERSERKER] carves: Lys: FIRE 2 -> BLOOD 7
+Carved: Lys: FIRE 2 -> BLOOD 7
+[BERSERKER] moves 1 -> tile 18 (shop). Options: ["shop", "shop"]
+[BERSERKER] buys weapon (gold 65)
+Bought Caravan Arms
+[BERSERKER] equips Tower Shield of Dunmere on Varek (gain 1.0)
+Varek takes up Tower Shield of Dunmere.
+[BERSERKER] buys fate_shard (gold 25)
+Bought Sunstone
+Fate Shard: +3 Fate
+[BERSERKER] moves 5 -> tile 23 (fight). Options: ["event", "fight"]
+== Fight ==
+Grave Pup hits Ash Jackal for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 22/29hp [guard 2] chg 0/4, Lys 15/21hp [blood 6] chg 0/5, Aldric 23/23hp [heal 4] chg 0/5 | enemies: Ash Jackal 12/15hp (Hesitates), Ash Jackal 15/15hp (Attack 5 -> Varek), Dune Wraith 18/18hp (Heal 3) | fate 5
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 4
+Varek hits Ash Jackal for 2 (resisted)
+Lys (blood magic) hits Ash Jackal for 7 (super effective!)
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Grave Pup hits Ash Jackal for 2
+Ash Jackal hesitates
+Ash Jackal hits Varek for 6 (super effective!)
+Dune Wraith heals Ash Jackal for 3
+--- Round 2 ---
+>> STATE R2  heroes: Varek 16/29hp [blank 0] chg 1/4, Lys 17/21hp [blood 7] chg 1/5, Aldric 23/23hp [heal 3] chg 1/5 | enemies: Ash Jackal 4/15hp (Hesitates), Ash Jackal 15/15hp (Hesitates), Dune Wraith 18/18hp (Sweep 4 -> ALL) | fate 5
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits Ash Jackal for 2 (resisted)
+Lys (blood magic) hits Ash Jackal for 8 (super effective!)
+Ash Jackal falls!
+Lys pays 2 HP in blood
+Aldric heals Varek for 3
+Grave Pup hits Ash Jackal for 2
+Ash Jackal hesitates
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 4
+Dune Wraith hits Lys for 4
+Dune Wraith hits Aldric for 5 (super effective!)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 15/29hp [attack 3] chg 2/4, Lys 11/21hp [fire 3] chg 2/5, Aldric 18/23hp [heal 4] chg 2/5 | enemies: Ash Jackal 13/15hp (Attack 6 -> Aldric), Dune Wraith 18/18hp (Attack 5 -> Varek) | fate 5
+* Fate twists Lys's die to BLOOD 7 (-4 Fate)
+[BERSERKER] spends Fate to twist Lys's die to blood 7
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 4
+Varek hits Ash Jackal for 2 (resisted)
+Lys (blood magic) hits Ash Jackal for 8 (super effective!)
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Grave Pup hits Ash Jackal for 2
+Ash Jackal hits Aldric for 6
+Dune Wraith hits Varek for 5
+--- Round 4 ---
+>> STATE R4  heroes: Varek 10/29hp [attack 3] chg 3/4, Lys 13/21hp [fire 3] chg 3/5, Aldric 12/23hp [guard 1] chg 3/5 | enemies: Ash Jackal 1/15hp (Attack 5 -> Lys), Dune Wraith 18/18hp (Hesitates) | fate 1
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits Ash Jackal for 2 (resisted)
+Ash Jackal falls!
+Lys (blood magic) hits Dune Wraith for 7
+Lys pays 2 HP in blood
+Aldric heals Varek for 3
+Grave Pup's die shows nothing this round.
+Dune Wraith hesitates
+--- Round 5 ---
+>> STATE R5  heroes: Varek 13/29hp [shield 5] chg 4/4, Lys 11/21hp [blood 6] chg 4/5, Aldric 12/23hp [guard 3] chg 4/5 | enemies: Dune Wraith 11/18hp (Sweep 4 -> ALL) | fate 1
+[BERSERKER] uses broken_oath (incoming 12, party missing 37 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[BERSERKER] ends turn with: Varek shield 5, Lys blood 6, Aldric guard 3
+Varek raises a shield (5)
+Lys (blood magic) hits Dune Wraith for 6
+Lys pays 2 HP in blood
+Aldric guards the party (+3 shield all)
+Grave Pup hits Dune Wraith for 2
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 0 (4 of 4 blocked by shield)
+Dune Wraith hits Lys for 1 (3 of 4 blocked by shield)
+Dune Wraith hits Aldric for 2 (super effective!) (3 of 5 blocked by shield)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 11/29hp [attack 2] chg 1/4, Lys 8/21hp [blood 7] chg 5/5, Aldric 10/23hp [heal 3] chg 5/5 | enemies: Dune Wraith 3/18hp (Hesitates) | fate 1
+[BERSERKER] uses hollow_flame (incoming 0, party missing 44 HP)
+* Lys uses Hollow Flame!
+Lys hits Dune Wraith for 4
+Dune Wraith falls!
+The flame feeds on Lys (-3 HP)
+VICTORY!
+[BERSERKER] carves: Varek: blank -> SHIELD 3
+Carved: Varek: blank -> SHIELD 3
+[BERSERKER] moves 1 -> tile 24 (event). Options: ["rest", "event"]
+[BERSERKER] event 'The Salt Merchant': picks "Buy his salt (-20 gold). All heroes heal 8."
+-20 gold. Varek heals 8 HP. Lys heals 8 HP. Aldric heals 8 HP.
+[BERSERKER] moves 1 -> tile 25 (chest). Options: ["rest", "chest"]
+You pry open a rotten chest: +31 gold.
+[BERSERKER] moves 5 -> tile 26 (rest). Options: ["rest", "rest"]
+[BERSERKER] rests: carve (party HP 68%)
+[BERSERKER] carves: Lys: FIRE 3 -> FIRE 4
+Carved: Lys: FIRE 3 -> FIRE 4
+[BERSERKER] moves 5 -> tile 31 (fight). Options: ["fight", "event"]
+== Fight ==
+Grave Pup hits Ash Jackal for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 19/29hp [shield 3] chg 0/4, Lys 13/21hp [fire 4] chg 0/5, Aldric 18/23hp [heal 3] chg 0/5 | enemies: Salt Mummy 23/23hp (Attack 5 -> Lys), Dune Wraith 19/19hp (Sweep 4 -> ALL), Ash Jackal 13/16hp (Attack 4 -> Varek) | fate 3
+Fate bends: +1 reroll (-2 Fate)
+[BERSERKER] spends Fate for an extra reroll
+[BERSERKER] ends turn with: Varek shield 3, Lys blood 7, Aldric heal 3
+Varek raises a shield (3)
+Lys (blood magic) hits Ash Jackal for 8 (super effective!)
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Ash Jackal for 3
+Salt Mummy hits Lys for 5
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 1 (3 of 4 blocked by shield)
+Dune Wraith hits Lys for 4
+Dune Wraith hits Aldric for 5 (super effective!)
+Ash Jackal hits Varek for 5 (super effective!)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 13/29hp [attack 3] chg 1/4, Lys 5/21hp [fire 4] chg 1/5, Aldric 13/23hp [guard 1] chg 1/5 | enemies: Salt Mummy 23/23hp (Attack 4 -> Lys), Dune Wraith 19/19hp (Attack 6 -> Varek), Ash Jackal 2/16hp (Attack 4 -> Lys) | fate 1
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 3
+Varek hits Ash Jackal for 2 (resisted)
+Ash Jackal falls!
+Lys (blood magic) hits Salt Mummy for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Salt Mummy for 2
+Salt Mummy hits Lys for 4
+Dune Wraith hits Varek for 6
+--- Round 3 ---
+>> STATE R3  heroes: Varek 7/29hp [attack 2] chg 2/4, Lys 2/21hp [shield 5] chg 2/5, Aldric 13/23hp [heal 3] chg 2/5 | enemies: Salt Mummy 15/23hp (Shield 4), Dune Wraith 19/19hp (Sweep 3 -> ALL) | fate 1
+[BERSERKER] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 3
+Varek hits Salt Mummy for 2
+Lys (blood magic) hits Salt Mummy for 6
+Lys pays 1 HP in blood
+Aldric heals Lys for 3
+Grave Pup's die shows nothing this round.
+Salt Mummy shields itself (4)
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 3
+Dune Wraith hits Lys for 3
+Dune Wraith hits Aldric for 4 (super effective!)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 4/29hp [shield 5] chg 3/4, Lys 1/21hp [shield 5] chg 3/5, Aldric 9/23hp [heal 3] chg 3/5 | enemies: Salt Mummy 7/23hp shield 4 (Heal 3), Dune Wraith 19/19hp (Heal 3) | fate 1
+[BERSERKER] ends turn with: Varek shield 5, Lys blood 7, Aldric heal 3
+Varek raises a shield (5)
+Lys (blood magic) hits Salt Mummy for 3 (4 of 7 blocked by shield)
+Aldric heals Lys for 3
+Grave Pup hits Salt Mummy for 3
+Salt Mummy heals Salt Mummy for 3
+Dune Wraith heals Salt Mummy for 3
+--- Round 5 ---
+>> STATE R5  heroes: Varek 4/29hp [shield 3] chg 4/4, Lys 4/21hp [blood 7] chg 4/5, Aldric 9/23hp [heal 4] chg 4/5 | enemies: Salt Mummy 7/23hp (Hesitates), Dune Wraith 19/19hp (Sweep 4 -> ALL) | fate 1
+[BERSERKER] uses broken_oath (incoming 12, party missing 56 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[BERSERKER] ends turn with: Varek guard 2, Lys blood 7, Aldric heal 4
+Varek guards the party (+2 shield all)
+Lys (blood magic) hits Salt Mummy for 7
+Salt Mummy falls!
+Lys pays 2 HP in blood
+Aldric heals Varek for 4
+Grave Pup hits Dune Wraith for 2
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 0 (4 of 4 blocked by shield)
+Dune Wraith hits Lys for 2 (2 of 4 blocked by shield)
+Lys the Hollow falls!
+Dune Wraith hits Aldric for 3 (super effective!) (2 of 5 blocked by shield)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 6/29hp [attack 3] chg 1/4, Lys DEAD, Aldric 6/23hp [heal 3] chg 5/5 | enemies: Dune Wraith 17/19hp (Sweep 3 -> ALL) | fate 1
+[BERSERKER] uses last_rite (incoming 6, party missing 40 HP)
+* Aldric uses Last Rite!
+Lys the Hollow rises from death!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits Dune Wraith for 3
+Lys (blood magic) hits Dune Wraith for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits Dune Wraith for 2
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 3
+Dune Wraith hits Lys for 3
+Dune Wraith hits Aldric for 4 (super effective!)
+--- Round 7 ---
+>> STATE R7  heroes: Varek 7/29hp [shield 3] chg 2/4, Lys 4/21hp [blood 7] chg 5/5, Aldric 4/23hp [heal 3] chg 1/5 | enemies: Dune Wraith 5/19hp (Attack 6 -> Aldric) | fate 1
+[BERSERKER] uses hollow_flame (incoming 6, party missing 58 HP)
+* Lys uses Hollow Flame!
+Lys hits Dune Wraith for 4
+The flame feeds on Lys (-3 HP)
+[BERSERKER] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits Dune Wraith for 3
+Dune Wraith falls!
+VICTORY!
+[BERSERKER] carves: Varek: ATTACK 2 -> ATTACK 3
+Carved: Varek: ATTACK 2 -> ATTACK 3
+[BERSERKER] moves 3 -> tile 34 (event). Options: ["event", "rest"]
+[BERSERKER] event 'The Ash Prophet': picks "Listen (+2 Fate, a random hero loses 2 max HP)."
+Fate +2 Fate
++2 Fate. Lys's max HP is now 19.
+[BERSERKER] moves 4 -> tile 35 (rest). Options: ["rest", "rest"]
+The last campfire warms you (+30% HP).
+[BERSERKER] rests: carve (party HP 44%)
+[BERSERKER] carves: Varek: ATTACK 3 -> ATTACK 4
+Carved: Varek: ATTACK 3 -> ATTACK 4
+[BERSERKER] moves 3 -> tile 36 (boss). Options: ["boss", "boss"]
+== BOSS ==
+Grave Pup hits The Glass Pilgrim for 3
+--- Round 1 ---
+>> STATE R1  heroes: Varek 15/29hp [attack 4] chg 0/4, Lys 6/19hp [blood 7] chg 0/5, Aldric 10/23hp [guard 3] chg 0/5 | enemies: The Glass Pilgrim 80/83hp (Attack 9 -> Varek) | fate 5
+[BERSERKER] ends turn with: Varek attack 4, Lys blood 7, Aldric guard 3
+Varek hits The Glass Pilgrim for 4
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric guards the party (+3 shield all)
+Grave Pup hits The Glass Pilgrim for 3
+The Glass Pilgrim hits Varek for 6 (3 of 9 blocked by shield)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 9/29hp [attack 4] chg 1/4, Lys 4/19hp [fire 4] chg 1/5, Aldric 10/23hp [guard 3] chg 1/5 | enemies: The Glass Pilgrim 66/83hp (Shield 6) | fate 5
+[BERSERKER] ends turn with: Varek attack 4, Lys blood 7, Aldric guard 3
+Varek hits The Glass Pilgrim for 4
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric guards the party (+3 shield all)
+Grave Pup hits The Glass Pilgrim for 2
+The Glass Pilgrim shields itself (6)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 9/29hp [shield 5] chg 2/4, Lys 2/19hp [fire 4] chg 2/5, Aldric 10/23hp [heal 3] chg 2/5 | enemies: The Glass Pilgrim 53/83hp shield 6 (Attack 9 -> Varek) | fate 5
+* Fate twists Varek's die to ATTACK 4 (-4 Fate)
+[BERSERKER] spends Fate to twist Varek's die to attack 4
+[BERSERKER] ends turn with: Varek attack 4, Lys blood 7, Aldric heal 3
+Varek hits The Glass Pilgrim for 0 (4 of 4 blocked by shield)
+Lys (blood magic) hits The Glass Pilgrim for 5 (2 of 7 blocked by shield)
+Lys pays 1 HP in blood
+Aldric heals Lys for 3
+Grave Pup's die shows nothing this round.
+The Glass Pilgrim hits Varek for 9
+Varek the Oathbroken falls!
+--- Round 4 ---
+>> STATE R4  heroes: Varek DEAD, Lys 4/19hp [blood 7] chg 3/5, Aldric 10/23hp [heal 3] chg 3/5 | enemies: The Glass Pilgrim 48/83hp (Attack 8 -> Aldric) | fate 1
+[BERSERKER] ends turn with: Lys blood 7, Aldric heal 3
+Lys (blood magic) hits The Glass Pilgrim for 7
+!! Cracks race across the Glass Pilgrim. The fallen sun's light pours out of him, white and terrible.
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Grave Pup hits The Glass Pilgrim for 3
+The Glass Pilgrim hits Aldric for 8
+--- Round 5 ---
+>> STATE R5  heroes: Varek DEAD, Lys 5/19hp [blood 6] chg 4/5, Aldric 2/23hp [heal 4] chg 4/5 | enemies: The Glass Pilgrim 38/83hp (Sweep 7 -> ALL) | fate 1
+[BERSERKER] ends turn with: Lys blood 6, Aldric heal 4
+Lys (blood magic) hits The Glass Pilgrim for 6
+Lys pays 2 HP in blood
+Aldric heals Aldric for 4
+Grave Pup hits The Glass Pilgrim for 2
+The Glass Pilgrim sweeps the whole party!
+The Glass Pilgrim hits Lys for 7
+Lys the Hollow falls!
+The Glass Pilgrim hits Aldric for 7
+Brother Aldric falls!
+Your party has fallen...
+
+RESULT: DEFEAT at tile 36/36

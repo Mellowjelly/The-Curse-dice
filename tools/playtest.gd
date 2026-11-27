@@ -33,14 +33,21 @@ func _init() -> void:
 	var args := OS.get_cmdline_user_args()
 	var version: String = args[0] if args.size() > 0 else "dev"
 	var runs: int = int(args[1]) if args.size() > 1 else RUNS
+	# 3.7: optional 3rd argument: another region (e.g. ash_desert). It opens after a road win,
+	# so its bots start from a small town (MID_TOWN) and the campaign section is skipped.
+	if args.size() > 2:
+		region_path = "res://data/region2.json" if args[2] == "ash_desert" else args[2]
 	var out_dir := "res://docs/playtests/%s" % version
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 
 	var report: Array[String] = ["# Playtest report %s" % version, "",
 		"%d full runs per bot style (start of the road -> boss)." % runs, ""]
+	if region_path != "":
+		report[2] = "%d full runs per bot style on %s, town %s." % [runs, region_path, str(MID_TOWN)]
 	for style in STYLES:
 		report.append_array(_measure(style, runs))
-		report.append_array(_campaign(style))
+		if region_path == "":
+			report.append_array(_campaign(style))
 		_write(out_dir + "/transcript_%s.txt" % style, "\n".join(_transcript(style, 7)))
 	_write(out_dir + "/report.md", "\n".join(report))
 	print("\n".join(report))
@@ -53,7 +60,14 @@ func _write(path: String, text: String) -> void:
 
 
 ## Plays one full run. If `log` is given, everything is recorded there.
+var region_path := ""
+const MID_TOWN := {"chapel": 1, "carver": 1, "smithy": 1, "fortune": 1}
+
+
 func play_run(style: String, seed_value: int, log: Array[String] = [], levels: Dictionary = {}) -> Dictionary:
+	if region_path != "":
+		levels = MID_TOWN.duplicate() if levels.is_empty() else levels.duplicate()
+		levels["region"] = region_path
 	var run := Run.new(seed_value, levels)
 	var bot := PlayerBot.new(style, seed_value)
 	bot.notes = log

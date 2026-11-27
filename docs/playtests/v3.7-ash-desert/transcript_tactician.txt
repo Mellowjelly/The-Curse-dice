@@ -1,0 +1,750 @@
+TRANSCRIPT - bot style: tactician, seed 7
+Lines starting with [TACTICIAN] are the player's own reasoning; '>> STATE' is what the screen shows at the start of a combat round.
+[TACTICIAN] adopts pet Candle Moth
+Candle Moth follows you.
+[TACTICIAN] equips Choir Bell on Aldric (gain 5.0)
+Aldric takes up Choir Bell.
+[TACTICIAN] moves 6 -> tile 6 (fight). Options: ["fight", "fight"]
+== Fight ==
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [guard 2] chg 0/4, Lys 21/21hp [fire 3] chg 0/5, Aldric 23/23hp [heal 3] chg 0/5 | enemies: Salt Mummy 21/21hp (Attack 4 -> Aldric), Cinder Scarab 10/10hp (Attack 4 -> Lys) | fate 1
+[TACTICIAN] ends turn with: Varek guard 2, Lys fire 3, Aldric guard 1
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+3 shield all)
+Lys hits Cinder Scarab for 3
+Cinder Scarab is burning (2)
+Aldric guards the party (+2 shield all)
+Candle Moth heals Varek for 1
+Cinder Scarab burns for 2
+Salt Mummy hits Aldric for 0 (4 of 4 blocked by shield)
+Cinder Scarab hits Lys for 0 (4 of 4 blocked by shield)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 29/29hp [blank 0] chg 2/4, Lys 21/21hp [fire 3] chg 1/5, Aldric 23/23hp [heal 4] chg 2/5 | enemies: Salt Mummy 21/21hp (Attack 4 -> Lys), Cinder Scarab 5/10hp (Attack 4 -> Lys) | fate 2
+[TACTICIAN] ends turn with: Varek attack 2, Lys fire 3, Aldric guard 3
+Varek hits Cinder Scarab for 2
+Lys hits Cinder Scarab for 3
+Cinder Scarab falls!
+Aldric guards the party (+3 shield all)
+Candle Moth hits Salt Mummy for 1
+Salt Mummy burns for 1
+Salt Mummy hits Lys for 1 (3 of 4 blocked by shield)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 29/29hp [attack 3] chg 3/4, Lys 20/21hp [shield 2] chg 2/5, Aldric 23/23hp [guard 3] chg 3/5 | enemies: Salt Mummy 19/21hp (Attack 5 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 3, Aldric guard 3
+Varek hits Salt Mummy for 3
+Lys hits Salt Mummy for 3
+Salt Mummy is burning (2)
+Aldric guards the party (+3 shield all)
+Candle Moth hits Salt Mummy for 1
+Salt Mummy burns for 3
+Salt Mummy hits Aldric for 2 (3 of 5 blocked by shield)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 29/29hp [attack 3] chg 4/4, Lys 20/21hp [shield 2] chg 3/5, Aldric 21/23hp [heal 3] chg 4/5 | enemies: Salt Mummy 9/21hp (Attack 5 -> Lys) | fate 2
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 6, Aldric heal 3
+Varek hits Salt Mummy for 3
+Lys (blood magic) hits Salt Mummy for 6
+Salt Mummy falls!
+Lys pays 2 HP in blood
+VICTORY!
+[TACTICIAN] carves: Lys: blank -> BLOOD 7
+Carved: Lys: blank -> BLOOD 7
+[TACTICIAN] moves 1 -> tile 7 (event). Options: ["rest", "event"]
+[TACTICIAN] event 'The Bone Caravan': picks "Search the carts. Something may still guard them."
+You move on.
+[TACTICIAN] equips Censer of Embers on Lys (gain 1.5)
+Lys takes up Censer of Embers.
+[TACTICIAN] moves 6 -> tile 13 (elite). Options: ["fight", "elite"]
+== Elite fight ==
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [attack 2] chg 0/4, Lys 19/21hp [fire 3] chg 0/5, Aldric 22/23hp [blank 0] chg 0/5 | enemies: Salt Mummy 19/19hp (Attack 5 -> Varek), Salt Mummy 19/19hp (Attack 5 -> Aldric), Dune Wraith 16/16hp (Sweep 4 -> ALL) | fate 4
+* Fate twists Varek's die to GUARD 2 (-4 Fate)
+[TACTICIAN] spends Fate to twist Varek's die to guard 2
+[TACTICIAN] ends turn with: Varek guard 2, Lys guard 2, Aldric blank 0
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+3 shield all)
+Lys guards the party (+3 shield all)
+Aldric rolls nothing... +1 Fate
+Candle Moth shields Lys (1)
+Salt Mummy hits Varek for 0 (5 of 5 blocked by shield)
+Salt Mummy hits Aldric for 0 (5 of 5 blocked by shield)
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 3 (1 of 4 blocked by shield)
+Dune Wraith hits Lys for 0 (4 of 4 blocked by shield)
+Dune Wraith hits Aldric for 4 (super effective!) (1 of 5 blocked by shield)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 26/29hp [shield 3] chg 2/4, Lys 19/21hp [fire 2] chg 2/5, Aldric 18/23hp [guard 1] chg 1/5 | enemies: Salt Mummy 19/19hp (Hesitates), Salt Mummy 19/19hp (Attack 4 -> Aldric), Dune Wraith 16/16hp (Hesitates) | fate 2
+[TACTICIAN] ends turn with: Varek shield 3, Lys guard 2, Aldric heal 3
+Varek raises a shield (3)
+Lys guards the party (+2 shield all)
+Aldric heals Aldric for 3
+Candle Moth hits Salt Mummy for 1
+Salt Mummy burns for 1
+Salt Mummy hesitates
+Salt Mummy hits Aldric for 2 (2 of 4 blocked by shield)
+Dune Wraith hesitates
+--- Round 3 ---
+>> STATE R3  heroes: Varek 26/29hp [guard 2] chg 3/4, Lys 19/21hp [guard 2] chg 3/5, Aldric 19/23hp [blank 0] chg 2/5 | enemies: Salt Mummy 19/19hp (Attack 5 -> Aldric), Salt Mummy 17/19hp (Attack 5 -> Varek), Dune Wraith 16/16hp (Attack 6 -> Lys) | fate 2
+[TACTICIAN] ends turn with: Varek guard 2, Lys guard 2, Aldric guard 3
+COMBO! Triple GUARD - values doubled
+The combo feeds your Fate +1 Fate
+Varek guards the party (+4 shield all)
+Lys guards the party (+4 shield all)
+Aldric guards the party (+6 shield all)
+Candle Moth's die shows nothing this round.
+Salt Mummy hits Aldric for 0 (5 of 5 blocked by shield)
+Salt Mummy hits Varek for 0 (5 of 5 blocked by shield)
+Dune Wraith hits Lys for 0 (6 of 6 blocked by shield)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 26/29hp [attack 2] chg 4/4, Lys 19/21hp [guard 2] chg 5/5, Aldric 19/23hp [heal 4] chg 4/5 | enemies: Salt Mummy 19/19hp (Attack 6 -> Aldric), Salt Mummy 17/19hp (Attack 4 -> Varek), Dune Wraith 16/16hp (Hesitates) | fate 3
+[TACTICIAN] uses hollow_flame (incoming 10, party missing 9 HP)
+* Lys uses Hollow Flame!
+Lys hits Salt Mummy for 4
+Lys hits Salt Mummy for 4
+Lys hits Dune Wraith for 4
+The flame feeds on Lys (-3 HP)
+[TACTICIAN] ends turn with: Varek attack 2, Lys guard 2, Aldric heal 4
+Varek hits Salt Mummy for 2
+Lys guards the party (+2 shield all)
+Aldric heals Lys for 4
+Candle Moth hits Salt Mummy for 1
+Salt Mummy burns for 2
+Salt Mummy burns for 1
+Dune Wraith burns for 1
+Salt Mummy hits Aldric for 4 (2 of 6 blocked by shield)
+Salt Mummy hits Varek for 2 (2 of 4 blocked by shield)
+Dune Wraith hesitates
+--- Round 5 ---
+>> STATE R5  heroes: Varek 24/29hp [shield 4] chg 4/4, Lys 20/21hp [blood 7] chg 1/5, Aldric 15/23hp [heal 3] chg 5/5 | enemies: Salt Mummy 10/19hp (Hesitates), Salt Mummy 12/19hp (Attack 4 -> Aldric), Dune Wraith 11/16hp (Sweep 3 -> ALL) | fate 3
+[TACTICIAN] uses broken_oath (incoming 13, party missing 14 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[TACTICIAN] uses last_rite (incoming 13, party missing 16 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[TACTICIAN] ends turn with: Varek shield 4, Lys blood 7, Aldric heal 4
+Varek raises a shield (4)
+Lys (blood magic) hits Dune Wraith for 7
+Lys pays 2 HP in blood
+Aldric heals Aldric for 4
+Candle Moth heals Varek for 1
+Salt Mummy burns for 1
+Salt Mummy hesitates
+Salt Mummy hits Varek for 0 (4 of 4 blocked by shield)
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 0 (3 of 3 blocked by shield)
+Dune Wraith hits Lys for 3
+Dune Wraith hits Aldric for 4 (super effective!)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 27/29hp [guard 2] chg 1/4, Lys 16/21hp [blood 7] chg 2/5, Aldric 17/23hp [guard 3] chg 1/5 | enemies: Salt Mummy 9/19hp (Shield 4), Salt Mummy 12/19hp (Heal 3), Dune Wraith 4/16hp (Sweep 3 -> ALL) | fate 3
+[TACTICIAN] ends turn with: Varek guard 2, Lys blood 7, Aldric guard 3
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+3 shield all)
+Lys (blood magic) hits Dune Wraith for 7
+Dune Wraith falls!
+Lys pays 2 HP in blood
+Aldric guards the party (+4 shield all)
+Candle Moth hits Salt Mummy for 1
+Salt Mummy burns for 1
+Salt Mummy shields itself (4)
+Salt Mummy heals Salt Mummy for 3
+--- Round 7 ---
+>> STATE R7  heroes: Varek 27/29hp [blank 0] chg 3/4, Lys 14/21hp [fire 2] chg 3/5, Aldric 17/23hp [guard 1] chg 3/5 | enemies: Salt Mummy 10/19hp shield 4 (Attack 4 -> Varek), Salt Mummy 12/19hp (Attack 6 -> Lys) | fate 4
+[TACTICIAN] ends turn with: Varek shield 4, Lys blood 6, Aldric heal 4
+Varek raises a shield (4)
+Lys (blood magic) hits Salt Mummy for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Candle Moth hits Salt Mummy for 1
+Salt Mummy burns for 1
+Salt Mummy hits Varek for 0 (4 of 4 blocked by shield)
+Salt Mummy hits Lys for 6
+--- Round 8 ---
+>> STATE R8  heroes: Varek 27/29hp [shield 3] chg 4/4, Lys 10/21hp [fire 2] chg 4/5, Aldric 17/23hp [heal 3] chg 4/5 | enemies: Salt Mummy 10/19hp (Shield 4), Salt Mummy 4/19hp (Hesitates) | fate 4
+* Fate twists Lys's die to BLOOD 7 (-4 Fate)
+[TACTICIAN] spends Fate to twist Lys's die to blood 7
+[TACTICIAN] ends turn with: Varek attack 2, Lys blood 7, Aldric heal 3
+Varek hits Salt Mummy for 2
+Lys (blood magic) hits Salt Mummy for 7
+Salt Mummy falls!
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Candle Moth shields Lys (1)
+Salt Mummy shields itself (4)
+--- Round 9 ---
+>> STATE R9  heroes: Varek 27/29hp [attack 2] chg 4/4, Lys 11/21hp [fire 2] chg 5/5, Aldric 17/23hp [heal 3] chg 5/5 | enemies: Salt Mummy 10/19hp shield 4 (Attack 6 -> Varek) | fate 0
+[TACTICIAN] uses last_rite (incoming 6, party missing 18 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[TACTICIAN] ends turn with: Varek shield 4, Lys fire 2, Aldric heal 3
+Varek raises a shield (4)
+Lys hits Salt Mummy for 0 (2 of 2 blocked by shield)
+Salt Mummy is burning (2)
+Aldric heals Lys for 3
+Candle Moth's die shows nothing this round.
+Salt Mummy burns for 2
+Salt Mummy hits Varek for 2 (4 of 6 blocked by shield)
+--- Round 10 ---
+>> STATE R10  heroes: Varek 27/29hp [attack 2] chg 4/4, Lys 18/21hp [blood 7] chg 5/5, Aldric 19/23hp [heal 3] chg 1/5 | enemies: Salt Mummy 8/19hp (Heal 3) | fate 0
+[TACTICIAN] ends turn with: Varek attack 2, Lys blood 7, Aldric heal 3
+Varek hits Salt Mummy for 2
+Lys (blood magic) hits Salt Mummy for 7
+Salt Mummy falls!
+Lys pays 2 HP in blood
+VICTORY!
+[TACTICIAN] skips the weapons
+[TACTICIAN] carves: Aldric: blank -> HEAL 3
+Carved: Aldric: blank -> HEAL 3
+[TACTICIAN] moves 1 -> tile 14 (chest). Options: ["rest", "chest"]
+You pry open a rotten chest: +17 gold.
+[TACTICIAN] skips the weapons
+[TACTICIAN] moves 2 -> tile 16 (event). Options: ["event", "shop"]
+[TACTICIAN] event 'The Buried Knight': picks "Pull the sword free."
+You move on.
+[TACTICIAN] equips Tower Shield of Dunmere on Lys (gain 1.5)
+Lys takes up Tower Shield of Dunmere.
+[TACTICIAN] moves 1 -> tile 17 (fight). Options: ["fight", "shop"]
+== Fight ==
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [attack 2] chg 0/4, Lys 21/21hp [blood 7] chg 0/5, Aldric 23/23hp [heal 3] chg 0/5 | enemies: Dune Wraith 18/18hp (Heal 3), Cinder Scarab 11/11hp (Sweep 3 -> ALL), Cinder Scarab 11/11hp (Attack 4 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 7, Aldric guard 3
+Varek hits Cinder Scarab for 3
+Lys (blood magic) hits Cinder Scarab for 7
+Lys pays 2 HP in blood
+Aldric guards the party (+3 shield all)
+Candle Moth's die shows nothing this round.
+Dune Wraith heals Cinder Scarab for 3
+Cinder Scarab sweeps the whole party!
+Cinder Scarab hits Varek for 0 (3 of 3 blocked by shield)
+Cinder Scarab hits Lys for 0 (3 of 3 blocked by shield)
+Cinder Scarab hits Aldric for 0 (3 of 3 blocked by shield)
+Cinder Scarab hits Aldric for 4
+--- Round 2 ---
+>> STATE R2  heroes: Varek 29/29hp [guard 2] chg 1/4, Lys 19/21hp [shield 5] chg 1/5, Aldric 19/23hp [heal 3] chg 1/5 | enemies: Dune Wraith 18/18hp (Sweep 4 -> ALL), Cinder Scarab 4/11hp (Attack 4 -> Lys), Cinder Scarab 11/11hp (Attack 4 -> Varek) | fate 2
+[TACTICIAN] ends turn with: Varek guard 2, Lys shield 5, Aldric heal 4
+Varek guards the party (+2 shield all)
+Lys raises a shield (5)
+Aldric heals Aldric for 4
+Candle Moth shields Lys (1)
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 2 (2 of 4 blocked by shield)
+Dune Wraith hits Lys for 0 (4 of 4 blocked by shield)
+Dune Wraith hits Aldric for 3 (super effective!) (2 of 5 blocked by shield)
+Cinder Scarab hits Lys for 0 (4 of 4 blocked by shield)
+Cinder Scarab hits Varek for 4
+--- Round 3 ---
+>> STATE R3  heroes: Varek 23/29hp [blank 0] chg 2/4, Lys 19/21hp [fire 3] chg 2/5, Aldric 20/23hp [heal 3] chg 2/5 | enemies: Dune Wraith 18/18hp (Attack 5 -> Lys), Cinder Scarab 4/11hp (Attack 4 -> Lys), Cinder Scarab 11/11hp (Attack 4 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek attack 2, Lys shield 5, Aldric guard 3
+Varek hits Cinder Scarab for 2
+Lys raises a shield (5)
+Aldric guards the party (+3 shield all)
+Candle Moth heals Varek for 1
+Dune Wraith hits Lys for 0 (5 of 5 blocked by shield)
+Cinder Scarab hits Lys for 1 (3 of 4 blocked by shield)
+Cinder Scarab hits Aldric for 1 (3 of 4 blocked by shield)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 24/29hp [shield 4] chg 3/4, Lys 18/21hp [blood 6] chg 3/5, Aldric 19/23hp [guard 3] chg 3/5 | enemies: Dune Wraith 18/18hp (Sweep 4 -> ALL), Cinder Scarab 2/11hp (Sweep 3 -> ALL), Cinder Scarab 11/11hp (Attack 3 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek shield 4, Lys blood 6, Aldric guard 3
+Varek raises a shield (4)
+Lys (blood magic) hits Cinder Scarab for 6
+Cinder Scarab falls!
+Lys pays 2 HP in blood
+Aldric guards the party (+3 shield all)
+Candle Moth heals Lys for 1
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 0 (4 of 4 blocked by shield)
+Dune Wraith hits Lys for 1 (3 of 4 blocked by shield)
+Dune Wraith hits Aldric for 2 (super effective!) (3 of 5 blocked by shield)
+Cinder Scarab hits Aldric for 3
+--- Round 5 ---
+>> STATE R5  heroes: Varek 24/29hp [attack 2] chg 4/4, Lys 16/21hp [blood 7] chg 4/5, Aldric 14/23hp [heal 4] chg 4/5 | enemies: Dune Wraith 18/18hp (Attack 6 -> Lys), Cinder Scarab 11/11hp (Sweep 3 -> ALL) | fate 2
+[TACTICIAN] uses broken_oath (incoming 15, party missing 19 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[TACTICIAN] ends turn with: Varek guard 2, Lys blood 7, Aldric heal 4
+Varek guards the party (+2 shield all)
+Lys (blood magic) hits Cinder Scarab for 7
+Lys pays 2 HP in blood
+Aldric heals Aldric for 4
+Candle Moth shields Lys (1)
+Dune Wraith hits Varek for 0 (6 of 6 blocked by shield)
+Cinder Scarab sweeps the whole party!
+Cinder Scarab hits Varek for 2 (1 of 3 blocked by shield)
+Cinder Scarab hits Lys for 0 (3 of 3 blocked by shield)
+Cinder Scarab hits Aldric for 1 (2 of 3 blocked by shield)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 20/29hp [guard 2] chg 1/4, Lys 14/21hp [fire 2] chg 5/5, Aldric 17/23hp [heal 3] chg 5/5 | enemies: Dune Wraith 18/18hp (Attack 5 -> Lys), Cinder Scarab 4/11hp (Shield 2) | fate 2
+[TACTICIAN] uses hollow_flame (incoming 5, party missing 22 HP)
+* Lys uses Hollow Flame!
+Lys hits Dune Wraith for 4
+Lys hits Cinder Scarab for 4
+Cinder Scarab falls!
+The flame feeds on Lys (-3 HP)
+[TACTICIAN] uses last_rite (incoming 5, party missing 25 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[TACTICIAN] ends turn with: Varek guard 2, Lys fire 3, Aldric guard 3
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+3 shield all)
+Lys hits Dune Wraith for 3
+Dune Wraith is burning (3)
+Aldric guards the party (+4 shield all)
+Candle Moth hits Dune Wraith for 1
+Dune Wraith burns for 4
+Dune Wraith hits Lys for 0 (5 of 5 blocked by shield)
+--- Round 7 ---
+>> STATE R7  heroes: Varek 24/29hp [blank 0] chg 3/4, Lys 15/21hp [fire 2] chg 1/5, Aldric 19/23hp [heal 4] chg 2/5 | enemies: Dune Wraith 6/18hp (Attack 6 -> Varek) | fate 3
+[TACTICIAN] ends turn with: Varek shield 3, Lys blood 7, Aldric heal 4
+Varek raises a shield (3)
+Lys (blood magic) hits Dune Wraith for 7
+Dune Wraith falls!
+Lys pays 2 HP in blood
+VICTORY!
+[TACTICIAN] carves: Lys: FIRE 2 -> BLOOD 7
+Carved: Lys: FIRE 2 -> BLOOD 7
+[TACTICIAN] moves 1 -> tile 18 (shop). Options: ["shop", "shop"]
+[TACTICIAN] buys carving (gold 65)
+Bought Glass Carver
+[TACTICIAN] carves: Aldric: HEAL 3 -> HEAL 4
+Carved: Aldric: HEAL 3 -> HEAL 4
+[TACTICIAN] buys fate_shard (gold 30)
+Bought Sunstone
+Fate Shard: +1 Fate
+Fate Shard: Fate overflows: +2 free reroll next round
+[TACTICIAN] moves 1 -> tile 19 (chest). Options: ["chest", "event"]
+You pry open a rotten chest: +25 gold.
+[TACTICIAN] moves 1 -> tile 20 (elite). Options: ["fight", "elite"]
+== Elite fight ==
+--- Round 1 ---
+>> STATE R1  heroes: Varek 25/29hp [attack 3] chg 0/4, Lys 14/21hp [blood 7] chg 0/5, Aldric 20/23hp [guard 3] chg 0/5 | enemies: Salt Mummy 19/19hp (Attack 4 -> Aldric), Salt Mummy 19/19hp (Heal 3), Dune Wraith 16/16hp (Heal 3) | fate 5
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 4
+Varek hits Dune Wraith for 3
+Lys (blood magic) hits Dune Wraith for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Candle Moth heals Lys for 1
+Salt Mummy hits Aldric for 4
+Salt Mummy heals Dune Wraith for 3
+Dune Wraith heals Dune Wraith for 3
+--- Round 2 ---
+>> STATE R2  heroes: Varek 25/29hp [shield 4] chg 1/4, Lys 17/21hp [blood 7] chg 1/5, Aldric 16/23hp [guard 1] chg 1/5 | enemies: Salt Mummy 19/19hp (Hesitates), Salt Mummy 19/19hp (Heal 3), Dune Wraith 12/16hp (Sweep 3 -> ALL) | fate 5
+[TACTICIAN] ends turn with: Varek shield 4, Lys blood 7, Aldric heal 4
+Varek raises a shield (4)
+Lys (blood magic) hits Dune Wraith for 7
+Lys pays 2 HP in blood
+Aldric heals Aldric for 4
+Candle Moth heals Lys for 1
+Salt Mummy hesitates
+Salt Mummy heals Dune Wraith for 3
+Dune Wraith sweeps the whole party!
+Dune Wraith hits Varek for 0 (3 of 3 blocked by shield)
+Dune Wraith hits Lys for 3
+Dune Wraith hits Aldric for 4 (super effective!)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 25/29hp [shield 3] chg 2/4, Lys 13/21hp [fire 3] chg 2/5, Aldric 16/23hp [heal 3] chg 2/5 | enemies: Salt Mummy 19/19hp (Attack 4 -> Lys), Salt Mummy 19/19hp (Attack 4 -> Aldric), Dune Wraith 8/16hp (Attack 5 -> Varek) | fate 5
+* Fate twists Lys's die to BLOOD 7 (-4 Fate)
+[TACTICIAN] spends Fate to twist Lys's die to blood 7
+[TACTICIAN] ends turn with: Varek shield 3, Lys blood 7, Aldric heal 4
+Varek raises a shield (3)
+Lys (blood magic) hits Dune Wraith for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Candle Moth hits Dune Wraith for 1
+Dune Wraith falls!
+Salt Mummy hits Lys for 4
+Salt Mummy hits Aldric for 4
+--- Round 4 ---
+>> STATE R4  heroes: Varek 25/29hp [guard 2] chg 3/4, Lys 11/21hp [blood 7] chg 3/5, Aldric 12/23hp [heal 3] chg 3/5 | enemies: Salt Mummy 19/19hp (Attack 6 -> Varek), Salt Mummy 19/19hp (Attack 4 -> Varek) | fate 1
+[TACTICIAN] ends turn with: Varek guard 2, Lys blood 7, Aldric heal 3
+Varek guards the party (+2 shield all)
+Lys (blood magic) hits Salt Mummy for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Candle Moth's die shows nothing this round.
+Salt Mummy hits Varek for 4 (2 of 6 blocked by shield)
+Salt Mummy hits Varek for 4
+--- Round 5 ---
+>> STATE R5  heroes: Varek 17/29hp [attack 2] chg 4/4, Lys 12/21hp [fire 3] chg 4/5, Aldric 12/23hp [heal 4] chg 4/5 | enemies: Salt Mummy 12/19hp (Attack 4 -> Lys), Salt Mummy 19/19hp (Heal 3) | fate 1
+[TACTICIAN] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 4
+Varek hits Salt Mummy for 2
+Lys (blood magic) hits Salt Mummy for 6
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Candle Moth shields Aldric (1)
+Salt Mummy hits Lys for 4
+Salt Mummy heals Salt Mummy for 3
+--- Round 6 ---
+>> STATE R6  heroes: Varek 17/29hp [attack 3] chg 4/4, Lys 10/21hp [shield 5] chg 5/5, Aldric 12/23hp [heal 3] chg 5/5 | enemies: Salt Mummy 7/19hp (Shield 4), Salt Mummy 19/19hp (Hesitates) | fate 1
+[TACTICIAN] uses hollow_flame (incoming 0, party missing 34 HP)
+* Lys uses Hollow Flame!
+Lys hits Salt Mummy for 4
+Lys hits Salt Mummy for 4
+The flame feeds on Lys (-3 HP)
+[TACTICIAN] uses last_rite (incoming 0, party missing 37 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits Salt Mummy for 3
+Salt Mummy falls!
+Lys (blood magic) hits Salt Mummy for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Candle Moth hits Salt Mummy for 1
+Salt Mummy burns for 2
+Salt Mummy hesitates
+--- Round 7 ---
+>> STATE R7  heroes: Varek 21/29hp [blank 0] chg 4/4, Lys 12/21hp [shield 5] chg 1/5, Aldric 14/23hp [heal 4] chg 1/5 | enemies: Salt Mummy 5/19hp (Attack 6 -> Lys) | fate 1
+[TACTICIAN] ends turn with: Varek blank 0, Lys shield 5, Aldric heal 4
+Varek rolls nothing... +1 Fate
+Lys raises a shield (5)
+Aldric heals Lys for 4
+Candle Moth shields Aldric (1)
+Salt Mummy burns for 1
+Salt Mummy hits Lys for 1 (5 of 6 blocked by shield)
+--- Round 8 ---
+>> STATE R8  heroes: Varek 21/29hp [attack 2] chg 4/4, Lys 15/21hp [blood 6] chg 2/5, Aldric 14/23hp [heal 4] chg 2/5 | enemies: Salt Mummy 4/19hp (Heal 3) | fate 2
+[TACTICIAN] ends turn with: Varek attack 2, Lys blood 6, Aldric heal 4
+Varek hits Salt Mummy for 2
+Lys (blood magic) hits Salt Mummy for 6
+Salt Mummy falls!
+Lys pays 2 HP in blood
+VICTORY!
+[TACTICIAN] equips Choir Bell on Varek (gain 1.0)
+Varek takes up Choir Bell.
+[TACTICIAN] carves: Lys: FIRE 3 -> FIRE 4
+Carved: Lys: FIRE 3 -> FIRE 4
+[TACTICIAN] moves 5 -> tile 25 (chest). Options: ["shop", "chest"]
+You pry open a rotten chest: +21 gold.
+[TACTICIAN] skips the weapons
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+[TACTICIAN] moves 1 -> tile 26 (rest). Options: ["rest", "rest"]
+[TACTICIAN] rests: carve (party HP 100%)
+[TACTICIAN] carves: Varek: blank -> CLEAVE 2
+Carved: Varek: blank -> CLEAVE 2
+[TACTICIAN] moves 4 -> tile 30 (fight). Options: ["fight", "event"]
+== Fight ==
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [heal 3] chg 0/4, Lys 21/21hp [shield 5] chg 0/5, Aldric 23/23hp [heal 3] chg 0/5 | enemies: Glass Sentinel 44/44hp (Attack 8 -> Aldric), Cinder Scarab 12/12hp (Hesitates) | fate 2
+[TACTICIAN] ends turn with: Varek cleave 2, Lys guard 2, Aldric heal 3
+Varek hits Glass Sentinel for 2
+Varek hits Cinder Scarab for 2
+Lys guards the party (+2 shield all)
+Aldric's prayer wards Varek (+3 shield)
+Candle Moth hits Glass Sentinel for 1
+Glass Sentinel burns for 1
+Glass Sentinel hits Aldric for 6 (2 of 8 blocked by shield)
+Cinder Scarab hesitates
+--- Round 2 ---
+>> STATE R2  heroes: Varek 29/29hp [cleave 2] chg 1/4, Lys 21/21hp [blood 7] chg 1/5, Aldric 17/23hp [guard 1] chg 1/5 | enemies: Glass Sentinel 40/44hp (Attack 7 -> Lys), Cinder Scarab 10/12hp (Sweep 3 -> ALL) | fate 2
+[TACTICIAN] ends turn with: Varek cleave 2, Lys blood 7, Aldric heal 4
+Varek hits Glass Sentinel for 2
+Varek hits Cinder Scarab for 2
+Lys (blood magic) hits Cinder Scarab for 7
+Lys pays 2 HP in blood
+Aldric heals Aldric for 4
+Candle Moth's die shows nothing this round.
+Glass Sentinel hits Lys for 7
+Cinder Scarab sweeps the whole party!
+Cinder Scarab hits Varek for 3
+Cinder Scarab hits Lys for 3
+Cinder Scarab hits Aldric for 3
+--- Round 3 ---
+>> STATE R3  heroes: Varek 26/29hp [guard 3] chg 2/4, Lys 9/21hp [guard 2] chg 2/5, Aldric 18/23hp [heal 4] chg 2/5 | enemies: Glass Sentinel 38/44hp (Attack 7 -> Aldric), Cinder Scarab 1/12hp (Attack 3 -> Lys) | fate 2
+[TACTICIAN] ends turn with: Varek guard 3, Lys guard 2, Aldric heal 4
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+4 shield all)
+Lys guards the party (+3 shield all)
+Aldric heals Lys for 4
+Candle Moth shields Lys (1)
+Glass Sentinel hits Aldric for 0 (7 of 7 blocked by shield)
+Cinder Scarab hits Lys for 0 (3 of 3 blocked by shield)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 26/29hp [guard 3] chg 4/4, Lys 13/21hp [fire 4] chg 4/5, Aldric 18/23hp [heal 3] chg 3/5 | enemies: Glass Sentinel 38/44hp (Attack 8 -> Lys), Cinder Scarab 1/12hp (Sweep 3 -> ALL) | fate 3
+[TACTICIAN] uses broken_oath (incoming 17, party missing 16 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[TACTICIAN] ends turn with: Varek guard 3, Lys fire 4, Aldric guard 3
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+4 shield all)
+Lys hits Cinder Scarab for 4
+Cinder Scarab falls!
+Aldric guards the party (+4 shield all)
+Candle Moth heals Lys for 1
+Glass Sentinel hits Varek for 0 (8 of 8 blocked by shield)
+--- Round 5 ---
+>> STATE R5  heroes: Varek 24/29hp [attack 3] chg 2/4, Lys 14/21hp [blood 7] chg 5/5, Aldric 18/23hp [guard 3] chg 5/5 | enemies: Glass Sentinel 38/44hp (Sweep 4 -> ALL) | fate 4
+[TACTICIAN] uses last_rite (incoming 12, party missing 17 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+* Fate twists Varek's die to GUARD 3 (-4 Fate)
+[TACTICIAN] spends Fate to twist Varek's die to guard 3
+[TACTICIAN] ends turn with: Varek guard 3, Lys blood 7, Aldric guard 3
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+4 shield all)
+Lys (blood magic) hits Glass Sentinel for 7
+Lys pays 2 HP in blood
+Aldric guards the party (+4 shield all)
+Candle Moth hits Glass Sentinel for 1
+Glass Sentinel burns for 1
+Glass Sentinel sweeps the whole party!
+Glass Sentinel hits Varek for 0 (4 of 4 blocked by shield)
+Glass Sentinel hits Lys for 0 (4 of 4 blocked by shield)
+Glass Sentinel hits Aldric for 0 (4 of 4 blocked by shield)
+--- Round 6 ---
+>> STATE R6  heroes: Varek 28/29hp [attack 2] chg 4/4, Lys 16/21hp [blood 7] chg 5/5, Aldric 20/23hp [heal 3] chg 2/5 | enemies: Glass Sentinel 29/44hp (Sweep 4 -> ALL) | fate 1
+[TACTICIAN] uses broken_oath (incoming 12, party missing 9 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[TACTICIAN] ends turn with: Varek heal 3, Lys blood 7, Aldric heal 4
+Combo: pair of HEAL - +1 each
+The combo feeds your Fate +1 Fate
+Varek heals Lys for 4
+Lys (blood magic) hits Glass Sentinel for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 3
+Aldric's prayer wards Lys (+2 shield)
+Candle Moth's die shows nothing this round.
+Glass Sentinel sweeps the whole party!
+Glass Sentinel hits Varek for 0 (4 of 4 blocked by shield)
+Glass Sentinel hits Lys for 2 (2 of 4 blocked by shield)
+Glass Sentinel hits Aldric for 4
+--- Round 7 ---
+>> STATE R7  heroes: Varek 26/29hp [attack 3] chg 2/4, Lys 19/21hp [blood 7] chg 5/5, Aldric 16/23hp [guard 3] chg 4/5 | enemies: Glass Sentinel 22/44hp (Sweep 4 -> ALL) | fate 2
+[TACTICIAN] ends turn with: Varek guard 3, Lys blood 7, Aldric guard 3
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+4 shield all)
+Lys (blood magic) hits Glass Sentinel for 7
+Lys pays 2 HP in blood
+Aldric guards the party (+4 shield all)
+Candle Moth heals Aldric for 1
+Glass Sentinel sweeps the whole party!
+Glass Sentinel hits Varek for 0 (4 of 4 blocked by shield)
+Glass Sentinel hits Lys for 0 (4 of 4 blocked by shield)
+Glass Sentinel hits Aldric for 0 (4 of 4 blocked by shield)
+--- Round 8 ---
+>> STATE R8  heroes: Varek 26/29hp [attack 3] chg 4/4, Lys 17/21hp [shield 5] chg 5/5, Aldric 17/23hp [guard 1] chg 5/5 | enemies: Glass Sentinel 15/44hp (Shield 6) | fate 3
+[TACTICIAN] uses last_rite (incoming 0, party missing 13 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[TACTICIAN] ends turn with: Varek attack 3, Lys fire 4, Aldric heal 3
+Varek hits Glass Sentinel for 3
+Lys hits Glass Sentinel for 4
+Glass Sentinel is burning (2)
+Aldric heals Aldric for 3
+Candle Moth's die shows nothing this round.
+Glass Sentinel burns for 2
+Glass Sentinel shields itself (6)
+--- Round 9 ---
+>> STATE R9  heroes: Varek 29/29hp [attack 3] chg 4/4, Lys 21/21hp [fire 4] chg 5/5, Aldric 22/23hp [heal 4] chg 1/5 | enemies: Glass Sentinel 6/44hp shield 6 (Sweep 4 -> ALL) | fate 3
+[TACTICIAN] uses broken_oath (incoming 12, party missing 1 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[TACTICIAN] ends turn with: Varek shield 3, Lys fire 4, Aldric guard 1
+Varek raises a shield (3)
+Lys hits Glass Sentinel for 0 (4 of 4 blocked by shield)
+Glass Sentinel is burning (3)
+Aldric guards the party (+1 shield all)
+Candle Moth shields Varek (1)
+Glass Sentinel burns for 3
+Glass Sentinel sweeps the whole party!
+Glass Sentinel hits Varek for 0 (4 of 4 blocked by shield)
+Glass Sentinel hits Lys for 3 (1 of 4 blocked by shield)
+Glass Sentinel hits Aldric for 3 (1 of 4 blocked by shield)
+--- Round 10 ---
+>> STATE R10  heroes: Varek 27/29hp [attack 2] chg 1/4, Lys 18/21hp [shield 5] chg 5/5, Aldric 19/23hp [guard 3] chg 2/5 | enemies: Glass Sentinel 3/44hp (Sweep 4 -> ALL) | fate 3
+[TACTICIAN] uses hollow_flame (incoming 12, party missing 9 HP)
+* Lys uses Hollow Flame!
+Lys hits Glass Sentinel for 4
+Glass Sentinel falls!
+The flame feeds on Lys (-3 HP)
+VICTORY!
+[TACTICIAN] carves: Lys: FIRE 4 -> FIRE 5
+Carved: Lys: FIRE 4 -> FIRE 5
+[TACTICIAN] moves 4 -> tile 34 (event). Options: ["rest", "event"]
+[TACTICIAN] event 'The Ash Prophet': picks "Listen (+2 Fate, a random hero loses 2 max HP)."
+Fate +1 Fate
+Fate Fate overflows: +1 free reroll next round
++2 Fate. Lys's max HP is now 19.
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+Fate bends the road (-1 Fate)
+[TACTICIAN] rerolls movement with Fate (options were bad)
+[TACTICIAN] moves 4 -> tile 35 (rest). Options: ["rest", "rest"]
+The last campfire warms you (+30% HP).
+[TACTICIAN] rests: carve (party HP 100%)
+[TACTICIAN] carves: Varek: ATTACK 2 -> ATTACK 3
+Carved: Varek: ATTACK 2 -> ATTACK 3
+[TACTICIAN] moves 1 -> tile 36 (boss). Options: ["boss", "boss"]
+== BOSS ==
+--- Round 1 ---
+>> STATE R1  heroes: Varek 29/29hp [shield 3] chg 0/4, Lys 19/19hp [blood 7] chg 0/5, Aldric 23/23hp [heal 3] chg 0/5 | enemies: The Glass Pilgrim 83/83hp (Shield 6) | fate 2
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits The Glass Pilgrim for 3
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 2
+Aldric's prayer wards Lys (+1 shield)
+Candle Moth heals Varek for 1
+The Glass Pilgrim shields itself (6)
+--- Round 2 ---
+>> STATE R2  heroes: Varek 29/29hp [heal 3] chg 1/4, Lys 19/19hp [blood 7] chg 1/5, Aldric 23/23hp [heal 4] chg 1/5 | enemies: The Glass Pilgrim 73/83hp shield 6 (Attack 8 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 7, Aldric guard 1
+Varek hits The Glass Pilgrim for 0 (3 of 3 blocked by shield)
+Lys (blood magic) hits The Glass Pilgrim for 4 (3 of 7 blocked by shield)
+Lys pays 2 HP in blood
+Aldric guards the party (+1 shield all)
+Candle Moth heals Lys for 1
+The Glass Pilgrim hits Aldric for 7 (1 of 8 blocked by shield)
+--- Round 3 ---
+>> STATE R3  heroes: Varek 29/29hp [cleave 2] chg 2/4, Lys 18/19hp [blood 7] chg 2/5, Aldric 16/23hp [heal 3] chg 2/5 | enemies: The Glass Pilgrim 69/83hp (Attack 8 -> Aldric) | fate 2
+[TACTICIAN] ends turn with: Varek guard 3, Lys blood 7, Aldric heal 4
+Varek guards the party (+3 shield all)
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric heals Aldric for 4
+Candle Moth heals Lys for 1
+The Glass Pilgrim hits Aldric for 5 (3 of 8 blocked by shield)
+--- Round 4 ---
+>> STATE R4  heroes: Varek 29/29hp [guard 3] chg 3/4, Lys 17/19hp [blood 7] chg 3/5, Aldric 15/23hp [heal 3] chg 3/5 | enemies: The Glass Pilgrim 62/83hp (Attack 8 -> Lys) | fate 2
+[TACTICIAN] ends turn with: Varek guard 3, Lys blood 7, Aldric guard 3
+Combo: pair of GUARD - +1 each
+The combo feeds your Fate +1 Fate
+Varek guards the party (+4 shield all)
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric guards the party (+4 shield all)
+Candle Moth's die shows nothing this round.
+The Glass Pilgrim hits Lys for 0 (8 of 8 blocked by shield)
+--- Round 5 ---
+>> STATE R5  heroes: Varek 29/29hp [attack 3] chg 4/4, Lys 15/19hp [blood 7] chg 4/5, Aldric 15/23hp [guard 1] chg 5/5 | enemies: The Glass Pilgrim 55/83hp (Heal 5) | fate 3
+[TACTICIAN] uses last_rite (incoming 0, party missing 12 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[TACTICIAN] ends turn with: Varek attack 3, Lys blood 7, Aldric heal 3
+Varek hits The Glass Pilgrim for 3
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric heals Aldric for 3
+Candle Moth hits The Glass Pilgrim for 1
+The Glass Pilgrim burns for 1
+The Glass Pilgrim heals The Glass Pilgrim for 5
+--- Round 6 ---
+>> STATE R6  heroes: Varek 29/29hp [cleave 2] chg 4/4, Lys 17/19hp [blood 7] chg 5/5, Aldric 20/23hp [heal 3] chg 1/5 | enemies: The Glass Pilgrim 48/83hp (Sweep 5 -> ALL) | fate 3
+[TACTICIAN] uses broken_oath (incoming 15, party missing 5 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[TACTICIAN] uses hollow_flame (incoming 15, party missing 7 HP)
+* Lys uses Hollow Flame!
+Lys hits The Glass Pilgrim for 4
+The flame feeds on Lys (-3 HP)
+[TACTICIAN] ends turn with: Varek guard 3, Lys blood 7, Aldric heal 4
+Varek guards the party (+3 shield all)
+Lys (blood magic) hits The Glass Pilgrim for 7
+!! Cracks race across the Glass Pilgrim. The fallen sun's light pours out of him, white and terrible.
+Lys pays 2 HP in blood
+Aldric heals Lys for 4
+Candle Moth heals Lys for 1
+The Glass Pilgrim burns for 1
+The Glass Pilgrim sweeps the whole party!
+The Glass Pilgrim hits Varek for 0 (5 of 5 blocked by shield)
+The Glass Pilgrim hits Lys for 2 (3 of 5 blocked by shield)
+The Glass Pilgrim hits Aldric for 2 (3 of 5 blocked by shield)
+--- Round 7 ---
+>> STATE R7  heroes: Varek 27/29hp [attack 3] chg 1/4, Lys 15/19hp [guard 2] chg 1/5, Aldric 18/23hp [heal 3] chg 2/5 | enemies: The Glass Pilgrim 36/83hp (Sweep 6 -> ALL) | fate 3
+[TACTICIAN] ends turn with: Varek guard 3, Lys fire 5, Aldric heal 4
+Varek guards the party (+3 shield all)
+Lys hits The Glass Pilgrim for 5
+The Glass Pilgrim is burning (2)
+Aldric heals Aldric for 4
+Candle Moth hits The Glass Pilgrim for 1
+The Glass Pilgrim burns for 3
+The Glass Pilgrim sweeps the whole party!
+The Glass Pilgrim hits Varek for 3 (3 of 6 blocked by shield)
+The Glass Pilgrim hits Lys for 3 (3 of 6 blocked by shield)
+The Glass Pilgrim hits Aldric for 3 (3 of 6 blocked by shield)
+--- Round 8 ---
+>> STATE R8  heroes: Varek 24/29hp [heal 3] chg 2/4, Lys 12/19hp [blood 6] chg 2/5, Aldric 19/23hp [heal 4] chg 3/5 | enemies: The Glass Pilgrim 27/83hp (Sweep 6 -> ALL) | fate 3
+[TACTICIAN] ends turn with: Varek heal 3, Lys blood 7, Aldric heal 4
+Combo: pair of HEAL - +1 each
+The combo feeds your Fate +1 Fate
+Varek heals Lys for 4
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric heals Lys for 5
+Candle Moth's die shows nothing this round.
+The Glass Pilgrim burns for 2
+The Glass Pilgrim sweeps the whole party!
+The Glass Pilgrim hits Varek for 6
+The Glass Pilgrim hits Lys for 6
+The Glass Pilgrim hits Aldric for 6
+--- Round 9 ---
+>> STATE R9  heroes: Varek 18/29hp [attack 3] chg 4/4, Lys 13/19hp [blood 7] chg 3/5, Aldric 13/23hp [heal 3] chg 5/5 | enemies: The Glass Pilgrim 18/83hp (Attack 10 -> Aldric) | fate 4
+[TACTICIAN] uses broken_oath (incoming 10, party missing 27 HP)
+* Varek uses Broken Oath!
+Varek gains 5 shield and draws every single-target attack to himself
+The broken oath bleeds Varek (-2 HP)
+[TACTICIAN] uses last_rite (incoming 10, party missing 29 HP)
+* Aldric uses Last Rite!
+All allies heal 4
+Aldric's faith is paid in blood (-2 HP)
+[TACTICIAN] ends turn with: Varek heal 3, Lys blood 7, Aldric heal 4
+Combo: pair of HEAL - +1 each
+The combo feeds your Fate +1 Fate
+Varek heals Aldric for 4
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric heals Varek for 5
+Candle Moth heals Lys for 1
+The Glass Pilgrim burns for 1
+The Glass Pilgrim hits Varek for 5 (5 of 10 blocked by shield)
+--- Round 10 ---
+>> STATE R10  heroes: Varek 20/29hp [guard 3] chg 2/4, Lys 16/19hp [shield 5] chg 4/5, Aldric 19/23hp [guard 1] chg 2/5 | enemies: The Glass Pilgrim 10/83hp (Sweep 7 -> ALL) | fate 5
+[TACTICIAN] ends turn with: Varek guard 3, Lys blood 7, Aldric heal 4
+Varek guards the party (+3 shield all)
+Lys (blood magic) hits The Glass Pilgrim for 7
+Lys pays 2 HP in blood
+Aldric heals Varek for 4
+Candle Moth hits The Glass Pilgrim for 1
+The Glass Pilgrim burns for 1
+The Glass Pilgrim sweeps the whole party!
+The Glass Pilgrim hits Varek for 4 (3 of 7 blocked by shield)
+The Glass Pilgrim hits Lys for 4 (3 of 7 blocked by shield)
+The Glass Pilgrim hits Aldric for 4 (3 of 7 blocked by shield)
+--- Round 11 ---
+>> STATE R11  heroes: Varek 20/29hp [shield 3] chg 3/4, Lys 10/19hp [blood 7] chg 5/5, Aldric 15/23hp [heal 3] chg 3/5 | enemies: The Glass Pilgrim 1/83hp (Attack 10 -> Aldric) | fate 5
+[TACTICIAN] uses hollow_flame (incoming 10, party missing 26 HP)
+* Lys uses Hollow Flame!
+Lys hits The Glass Pilgrim for 4
+The Glass Pilgrim falls!
+The flame feeds on Lys (-3 HP)
+!! He shatters into a thousand pieces of coloured glass. Each one holds a different sunrise.
+VICTORY!
+
+RESULT: VICTORY at tile 36/36

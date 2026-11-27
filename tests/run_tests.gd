@@ -65,6 +65,7 @@ func _init() -> void:
 	test_v37_fight_pacing()
 	test_v37_new_dungeons()
 	test_v37_dungeon_art()
+	test_v37_ash_desert()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1010,7 +1011,8 @@ func test_v32_translations() -> void:
 
 
 const _NOT_TEXT_KEYS := ["id", "type", "sprite", "element", "grade", "slot", "stat", "scope", "kind", "material",
-	"times", "color", "biome", "music", "tile", "icon", "bg", "background", "rarity", "mood", "strong", "effect", "goal", "phase", "group"]
+	"times", "color", "biome", "music", "tile", "icon", "bg", "background", "rarity", "mood", "strong", "effect", "goal", "phase", "group",
+	"file", "event_pool", "battle_scene", "region"]
 
 
 func _collect_untranslated(x: Variant, key: String, th: Dictionary, keep: Array, out: Array[String]) -> void:
@@ -1598,3 +1600,60 @@ func test_v37_dungeon_art() -> void:
 		seen[bg] = true
 	check(seen.size() >= 3, "three dungeons have board art")
 	check(not GameData.load_region().has("background"), "the Hollow Road keeps its map")
+
+
+## 3.7: region 2, the Ash Desert: its own board, monsters, boss, events and shop; opens after the first road win.
+func test_v37_ash_desert() -> void:
+	var p := _fresh_profile("test_v37_desert")
+	check(not p.road_unlocked("ash_desert") and not p.set_road("ash_desert"), "the Ash Desert is locked before a road win")
+	check(not p.run_options().has("region") and p.current_road()["id"] == "hollow_road", "a new player walks the Hollow Road")
+	p.stats["wins"] = 1
+	p.curse = 2
+	check(p.set_road("ash_desert") and p.current_road()["id"] == "ash_desert", "after a road win the desert can be chosen")
+	var o := p.run_options()
+	check(o["region"] == "res://data/region2.json" and o["curse"] == 0, "desert options: its region, no Curse")
+	check(p.road_boss()["id"] == "glass_pilgrim", "town shows the desert's boss")
+	var copy := Profile.new(p.path)
+	copy.load_profile()
+	check(copy.road == "ash_desert", "the chosen road is saved")
+	var old := Profile.migrate({"version": 5, "stats": {"wins": 3}})
+	check(not old.has("road"), "old saves need no road field (the loader defaults to the Hollow Road)")
+	var run := Run.new(3720, o, p.party)
+	check(run.region["id"] == "ash_desert" and run.board.size() == 37 and run.boss_id == "glass_pilgrim", "a 36-tile desert board with the Glass Pilgrim")
+	check(run.events.size() == 10 and run.events.all(func(e): return e.get("region", "") == "ash_desert"), "the desert has its own 10 events")
+	check(not Run.new(3721).events.any(func(e): return e.has("region")), "desert events never appear on the Hollow Road")
+	var monsters := GameData.load_monsters()
+	var lore: Dictionary = GameData.load_json("res://data/bestiary.json")["lore"]
+	for id in ["ash_jackal", "salt_mummy", "cinder_scarab", "dune_wraith", "glass_sentinel", "glass_pilgrim"]:
+		check(monsters.has(id) and lore.has(id) and ResourceLoader.exists("res://assets/sprites/%s.png" % id), "%s exists with lore and a sprite" % id)
+	var boss: Dictionary = monsters["glass_pilgrim"]
+	check(boss.get("boss", false) and boss.has("phase2") and boss.get("death_line", "") != "", "the Glass Pilgrim is a boss with phase 2 and a death line")
+	for bg in ["map_ash_desert", "battle_desert", "battle_glass"]:
+		check(ResourceLoader.exists("res://assets/backgrounds/%s.png" % bg), "desert art: %s" % bg)
+	var saved = Run.from_dict(run.to_dict())
+	check(saved.region["id"] == "ash_desert" and saved.board.size() == 37, "a saved desert journey loads as the desert")
+	# Bots can play it to the end, and a finished journey pays the desert's +25% Soul Embers.
+	var PlayerBot = load("res://tools/bots/player_bot.gd")
+	var bot = PlayerBot.new("tactician", 3720)
+	var steps := 0
+	while not run.is_over() and steps < 3000:
+		bot.play_run_step(run)
+		steps += 1
+	check(run.is_over(), "a bot finishes a desert journey")
+	var plain := _fresh_profile("test_v37_desert_plain")
+	plain.time_of_day = p.time_of_day
+	var road_pay: int = plain.record_run(_clone_as_road(run))["embers"]
+	var w0 := p.stat("wins_ash_desert")
+	var desert_pay: int = p.record_run(run)["embers"]
+	check(desert_pay > road_pay, "the desert pays more Soul Embers (%d vs %d)" % [desert_pay, road_pay])
+	check(p.stat("wins_ash_desert") == w0 + (1 if run.phase == "victory" else 0), "desert wins are counted")
+
+
+## The same finished run, as if it had been on the Hollow Road (for comparing rewards).
+func _clone_as_road(run: Run) -> Run:
+	var r := Run.from_dict(run.to_dict())
+	r.phase = run.phase
+	r.pos = run.pos
+	r.stats = run.stats.duplicate(true)
+	r.region = GameData.load_region()
+	return r

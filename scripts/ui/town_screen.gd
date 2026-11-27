@@ -388,7 +388,8 @@ func _refresh() -> void:
 	if profile.max_curse() > 0 and profile.curse == 0:
 		_result_box.add_child(UI.wrap_label(tr("The Bishop has fallen. The road can be walked under a Curse now: harder, but +25% Soul Embers per level (Party tab)."), 13, UI.BLOOD, 560))
 	var saved := Profile.has_saved_run()
-	_go.text = tr("Continue your journey") if saved else (tr("Set out on the Hollow Road") if profile.party.size() == 3 else tr("Choose 3 heroes to set out"))
+	var set_out := tr("Set out into the Ash Desert") if profile.current_road()["id"] == "ash_desert" else tr("Set out on the Hollow Road")
+	_go.text = tr("Continue your journey") if saved else (set_out if profile.party.size() == 3 else tr("Choose 3 heroes to set out"))
 	_go.disabled = not saved and profile.party.size() != 3
 	_refresh_unlocks()
 	_refresh_party()
@@ -418,6 +419,21 @@ func _refresh_time_box() -> void:
 		var ready := profile.road_bonus_ready()
 		info.add_child(UI.wrap_label((tr("Today's first road boss pays +%d Soul Embers, +%d Grave Die.") % [int(daily.get("embers", 0)), int(daily.get("dice", 0))])
 			if ready else tr("Today's road-boss bonus is taken. It returns at Dawn."), 12, Color("#d08a6a") if ready else UI.DIM, 380))
+	# 3.7: after the first road win, choose the journey: the Hollow Road or the Ash Desert.
+	if profile.road_unlocked("ash_desert") and not Profile.has_saved_run():
+		var roads_row := HBoxContainer.new()
+		roads_row.add_theme_constant_override("separation", 6)
+		roads_row.add_child(UI.label(tr("Journey:"), 12, UI.DIM))
+		for r in profile.roads():
+			var rid: String = r["id"]
+			var chosen: bool = profile.current_road()["id"] == rid
+			var rb := UI.button(("> " if chosen else "") + tr(r["name"]), func(): profile.set_road(rid); Sfx.play(self, "fate"); _refresh(), 12)
+			rb.disabled = chosen or not profile.road_unlocked(rid)
+			if chosen:
+				rb.add_theme_color_override("font_disabled_color", UI.GOLD)  # the chosen road reads as selected, not greyed out
+			rb.tooltip_text = tr(String(r.get("desc", "")))
+			roads_row.add_child(rb)
+		info.add_child(roads_row)
 	_time_box.add_child(info)
 	var next: String = Profile.TIMES[(Profile.TIMES.find(t) + 1) % Profile.TIMES.size()]
 	var wait := UI.button(tr("Wait until %s") % tr(Profile.TIME_NAMES[next]), func(): profile.advance_time(); Sfx.play(self, "fate"); _refresh(), 14)

@@ -38,6 +38,7 @@ var bestiary_claimed := {}        # monster id -> how many Bestiary milestones a
 var bestiary: Dictionary          # data/bestiary.json
 var star_rules: Dictionary
 var curse := 0                    # chosen Curse level (opt-in difficulty, unlocked by wins)
+var road := "hollow_road"         # 3.7: which journey "Set out" starts (town.json "roads"); old saves default to the Hollow Road
 const MAX_CURSE := 4
 const CURSE_EMBER_BONUS := 0.25
 var summon: Dictionary
@@ -152,6 +153,7 @@ func load_profile() -> void:
 	equipped = d.get("equipped", {})
 	next_uid = d.get("next_uid", 1)
 	bestiary_claimed = d.get("bestiary_claimed", {})
+	road = String(d.get("road", "hollow_road"))
 
 
 func save() -> void:
@@ -161,7 +163,7 @@ func save() -> void:
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
 		"star_dust": star_dust, "stars": stars, "npc_done": npc_done, "isle_pet": isle_pet, "npc_active": npc_active,
 		"materials": materials, "world_state": world_state, "gear": gear, "equipped": equipped, "next_uid": next_uid,
-		"bestiary_claimed": bestiary_claimed, "day": day, "road_bonus_day": road_bonus_day})
+		"bestiary_claimed": bestiary_claimed, "day": day, "road_bonus_day": road_bonus_day, "road": road})
 
 
 # ---------------------------------------------------------------- town
@@ -219,11 +221,13 @@ func record_run(run) -> Dictionary:
 		earned += int(e["victory"])
 	var run_curse := int(run.upgrades.get("curse", 0))
 	var night: bool = run.upgrades.get("time", "") == "night"
-	earned = int(earned * (1.0 + CURSE_EMBER_BONUS * run_curse + (0.4 if night else 0.0)))
+	var region_bonus := float(run.region.get("ember_bonus", 0.0))  # 3.7: the Ash Desert pays +25%
+	earned = int(earned * (1.0 + CURSE_EMBER_BONUS * run_curse + (0.4 if night else 0.0) + region_bonus))
 	if won:
 		stats["best_curse_won"] = max(stat("best_curse_won"), run_curse + 1) if stats.has("best_curse_won") else run_curse + 1
 	_add("runs", 1)
 	_add("wins", 1 if won else 0)
+	_add("wins_" + String(run.region.get("id", "hollow_road")), 1 if won else 0)
 	stats["best_tile"] = max(stat("best_tile"), run.pos)
 	_add("fate_twists", run.combat.twists)
 	for id in s.get("kills", {}):
@@ -289,9 +293,44 @@ func set_curse(level: int) -> void:
 	save()
 
 
+# ---------------------------------------------------------------- roads (3.7)
+# Journeys that "Set out" can start (town.json "roads"). The Ash Desert opens after the first road win.
+
+func roads() -> Array:
+	return town.get("roads", [])
+
+
+func road_unlocked(road_id: String) -> bool:
+	for r in roads():
+		if r["id"] == road_id:
+			return stat("wins") >= int(r.get("after_wins", 0))
+	return false
+
+
+## The road the next journey takes (falls back to the first road if the chosen one is locked or unknown).
+func current_road() -> Dictionary:
+	for r in roads():
+		if r["id"] == road and road_unlocked(road):
+			return r
+	return roads()[0] if not roads().is_empty() else {"id": "hollow_road", "file": "res://data/region1.json"}
+
+
+func set_road(road_id: String) -> bool:
+	if not road_unlocked(road_id):
+		return false
+	road = road_id
+	save()
+	return true
+
+
 func run_options() -> Dictionary:
 	var o := levels.duplicate()
 	o["curse"] = curse
+	var r := current_road()
+	if String(r.get("file", "res://data/region1.json")) != "res://data/region1.json":
+		o["region"] = r["file"]
+		if r.get("no_curse", false):
+			o["curse"] = 0  # the Ash Desert is hard enough on its own
 	o["owned_pets"] = owned_pets.duplicate()
 	o["time"] = time_name()
 	o["road_wins"] = stat("wins")  # 3.4: the second road boss appears only after the first win
@@ -900,7 +939,7 @@ func time_name() -> String:
 ## The boss that would guard the Hollow Road if the player set out now (3.4: shown in town).
 func road_boss() -> Dictionary:
 	var Run = load("res://scripts/core/run.gd")
-	return Run.pick_road_boss(GameData.load_json("res://data/region1.json"), time_name(), stat("wins"))
+	return Run.pick_road_boss(GameData.load_json(String(current_road().get("file", "res://data/region1.json"))), time_name(), stat("wins"))
 
 
 func advance_time() -> void:

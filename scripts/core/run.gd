@@ -65,7 +65,9 @@ func _init(seed_value: int = -1, town_levels: Dictionary = {}, party: Array = []
 	# 3.5: an Isle dungeon is a short board with its own data file (upgrades["region"]); the road is region1.json.
 	region = GameData.load_json(String(upgrades.get("region", "res://data/region1.json")))
 	monster_defs = GameData.load_monsters()
-	events = GameData.load_json("res://data/events.json")
+	# 3.7: events with a "region" belong to that region's pool (region "event_pool"); the others are the road's.
+	var event_pool := String(region.get("event_pool", ""))
+	events = GameData.load_json("res://data/events.json").filter(func(e): return String(e.get("region", "")) == event_pool)
 	var defs: Array = GameData.load_heroes()
 	if party.is_empty():
 		defs = defs.filter(func(d): return d.get("starter", false))

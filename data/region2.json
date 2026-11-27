@@ -1,0 +1,213 @@
+{
+	"id": "ash_desert",
+	"name": "The Ash Desert",
+	"event_pool": "ash_desert",
+	"background": "map_ash_desert",
+	"battle_scene": "battle_desert",
+	"no_curse": true,
+	"ember_bonus": 0.25,
+	"board_length": 36,
+	"tile_weights": {
+		"early": {
+			"fight": 48,
+			"event": 27,
+			"chest": 15,
+			"rest": 5,
+			"shop": 5
+		},
+		"mid": {
+			"fight": 36,
+			"elite": 12,
+			"event": 24,
+			"chest": 10,
+			"rest": 9,
+			"shop": 9
+		},
+		"late": {
+			"fight": 34,
+			"elite": 15,
+			"event": 19,
+			"chest": 8,
+			"rest": 12,
+			"shop": 12
+		}
+	},
+	"encounters": {
+		"early": [
+			[
+				"ash_jackal",
+				"ash_jackal"
+			],
+			[
+				"cinder_scarab",
+				"cinder_scarab",
+				"cinder_scarab"
+			],
+			[
+				"salt_mummy",
+				"cinder_scarab"
+			],
+			[
+				"dune_wraith",
+				"ash_jackal"
+			]
+		],
+		"mid": [
+			[
+				"ash_jackal",
+				"ash_jackal",
+				"dune_wraith"
+			],
+			[
+				"salt_mummy",
+				"salt_mummy"
+			],
+			[
+				"dune_wraith",
+				"cinder_scarab",
+				"cinder_scarab"
+			],
+			[
+				"salt_mummy",
+				"ash_jackal",
+				"cinder_scarab"
+			]
+		],
+		"late": [
+			[
+				"salt_mummy",
+				"dune_wraith",
+				"ash_jackal"
+			],
+			[
+				"dune_wraith",
+				"dune_wraith",
+				"cinder_scarab"
+			],
+			[
+				"glass_sentinel",
+				"cinder_scarab"
+			]
+		],
+		"elite": [
+			[
+				"glass_sentinel",
+				"ash_jackal"
+			],
+			[
+				"salt_mummy",
+				"salt_mummy",
+				"dune_wraith"
+			]
+		],
+		"boss": [
+			[
+				"glass_pilgrim"
+			]
+		]
+	},
+	"gold": {
+		"fight": [
+			9,
+			15
+		],
+		"elite": [
+			24,
+			32
+		],
+		"chest": [
+			16,
+			32
+		]
+	},
+	"shop": [
+		{
+			"id": "tonic",
+			"name": "Salt Water",
+			"desc": "Heal all heroes 8 HP.",
+			"cost": 20
+		},
+		{
+			"id": "carving",
+			"name": "Glass Carver",
+			"desc": "Carve one of your dice: pick from the offered carvings.",
+			"cost": 35
+		},
+		{
+			"id": "weapon",
+			"name": "Caravan Arms",
+			"desc": "Choose 1 of 2 weapons.",
+			"cost": 40
+		},
+		{
+			"id": "fate_shard",
+			"name": "Sunstone",
+			"desc": "+3 Fate.",
+			"cost": 15
+		},
+		{
+			"id": "resurrect",
+			"name": "Embalmer's Oil",
+			"desc": "Revive all fallen heroes at half HP.",
+			"cost": 25
+		}
+	],
+	"shop_name": "The Salt Caravan",
+	"rest_heal_percent": 30,
+	"revive_after_fight_percent": 40,
+	"fixed_tiles": {
+		"11": "rest",
+		"18": "shop",
+		"26": "rest"
+	},
+	"gate_tiles": [
+		18,
+		26
+	],
+	"scaling": {
+		"early": {
+			"hp": 1.3,
+			"damage": 1
+		},
+		"mid": {
+			"hp": 1.4,
+			"damage": 1
+		},
+		"late": {
+			"hp": 1.45,
+			"damage": 1
+		},
+		"elite": {
+			"hp": 1.2,
+			"damage": 1
+		},
+		"boss": {
+			"hp": 1.25,
+			"damage": 1
+		}
+	},
+	"elite_heal_percent": 35,
+	"night": {
+		"hp": 1.1,
+		"damage": 0
+	},
+	"bosses": [
+		{
+			"id": "glass_pilgrim",
+			"times": [
+				"dawn",
+				"day",
+				"dusk",
+				"night"
+			],
+			"after_wins": 0,
+			"lair": "The Fallen Sun",
+			"scene": "battle_glass",
+			"omen": "Heat shimmers over the dunes. The Glass Pilgrim walks the Ash Desert.",
+			"gate_text": "The sand turns to glass under your boots. At the bottom of the crater, the fallen sun still smoulders, and a man of glass kneels before it.",
+			"victory_title": "The Pilgrim shatters",
+			"victory_text": "Coloured glass rains on the crater. In the cooling heart of the fallen sun, one shard of the Dice of Fate is still warm.",
+			"defeat_text": "The light takes you. The caravan finds you at dusk, blistered and alive, and carries you home without a word."
+		}
+	]
+}
