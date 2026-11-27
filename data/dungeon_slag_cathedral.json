@@ -1,0 +1,202 @@
+{
+	"id": "slag_cathedral",
+	"kind": "dungeon",
+	"name": "The Slag Cathedral",
+	"country": "cindermaw",
+	"entrance": [
+		4,
+		-3
+	],
+	"desc": "A cathedral poured from molten iron by a cult that wanted its saint to stay warm forever. It never cooled. Neither did he.",
+	"board_length": 12,
+	"tile_weights": {
+		"early": {
+			"fight": 55,
+			"event": 25,
+			"chest": 20
+		},
+		"mid": {
+			"fight": 40,
+			"elite": 20,
+			"event": 20,
+			"chest": 10,
+			"shop": 10
+		},
+		"late": {
+			"fight": 40,
+			"elite": 20,
+			"event": 15,
+			"rest": 10,
+			"shop": 15
+		}
+	},
+	"encounters": {
+		"early": [
+			[
+				"cultist",
+				"lava_lizard"
+			],
+			[
+				"bone_hound",
+				"bone_hound",
+				"cultist"
+			],
+			[
+				"lava_lizard",
+				"lava_lizard"
+			]
+		],
+		"mid": [
+			[
+				"cultist",
+				"cultist",
+				"lava_lizard"
+			],
+			[
+				"grave_knight",
+				"cultist"
+			],
+			[
+				"lava_lizard",
+				"bone_hound",
+				"bone_hound"
+			]
+		],
+		"late": [
+			[
+				"grave_knight",
+				"lava_lizard"
+			],
+			[
+				"cultist",
+				"cultist",
+				"bone_hound"
+			],
+			[
+				"lava_lizard",
+				"lava_lizard",
+				"cultist"
+			]
+		],
+		"elite": [
+			[
+				"grave_knight",
+				"grave_knight"
+			],
+			[
+				"bone_colossus",
+				"cultist"
+			]
+		],
+		"boss": [
+			[
+				"slag_saint"
+			]
+		]
+	},
+	"gold": {
+		"fight": [
+			8,
+			14
+		],
+		"elite": [
+			22,
+			30
+		],
+		"chest": [
+			15,
+			30
+		]
+	},
+	"shop": [
+		{
+			"id": "tonic",
+			"name": "Bitter Tonic",
+			"desc": "Heal all heroes 8 HP.",
+			"cost": 20
+		},
+		{
+			"id": "carving",
+			"name": "Bone Carver",
+			"desc": "Carve one of your dice: pick from the offered carvings.",
+			"cost": 35
+		},
+		{
+			"id": "weapon",
+			"name": "Weapon Rack",
+			"desc": "Choose 1 of 2 weapons.",
+			"cost": 40
+		},
+		{
+			"id": "fate_shard",
+			"name": "Fate Shard",
+			"desc": "+3 Fate.",
+			"cost": 15
+		},
+		{
+			"id": "resurrect",
+			"name": "Grave Candle",
+			"desc": "Revive all fallen heroes at half HP.",
+			"cost": 25
+		}
+	],
+	"rest_heal_percent": 30,
+	"revive_after_fight_percent": 40,
+	"fixed_tiles": {
+		"6": "rest"
+	},
+	"gate_tiles": [],
+	"scaling": {
+		"early": {
+			"hp": 1.45,
+			"damage": 2
+		},
+		"mid": {
+			"hp": 1.6,
+			"damage": 2
+		},
+		"late": {
+			"hp": 1.7,
+			"damage": 2
+		},
+		"elite": {
+			"hp": 1.4,
+			"damage": 2
+		},
+		"boss": {
+			"hp": 1.25,
+			"damage": 2
+		}
+	},
+	"elite_heal_percent": 35,
+	"bosses": [
+		{
+			"id": "slag_saint",
+			"times": [
+				"dawn",
+				"day",
+				"dusk",
+				"night"
+			],
+			"after_wins": 0,
+			"lair": "The Pouring Nave",
+			"scene": "battle_boss",
+			"gate_text": "The floor is warm through your boots. At the altar, an iron saint turns his head, slowly, the way a ladle turns.",
+			"victory_title": "The Saint goes cold",
+			"victory_text": "The iron sets at last. In the slag at his feet, a fire ruby beats like a heart, and beside it a shard of the Dice of Fate.",
+			"defeat_text": "The heat closes over you. Someone drags you out by the ankles and leaves you on the black sand."
+		}
+	],
+	"reward": {
+		"materials": {
+			"fire_ruby": 3,
+			"obsidian": 6
+		},
+		"embers": 80,
+		"dust": 5
+	},
+	"night": {
+		"hp": 1.1,
+		"damage": 0
+	}
+}

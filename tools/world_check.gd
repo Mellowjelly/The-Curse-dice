@@ -26,8 +26,9 @@ func _init():
 	for ci in [0, 2]:
 		for style in ["newbie", "tactician"]:
 			print(_trip_economy(ci, style))
-	for style in ["newbie", "tactician"]:
-		print(_dungeon_check("sunken_abbey", style))
+	for id in ["sunken_abbey", "slag_cathedral", "marrow_vault"]:
+		for style in ["newbie", "tactician"]:
+			print(_dungeon_check(id, style))
 	quit()
 
 
@@ -35,7 +36,8 @@ func _init():
 func _dungeon_check(id: String, style: String) -> String:
 	const Run = preload("res://scripts/core/run.gd")
 	var out: Array[String] = []
-	for town in [{}, {"chapel": 2, "smithy": 1, "carver": 2, "fortune": 1, "kennel": 1}]:
+	for town in [{}, {"chapel": 2, "smithy": 1, "carver": 2, "fortune": 1, "kennel": 1},
+			{"chapel": 3, "smithy": 2, "carver": 2, "fortune": 1, "kennel": 1, "market": 2}]:
 		var wins := 0
 		var boss := 0
 		var n := 120
@@ -51,7 +53,7 @@ func _dungeon_check(id: String, style: String) -> String:
 				steps += 1
 			wins += int(run.phase == "victory")
 			boss += int(run.pos == run.board.size() - 1)
-		out.append("%s %d%% (reached the boss %d%%)" % ["starter town" if town.is_empty() else "mid town", wins * 100 / n, boss * 100 / n])
+		out.append("%s %d%% (reached the boss %d%%)" % [["starter town", "mid town", "full town"][0 if town.is_empty() else (1 if town.size() == 5 else 2)], wins * 100 / n, boss * 100 / n])
 	return "Dungeon %-13s %-9s: %s" % [id, style, ", ".join(out)]
 
 

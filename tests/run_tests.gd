@@ -63,6 +63,7 @@ func _init() -> void:
 	test_v35_pet_clarity()
 	test_v35_isle_dungeon()
 	test_v37_fight_pacing()
+	test_v37_new_dungeons()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1545,3 +1546,39 @@ func _night_elite_rounds(night: Dictionary, elite_hp: float) -> float:
 			guard += 1
 		rounds += run.combat.round_number
 	return float(rounds) / n
+
+
+## 3.7: two more Isle dungeons, in the tier 4 and tier 5 countries.
+func test_v37_new_dungeons() -> void:
+	var World = load("res://scripts/core/world.gd")
+	var w = World.new()
+	var bestiary: Dictionary = GameData.load_json("res://data/bestiary.json")["lore"]
+	var monsters := GameData.load_monsters()
+	var PlayerBot = load("res://tools/bots/player_bot.gd")
+	var p := _fresh_profile("test_v37_dungeons")
+	for want in [["slag_cathedral", 4, "slag_saint"], ["marrow_vault", 5, "tithe_taker"]]:
+		var id: String = want[0]
+		var found: Array = w.dungeons.filter(func(d): return d["id"] == id)
+		check(found.size() == 1, "%s has an entrance on the Isle" % id)
+		if found.is_empty():
+			continue
+		var c: Dictionary = w.countries[found[0]["country"]]
+		check(int(c["tier"]) == want[1], "%s is in a tier %d country" % [id, want[1]])
+		var run := Run.new(3710, p.dungeon_options(id))
+		check(run.is_dungeon() and run.board.size() == 13 and run.boss_id == want[2], "%s: a 12-tile board with %s at the end" % [id, want[2]])
+		var boss: Dictionary = monsters[want[2]]
+		check(boss.get("boss", false) and boss.has("phase2") and boss.get("death_line", "") != "" and boss.get("element", "") != "", "%s is a boss with phase 2, a death line and an element" % want[2])
+		check(bestiary.has(want[2]), "%s has a bestiary page" % want[2])
+		check(ResourceLoader.exists("res://assets/sprites/%s.png" % want[2]) and ResourceLoader.exists("res://assets/world/dungeon_%s.png" % id), "%s and its door have art" % id)
+		var reward: Dictionary = run.region["reward"]["materials"]
+		check(reward.has(c["rare"]["id"]) and reward.has(c["mineral"]["id"]), "%s pays the country's rare ore" % id)
+		for pool in run.region["encounters"]:
+			for enc in run.region["encounters"][pool]:
+				for mid in enc:
+					check(monsters.has(mid), "%s uses a known monster %s" % [id, mid])
+		var bot = PlayerBot.new("tactician", 3710)
+		var steps := 0
+		while not run.is_over() and steps < 3000:
+			bot.play_run_step(run)
+			steps += 1
+		check(run.is_over(), "a bot run of %s ends" % id)

@@ -331,7 +331,8 @@
 					"lava_lizard"
 				]
 			],
-			"boss": "cinder_drake"
+			"boss": "cinder_drake",
+			"dungeon": "slag_cathedral"
 		},
 		{
 			"id": "bonewastes",
@@ -384,7 +385,8 @@
 					"bone_hound"
 				]
 			],
-			"boss": "rotting_bishop"
+			"boss": "rotting_bishop",
+			"dungeon": "marrow_vault"
 		}
 	],
 	"nodes_per_country": 16,

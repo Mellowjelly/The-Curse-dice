@@ -1,0 +1,203 @@
+{
+	"id": "marrow_vault",
+	"kind": "dungeon",
+	"name": "The Marrow Vault",
+	"country": "bonewastes",
+	"entrance": [
+		-4,
+		4
+	],
+	"desc": "Every pilgrim who crossed the Wastes paid one bone at this door. The vault is full. The toll-keeper is still collecting.",
+	"board_length": 12,
+	"tile_weights": {
+		"early": {
+			"fight": 55,
+			"event": 25,
+			"chest": 20
+		},
+		"mid": {
+			"fight": 40,
+			"elite": 20,
+			"event": 20,
+			"chest": 10,
+			"shop": 10
+		},
+		"late": {
+			"fight": 40,
+			"elite": 20,
+			"event": 15,
+			"rest": 10,
+			"shop": 15
+		}
+	},
+	"encounters": {
+		"early": [
+			[
+				"bone_vulture",
+				"bone_hound"
+			],
+			[
+				"ghoul",
+				"ghoul",
+				"bone_vulture"
+			],
+			[
+				"bone_hound",
+				"bone_hound",
+				"plague_rat"
+			]
+		],
+		"mid": [
+			[
+				"grave_knight",
+				"bone_vulture"
+			],
+			[
+				"weeping_nun",
+				"bone_hound",
+				"bone_hound"
+			],
+			[
+				"bone_vulture",
+				"bone_vulture",
+				"ghoul"
+			]
+		],
+		"late": [
+			[
+				"grave_knight",
+				"weeping_nun"
+			],
+			[
+				"bone_vulture",
+				"bone_vulture",
+				"bone_hound"
+			],
+			[
+				"grave_knight",
+				"ghoul",
+				"plague_rat"
+			]
+		],
+		"elite": [
+			[
+				"bone_colossus",
+				"bone_vulture"
+			],
+			[
+				"grave_knight",
+				"grave_knight"
+			]
+		],
+		"boss": [
+			[
+				"tithe_taker"
+			]
+		]
+	},
+	"gold": {
+		"fight": [
+			8,
+			14
+		],
+		"elite": [
+			22,
+			30
+		],
+		"chest": [
+			15,
+			30
+		]
+	},
+	"shop": [
+		{
+			"id": "tonic",
+			"name": "Bitter Tonic",
+			"desc": "Heal all heroes 8 HP.",
+			"cost": 20
+		},
+		{
+			"id": "carving",
+			"name": "Bone Carver",
+			"desc": "Carve one of your dice: pick from the offered carvings.",
+			"cost": 35
+		},
+		{
+			"id": "weapon",
+			"name": "Weapon Rack",
+			"desc": "Choose 1 of 2 weapons.",
+			"cost": 40
+		},
+		{
+			"id": "fate_shard",
+			"name": "Fate Shard",
+			"desc": "+3 Fate.",
+			"cost": 15
+		},
+		{
+			"id": "resurrect",
+			"name": "Grave Candle",
+			"desc": "Revive all fallen heroes at half HP.",
+			"cost": 25
+		}
+	],
+	"rest_heal_percent": 30,
+	"revive_after_fight_percent": 40,
+	"fixed_tiles": {
+		"6": "rest"
+	},
+	"gate_tiles": [],
+	"scaling": {
+		"early": {
+			"hp": 1.6,
+			"damage": 2
+		},
+		"mid": {
+			"hp": 1.75,
+			"damage": 2
+		},
+		"late": {
+			"hp": 1.85,
+			"damage": 2
+		},
+		"elite": {
+			"hp": 1.45,
+			"damage": 2
+		},
+		"boss": {
+			"hp": 1.3,
+			"damage": 1
+		}
+	},
+	"elite_heal_percent": 35,
+	"bosses": [
+		{
+			"id": "tithe_taker",
+			"times": [
+				"dawn",
+				"day",
+				"dusk",
+				"night"
+			],
+			"after_wins": 0,
+			"lair": "The Toll Chamber",
+			"scene": "battle_late",
+			"gate_text": "Shelves of bones, each one labelled in a careful hand. At the far end, a tall shape is writing your names in a ledger.",
+			"victory_title": "The tithe is returned",
+			"victory_text": "The ledger burns. The borrowed bones climb down from their shelves and walk home, one by one. Under the toll-stone, a Fate Fragment glows.",
+			"defeat_text": "He takes his tithe from you: one bone each, neatly. You wake at the edge of the Wastes, lighter."
+		}
+	],
+	"reward": {
+		"materials": {
+			"fate_fragment": 3,
+			"soulstone": 6
+		},
+		"embers": 100,
+		"dust": 6
+	},
+	"night": {
+		"hp": 1.1,
+		"damage": 0
+	}
+}

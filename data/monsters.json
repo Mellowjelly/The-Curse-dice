@@ -400,5 +400,53 @@
 		]},
 		"death_line": "He sinks without a sound. For the first time in a hundred years, the bell is still.",
 		"element": "water"
+	},
+	{
+		"id": "slag_saint",
+		"name": "The Slag Saint",
+		"hp": 60,
+		"boss": true,
+		"faces": [
+			{ "type": "attack", "value": 8 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "shield", "value": 7 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "heal", "value": 5 },
+			{ "type": "sweep", "value": 5 }
+		],
+		"phase2": {"at": 0.5, "text": "The Slag Saint's iron skin splits. Inside, the fire was praying all along.", "faces": [
+			{ "type": "sweep", "value": 6 },
+			{ "type": "attack", "value": 10 },
+			{ "type": "attack", "value": 11 },
+			{ "type": "sweep", "value": 5 },
+			{ "type": "shield", "value": 6 },
+			{ "type": "attack", "value": 9 }
+		]},
+		"death_line": "The saint slumps, and cools, and is only a statue again.",
+		"element": "fire"
+	},
+	{
+		"id": "tithe_taker",
+		"name": "The Tithe-Taker",
+		"hp": 64,
+		"boss": true,
+		"faces": [
+			{ "type": "attack", "value": 8 },
+			{ "type": "sweep", "value": 4 },
+			{ "type": "heal", "value": 5 },
+			{ "type": "attack", "value": 9 },
+			{ "type": "shield", "value": 7 },
+			{ "type": "sweep", "value": 4 }
+		],
+		"phase2": {"at": 0.5, "text": "The Tithe-Taker spends his tithe: a thousand borrowed bones climb onto him like armour.", "faces": [
+			{ "type": "attack", "value": 10 },
+			{ "type": "sweep", "value": 5 },
+			{ "type": "shield", "value": 7 },
+			{ "type": "attack", "value": 11 },
+			{ "type": "sweep", "value": 5 },
+			{ "type": "attack", "value": 9 }
+		]},
+		"death_line": "The borrowed bones fall away from him. Under them there was almost nothing at all.",
+		"element": "dark"
 	}
 ]

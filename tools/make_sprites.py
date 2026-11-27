@@ -620,6 +620,8 @@ BOSSES = {
     "pale_matriarch": (lambda: dire_wolf((200, 214, 230), (130, 150, 180), (120, 200, 255)), lambda r, g, b: (r, g, b + 10)),
     "cinder_drake": (lava_lizard, lambda r, g, b: (r + 40, g // 2, b // 3)),
     "drowned_abbot": (weeping_nun, lambda r, g, b: (r // 2, g + 30, b + 70)),           # 3.5: drowned, sea-green
+    "slag_saint": (grave_knight, lambda r, g, b: (r + 90, g // 2 + 20, b // 4)),        # 3.7: iron saint, still glowing
+    "tithe_taker": (bone_colossus, lambda r, g, b: (r * 2 // 3, g * 3 // 5, b * 3 // 4 + 10)),  # 3.7: ledger-grey bones, a little violet
 }
 
 

@@ -196,7 +196,9 @@ func _build_world() -> void:
 	# 3.5: dungeon entrances
 	for d in world.dungeons:
 		var door := Sprite2D.new()
-		door.texture = load("res://assets/world/dungeon_entrance.png")
+		# 3.7: each dungeon may have its own door art (assets/world/dungeon_<id>.png); the Abbey uses the first door.
+		var door_art := "res://assets/world/dungeon_%s.png" % d["id"]
+		door.texture = load(door_art if ResourceLoader.exists(door_art) else "res://assets/world/dungeon_entrance.png")
 		door.offset = Vector2(0, -28)
 		door.position = _ground.map_to_local(d["cell"])
 		var sign_label := Label.new()
@@ -204,8 +206,11 @@ func _build_world() -> void:
 		sign_label.add_theme_font_size_override("font_size", 8)
 		sign_label.add_theme_color_override("font_color", Color("#7fd0c0"))
 		sign_label.add_theme_color_override("font_shadow_color", Color.BLACK)
-		sign_label.position = Vector2(-50, -72)
-		sign_label.size = Vector2(100, 10)
+		sign_label.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.07))
+		sign_label.add_theme_constant_override("font_outline_size", 3)  # 3.7: readable on pale ground (Bonewastes)
+		sign_label.z_index = 2  # above the veins and props behind the door
+		sign_label.position = Vector2(-60, -74)
+		sign_label.size = Vector2(120, 10)
 		sign_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		door.add_child(sign_label)
 		_objects.add_child(door)

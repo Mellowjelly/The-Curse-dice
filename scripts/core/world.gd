@@ -53,11 +53,11 @@ func _place_dungeons() -> void:
 		var want := centre + Vector2i(int(off[0]), int(off[1]))
 		var cell := centre
 		var best := INF
-		for dy in range(-4, 5):  # the nearest free cell in the country: no vein, tree or monster on it
+		for dy in range(-4, 5):  # the nearest free cell in the country: no vein, tree or monster on or next to it (3.7)
 			for dx in range(-4, 5):
 				var c := want + Vector2i(dx, dy)
 				var dist := Vector2(c).distance_to(Vector2(want))
-				if dist < best and country_index_at(c) == ci and not nodes.any(func(n): return n["cell"] == c) \
+				if dist < best and country_index_at(c) == ci and not nodes.any(func(n): return Vector2(n["cell"]).distance_to(Vector2(c)) < 2.5) \
 						and not enemies.any(func(e): return Vector2(e["cell"]).distance_to(Vector2(c)) < 2.0):
 					best = dist
 					cell = c

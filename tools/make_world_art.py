@@ -189,6 +189,41 @@ def dungeon_entrance():
     return outline(img)
 
 
+
+def slag_door():
+    """3.7: the Slag Cathedral: an iron gate in a black glass wall, lit from inside (48x64)."""
+    img = Image.new("RGBA", (48, 64), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
+    d.ellipse([4, 54, 44, 62], fill=(90, 30, 20, 200))                                # cooling slag at the steps
+    iron, iron_d, glow = (70, 58, 60, 255), (44, 36, 40, 255), (240, 130, 40, 255)
+    d.polygon([(6, 58), (6, 20), (24, 4), (42, 20), (42, 58)], fill=iron)            # a pointed iron facade
+    d.polygon([(14, 58), (14, 26), (24, 14), (34, 26), (34, 58)], fill=K + (255,))   # the doorway
+    for x in (18, 24, 30):
+        d.line([(x, 24 if x != 24 else 18), (x, 58)], fill=iron_d, width=1)          # gate bars
+    d.rectangle([16, 46, 32, 57], fill=(200, 90, 30, 255))                           # the furnace glow behind the bars
+    d.rectangle([20, 50, 28, 57], fill=glow)
+    for x, y in ((9, 30), (38, 40), (10, 48)):
+        d.line([(x, y), (x + 1, y + 6)], fill=glow)                                   # molten seams in the wall
+    d.rectangle([22, 0, 26, 6], fill=iron_d)                                           # a small iron spire
+    return outline(img)
+
+
+def bone_door():
+    """3.7: the Marrow Vault: a gate stacked from bones and skulls, with a toll-stone (48x64)."""
+    img = Image.new("RGBA", (48, 64), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
+    d.ellipse([4, 54, 44, 62], fill=(80, 70, 62, 200))
+    bone, bone_d = (214, 204, 184, 255), (150, 140, 124, 255)
+    d.rectangle([6, 18, 15, 58], fill=bone); d.rectangle([33, 18, 42, 58], fill=bone)   # stacked bone pillars
+    for y in range(20, 58, 5):
+        d.line([(6, y), (15, y)], fill=bone_d); d.line([(33, y + 2), (42, y + 2)], fill=bone_d)
+    d.rectangle([6, 12, 42, 18], fill=bone_d)                                          # the lintel
+    for x in (10, 19, 28, 37):                                                         # skulls on the lintel
+        d.ellipse([x - 3, 7, x + 3, 15], fill=bone); d.rectangle([x - 2, 10, x - 1, 11], fill=K + (255,)); d.rectangle([x + 1, 10, x + 2, 11], fill=K + (255,))
+    d.rectangle([15, 18, 33, 58], fill=K + (255,))                                    # the dark doorway
+    d.rectangle([18, 52, 30, 58], fill=(96, 90, 86, 255))                              # the toll-stone
+    d.point((24, 54), fill=(170, 120, 230, 255)); d.point((23, 55), fill=(170, 120, 230, 255))  # a fate fragment's glint
+    return outline(img)
+
+
 DECOR = {
     "deadwood": [dead_tree, dead_bush], "swamp": [reeds, mossy_stump], "deepforest": [green_tree, mushroom],
     "coast": [driftwood, coast_rock], "snow": [snow_pine, ice_rock], "volcanic": [obsidian_spike, lava_vent],
@@ -272,4 +307,6 @@ if __name__ == "__main__":
         chop_tree(trunk, crown).save(f"assets/world/tree_{t}.png")
     stump().save("assets/world/tree_stump.png")
     dungeon_entrance().save("assets/world/dungeon_entrance.png")
+    slag_door().save("assets/world/dungeon_slag_cathedral.png")
+    bone_door().save("assets/world/dungeon_marrow_vault.png")
     print("world art done")
