@@ -173,7 +173,7 @@
 			"damage": 1
 		},
 		"elite": {
-			"hp": 1.45,
+			"hp": 1.2,
 			"damage": 1
 		},
 		"boss": {
@@ -215,5 +215,9 @@
 			"victory_title": "The Wick-Mother is snuffed out",
 			"victory_text": "The mill falls dark. In the cold wax, one shard of the Dice of Fate glows."
 		}
-	]
+	],
+	"night": {
+		"hp": 1.1,
+		"damage": 0
+	}
 }

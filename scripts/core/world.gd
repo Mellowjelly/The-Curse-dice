@@ -310,9 +310,10 @@ func fight_defs(e: Dictionary) -> Array:
 		var d: Dictionary = monster_defs[id].duplicate(true)
 		# Early bosses get a big boost; late bosses are already huge and are meant for crafted gear.
 		var boss_hp := (1.35 if tier <= 2 else 1.0) if is_boss else 1.0
-		var night := 1.2 if time_of_day == "night" else 1.0
-		d["hp"] = int(round(float(d["hp"]) * (1.0 + 0.22 * (tier - 1)) * boss_hp * night))
-		var bonus := tier / 2 + (1 if is_boss and tier <= 2 else 0) - (1 if is_boss and tier >= 3 else 0)
+		# 3.7: night is "sharper, not longer" (world.json "night": hp and damage).
+		var nt: Dictionary = data.get("night", {"hp": 1.2, "damage": 0}) if time_of_day == "night" else {}
+		d["hp"] = int(round(float(d["hp"]) * (1.0 + 0.22 * (tier - 1)) * boss_hp * float(nt.get("hp", 1.0))))
+		var bonus := tier / 2 + (1 if is_boss and tier <= 2 else 0) - (1 if is_boss and tier >= 3 else 0) + int(nt.get("damage", 0))
 		for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:
 			for f in faces:
 				if f["type"] in ["attack", "sweep"]:

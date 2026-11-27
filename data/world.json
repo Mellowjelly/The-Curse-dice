@@ -469,5 +469,9 @@
 			"Bishop's Relic",
 			80
 		]
+	},
+	"night": {
+		"hp": 1.1,
+		"damage": 0
 	}
 }

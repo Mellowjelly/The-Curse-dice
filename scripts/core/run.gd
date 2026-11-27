@@ -296,8 +296,10 @@ func scaled_monster(def: Dictionary, kind: String, tier: String) -> Dictionary:
 		return def
 	var d := def.duplicate(true)
 	# Curse rules (see CURSE_RULES): I hungry dead, II sharpened bones, IV the Bishop wakes early.
-	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.15 if curse >= 1 else 1.0) * (1.2 if night else 1.0) * gear_k))
-	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 and kind == "elite" else 0) 
+	# 3.7: night is "sharper, not longer" (region "night": hp and damage), so night fights stop dragging.
+	var nt: Dictionary = region.get("night", {"hp": 1.2, "damage": 0}) if night else {}
+	d["hp"] = int(round(float(d["hp"]) * float(sc.get("hp", 1.0)) * (1.15 if curse >= 1 else 1.0) * float(nt.get("hp", 1.0)) * gear_k))
+	var bonus := int(sc.get("damage", 0)) + (1 if curse >= 2 else 0) + (1 if curse >= 4 and kind == "elite" else 0) + int(nt.get("damage", 0))
 	if curse >= 4 and d.has("phase2"):
 		d["phase2"]["at"] = 0.7
 	for faces in [d["faces"], d.get("phase2", {}).get("faces", [])]:

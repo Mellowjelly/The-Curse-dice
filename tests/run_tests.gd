@@ -62,6 +62,7 @@ func _init() -> void:
 	test_v35_villagers()
 	test_v35_pet_clarity()
 	test_v35_isle_dungeon()
+	test_v37_fight_pacing()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1513,3 +1514,34 @@ func test_v36_player_bugs() -> void:
 	for tool in ["res://tools/play_cli.gd", "res://tools/playtest.gd"]:
 		var scr: GDScript = load(tool)
 		check(scr != null and scr.can_instantiate(), "tool script compiles: %s" % tool)
+
+
+## 3.7: night and elite fights no longer drag (the diary saw 7-9 rounds). Night is "sharper, not longer".
+func test_v37_fight_pacing() -> void:
+	var region := GameData.load_region()
+	check(float(region["night"]["hp"]) <= 1.1 and float(region["scaling"]["elite"]["hp"]) <= 1.25, "night and elite HP multipliers stay small")
+	var world: Dictionary = GameData.load_json("res://data/world.json")
+	check(float(world["night"]["hp"]) <= 1.1, "Isle night HP stays small")
+	# The same fresh party fights the same night elites under the 3.6 numbers (elite HP x1.45, night HP x1.2) and today's.
+	var avg_old := _night_elite_rounds({"hp": 1.2, "damage": 0}, 1.45)
+	var avg_new := _night_elite_rounds(region["night"], float(region["scaling"]["elite"]["hp"]))
+	print("  night elite fight (fresh party): %.1f rounds in 3.6 -> %.1f now" % [avg_old, avg_new])
+	check(avg_new <= avg_old - 1.5, "night elite fights are much shorter than in 3.6")
+
+
+func _night_elite_rounds(night: Dictionary, elite_hp: float) -> float:
+	var PlayerBot = load("res://tools/bots/player_bot.gd")
+	var rounds := 0
+	var n := 12
+	for i in n:
+		var run := Run.new(3700 + i, {"time": "night"})
+		run.region["night"] = night
+		run.region["scaling"]["elite"]["hp"] = elite_hp
+		run._start_fight("elite", "mid")
+		var bot = PlayerBot.new("tactician", 3700 + i)
+		var guard := 0
+		while not run.combat.finished and guard < 60:
+			bot.play_turn(run.combat)
+			guard += 1
+		rounds += run.combat.round_number
+	return float(rounds) / n

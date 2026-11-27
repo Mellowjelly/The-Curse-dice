@@ -193,5 +193,9 @@
 		},
 		"embers": 60,
 		"dust": 4
+	},
+	"night": {
+		"hp": 1.1,
+		"damage": 0
 	}
 }

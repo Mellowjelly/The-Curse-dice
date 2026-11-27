@@ -889,7 +889,7 @@ const TIME_EFFECTS := {
 	"dawn": "First light: camps heal +10% more.",
 	"day": "Open roads: shop prices -15%.",
 	"dusk": "Long shadows: +1 Fate at the start of every fight.",
-	"night": "The dead walk: enemies +20% HP, but +40% Soul Embers and +1 Grave Die.",
+	"night": "The dead walk: enemies +10% HP, but +40% Soul Embers and +1 Grave Die.",
 }
 
 
