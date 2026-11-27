@@ -188,7 +188,7 @@ func fate_twist(hero_index: int, face_index: int) -> bool:
 	h["face"] = face_index
 	h["locked"] = true
 	h["twisted"] = true  # a twisted die cannot be unlocked by accident
-	_log(tr("* Fate twists %s's die to %s %d (-%d Fate)") % [short_name(h), String(h["faces"][face_index]["type"]).to_upper(),
+	_log(tr("* Fate twists %s's die to %s %d (-%d Fate)") % [short_name(h), tr(String(h["faces"][face_index]["type"]).to_upper()),
 		int(h["faces"][face_index]["value"]), FATE_TWIST_COST])
 	state_changed.emit()
 	return true
@@ -235,6 +235,22 @@ func can_use_skill(hero_index: int) -> bool:
 	if h["skill"].get("id", "") == "ash_feast" and fate < 1:
 		return false  # nothing to eat
 	return is_alive(h) and not h["skill"].is_empty() and h["charge"] >= skill_cost(h)
+
+
+## Why a hero's skill cannot be used right now ("" = it can). Shown by the UI so a press never fails silently.
+func skill_block_reason(hero_index: int) -> String:
+	if finished or hero_index < 0 or hero_index >= heroes.size():
+		return tr("The fight is over.")
+	var h: Dictionary = heroes[hero_index]
+	if not is_alive(h):
+		return tr("%s has fallen.") % short_name(h)
+	if h["skill"].is_empty():
+		return tr("%s has no skill.") % short_name(h)
+	if h["charge"] < skill_cost(h):
+		return tr("%s is still charging (%d/%d).") % [short_name(h), int(h["charge"]), skill_cost(h)]
+	if h["skill"].get("id", "") == "ash_feast" and fate < 1:
+		return tr("%s needs at least 1 Fate to eat.") % short_name(h)
+	return ""
 
 
 ## Uses a hero's special skill right away (during the planning phase).
@@ -288,13 +304,13 @@ func use_skill(hero_index: int) -> bool:
 		"backstab":
 			var t := _get_target()
 			_damage(t, BACKSTAB_DAMAGE, who, true, h)
-			_pay_hp(h, 2, "The grave takes its due from %s" % who)
+			_pay_hp(h, 2, tr("The grave takes its due from %s") % who)
 		"miasma":
 			for m in monsters:
 				if is_alive(m):
 					m["burn"] = min(MAX_BURN, m["burn"] + 3)
 			_log(tr("A sickly green fog: every enemy is burning"))
-			_pay_hp(h, 2, "The plague bites %s" % who)
+			_pay_hp(h, 2, tr("The plague bites %s") % who)
 		"loaded_dice":
 			var best := 0
 			for fi in h["faces"].size():
@@ -575,6 +591,8 @@ func _apply_pet_face() -> void:
 			if not ally.is_empty():
 				ally["shield"] += v
 				_log(tr("%s shields %s (%d)") % [tr(pet["name"]), short_name(ally), v])
+		"blank":
+			_log(tr("%s's die shows nothing this round.") % tr(pet["name"]))
 
 
 ## Adds Fate. Fate beyond the cap is not wasted: it becomes a free reroll next round.
@@ -686,12 +704,12 @@ func _damage(unit: Dictionary, amount: int, source: String, pierce := false, att
 	var overkill: int = max(0, dealt - int(unit["hp"]))
 	unit["hp"] = max(0, unit["hp"] - dealt)
 	var text := tr("%s hits %s for %d") % [tr(source), short_name(unit) if heroes.has(unit) else tr(unit["name"]), dealt]
-	if mult > 1.0 and dealt > 0:
+	if mult > 1.0:
 		text += tr(" (super effective!)")
-	elif mult < 1.0 and dealt > 0:
+	elif mult < 1.0:
 		text += tr(" (resisted)")
 	if absorbed > 0:
-		text += tr(" (%d blocked)") % absorbed
+		text += tr(" (%d of %d blocked by shield)") % [absorbed, amount]
 	_log(text)
 	damaged.emit(unit, dealt, absorbed)
 	# Bosses harden after a huge single hit, so one lucky combo cannot end the fight.

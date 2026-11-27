@@ -77,7 +77,7 @@ func _ready() -> void:
 	if not profile.world_state.is_empty():
 		world.load_dict(profile.world_state)
 	# The party always sets out with its current gear and stars from town.
-	var pet_id: String = profile.owned_pets[0] if not profile.owned_pets.is_empty() else ""
+	var pet_id: String = profile.isle_pet_id()
 	# 3.5: an Isle trip interrupted by closing the app resumes (HP, sharpened faces, a pending sharpening).
 	var resumed := world.begin_trip(profile.party, profile.stars, pet_id, profile.gear_bonuses(), profile.level("chapel"))
 	world.time_of_day = profile.time_name()

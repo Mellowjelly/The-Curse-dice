@@ -25,9 +25,9 @@ var rng_world := RandomNumberGenerator.new()
 var out: Array[String] = []
 
 const HELP := """COMMANDS
- anywhere: help | status
+ anywhere: help | status | requests (villager progress)
  TOWN: party <hero> <hero> <hero> | wait | build <building> | summon heroes|relics|pets
-       talk <villager> | accept <villager> | claim <villager> | upgrade hero|pet|relic <id>
+       talk <villager> | accept <villager> | claim <villager> | isle_pet <pet> | upgrade hero|pet|relic <id>
        bestiary | trophy <monster> (claim a Bestiary kill milestone)
        recipes | craft <recipe> | equip <hero> <weapon|armor> <uid> | feed <pet> <treat uid> | sell <material> <n> | grind <material> <n>
        road (start a Hollow Road journey) | explore (go out to the Cursed Isle)
@@ -89,6 +89,17 @@ func _exec(cmd: String) -> void:
 	if c == "status":
 		say(_status())
 		return
+	if c == "requests":  # villagers' requests, from anywhere (3.5 player: could not check progress on the road)
+		for v in profile.villagers:
+			var req := profile.npc_request(v["id"])
+			if req.is_empty():
+				say("  %s: all requests done" % tr(v["name"]))
+			elif profile.is_request_active(v["id"]):
+				say("  %s: %s %d/%d%s" % [tr(v["name"]), tr(req["title"]), profile.request_progress(v["id"]), int(req["goal"]["amount"]),
+					"  (DONE - claim in town)" if profile.is_request_done(v["id"]) else ""])
+			else:
+				say("  %s: new request '%s' waiting (talk in town)" % [tr(v["name"]), tr(req["title"])])
+		return
 	var combat := _combat()
 	if combat != null and not combat.finished:
 		_combat_cmd(combat, c, p)
@@ -118,6 +129,11 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 		say("Locked. " + profile.unlock_hint(gate[c]))
 		return
 	match c:
+		"isle_pet":
+			if p.size() > 1 and profile.set_isle_pet(p[1]):
+				say("%s will follow you on the Cursed Isle." % p[1])
+			else:
+				say("Companions you own: " + ", ".join(profile.owned_pets))
 		"party":
 			var ids := Array(p.slice(1))
 			if ids.size() != 3 or not ids.all(func(x): return x in profile.owned_heroes):
@@ -134,7 +150,7 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 		"summon":
 			var banner := p[1] if p.size() > 1 else "heroes"
 			var r := profile.summon_roll(rng_summon, banner)
-			say(r["text"] if not r.is_empty() else "Cannot summon (need %d Grave Dice, or the banner is complete)." % profile.banner_cost(banner))
+			say(tr(r["text"]) if not r.is_empty() else "Cannot summon (need %d Grave Dice, or the banner is complete)." % profile.banner_cost(banner))
 		"talk":
 			_talk(p[1] if p.size() > 1 else "")
 		"accept":
@@ -147,7 +163,7 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 			var vid := p[1] if p.size() > 1 else ""
 			var r := profile.claim_request(vid)
 			if not r.is_empty():
-				say("Reward: " + r["text"])
+				say("Reward: " + tr(r["text"]))
 			elif profile.is_request_done(vid) and not profile.npc_is_out(vid):
 				say("%s is not in town right now (out at: %s). Wait until then to claim." % [vid, ", ".join(profile.npc(vid).get("times", []))])
 			else:
@@ -159,11 +175,11 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 					unknown += 1
 					continue
 				var nxt: String = "all milestones claimed" if int(e["next_kills"]) < 0 else "next %d kills -> %s%s" % [int(e["next_kills"]), str(e["next_reward"]), "  (CLAIM: trophy %s)" % e["id"] if e["claimable"] else ""]
-				say("  %s [%s] x%d - %s  | %s" % [e["name"], e["rank"], int(e["kills"]), nxt, e["lore"]])
+				say("  %s [%s] x%d - %s  | %s" % [tr(e["name"]), e["rank"], int(e["kills"]), nxt, tr(e["lore"])])
 			say("  ...and %d pages not yet met." % unknown)
 		"trophy":
 			var tr := profile.claim_bestiary(p[1] if p.size() > 1 else "")
-			say(("Bestiary milestone: " + tr["text"]) if not tr.is_empty() else "No milestone ready for that monster.")
+			say(("Bestiary milestone: " + tr(tr["text"])) if not tr.is_empty() else "No milestone ready for that monster.")
 		"upgrade":
 			if p.size() > 2 and profile.upgrade_star(p[1], p[2]):
 				say("%s %s is now %d stars." % [p[1], p[2], profile.star(p[1], p[2])])
@@ -184,7 +200,7 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 				else:
 					eff = "+%d max HP, +%d shield each fight" % [int(r["hp"]), int(r["shield"])]
 				var how: String = ("feed <pet> %d" % uid) if r["slot"] == "treat" else ("equip <hero> %s %d" % [r["slot"], uid])
-				say("Crafted item #%d: [%s] %s - %s. Use with: %s" % [uid, r["grade"], r["name"], eff, how])
+				say("Crafted item #%d: [%s] %s - %s. Use with: %s" % [uid, r["grade"], tr(r["name"]), eff, how])
 			else:
 				say("Missing materials or embers.")
 		"feed":
@@ -213,7 +229,7 @@ func _town_cmd(c: String, p: PackedStringArray) -> void:
 			world = World.new()
 			if not profile.world_state.is_empty():
 				world.load_dict(profile.world_state)
-			var resumed: bool = world.begin_trip(profile.party, profile.stars, profile.owned_pets[0] if not profile.owned_pets.is_empty() else "", profile.gear_bonuses(), profile.level("chapel"))
+			var resumed: bool = world.begin_trip(profile.party, profile.stars, profile.isle_pet_id(), profile.gear_bonuses(), profile.level("chapel"))
 			world.time_of_day = profile.time_name()
 			mode = "world"
 			say("You pick up the trail where you left it." if resumed else "You walk out of the gate onto the Cursed Isle.")
@@ -230,19 +246,19 @@ func _talk(vid: String) -> void:
 		say("Villagers: " + ", ".join(profile.villagers.map(func(x): return x["id"])))
 		return
 	if not profile.npc_is_out(vid):
-		say("%s is not out now (out at: %s)." % [v["name"], ", ".join(v["times"])])
+		say("%s is not out now (out at: %s)." % [tr(v["name"]), ", ".join(v["times"])])
 		return
 	var req := profile.npc_request(vid)
-	say("%s, %s: \"%s\"" % [v["name"], v["title"], v["greeting"][0]])
+	say("%s, %s: \"%s\"" % [tr(v["name"]), tr(v["title"]), tr(v["greeting"])[0]])
 	if req.is_empty():
 		say("  (no more requests)")
 	elif profile.is_request_done(vid):
-		say("  Request '%s' is DONE - claim it." % req["title"])
+		say("  Request '%s' is DONE - claim it." % tr(req["title"]))
 	elif profile.is_request_active(vid):
-		say("  Working on '%s': %d/%d%s  -> reward %s" % [req["title"], profile.request_progress(vid), int(req["goal"]["amount"]),
+		say("  Working on '%s': %d/%d%s  -> reward %s" % [tr(req["title"]), profile.request_progress(vid), int(req["goal"]["amount"]),
 			" (counts %s in Storage, handed over on claim)" % req["goal"]["material"] if req["goal"]["scope"] == "deliver" else "", _reward_text(profile.request_reward(vid))])
 	else:
-		say("  Asks: %s  -> reward %s" % [req["ask"], _reward_text(profile.request_reward(vid))])
+		say("  Asks: %s  -> reward %s" % [tr(req["ask"]), _reward_text(profile.request_reward(vid))])
 
 
 # ---------------------------------------------------------------- the Hollow Road
@@ -275,7 +291,7 @@ func _road_cmd(c: String, p: PackedStringArray) -> void:
 			if n >= 0 and n < run.weapon_offers.size() and hi >= 0 and hi < run.heroes.size():
 				var w: Dictionary = run.weapon_offers[n]
 				var hf: Array = run.heroes[hi]["faces"]
-				say("%s takes %s: faces 5-6 %s %s -> %s" % [Combat.short_name(run.heroes[hi]), w["name"], _face(hf[4]), _face(hf[5]),
+				say("%s takes %s: faces 5-6 %s %s -> %s" % [Combat.short_name(run.heroes[hi]), tr(w["name"]), _face(hf[4]), _face(hf[5]),
 					" ".join(w["faces"].map(_face))])
 			run.equip(n, hi)
 		"buy":
@@ -326,7 +342,7 @@ func _road_state() -> String:
 		"map":
 			var ahead: Array[String] = []
 			for i in range(run.pos + 1, min(run.pos + 9, run.board.size())):
-				ahead.append("%d:%s" % [i, run.board[i]["type"]])
+				ahead.append("%d:%s%s" % [i, run.board[i]["type"], "[GATE-stop]" if run.board[i].get("gate", false) else ""])
 			s.append("  ahead: " + " ".join(ahead))
 			if run.move_options.is_empty():
 				s.append("  -> roll")
@@ -337,29 +353,31 @@ func _road_state() -> String:
 						" (the party must stop here)" if dest - run.pos < run.move_options[i] else ""])
 		"pet":
 			for i in run.pet_offers.size():
-				s.append("  pick %d: %s - %s" % [i, run.pet_offers[i]["name"], run.pet_offers[i]["desc"]])
+				s.append("  pick %d: %s - %s" % [i, tr(run.pet_offers[i]["name"]), tr(run.pet_offers[i]["desc"])])
 		"reward":
 			s.append("  " + run.last_reward_text)
 			for i in run.carve_offers.size():
-				s.append("  pick %d: %s" % [i, run.carve_offers[i]["text"]])
+				s.append("  pick %d: %s" % [i, tr(run.carve_offers[i]["text"])])
 		"loot":
 			for i in run.weapon_offers.size():
 				var w: Dictionary = run.weapon_offers[i]
-				s.append("  weapon %d: %s (%s) faces %s" % [i, w["name"], w["rarity"], str(w["faces"].map(func(f): return "%s%d" % [f["type"], f["value"]]))])
+				s.append("  weapon %d: %s (%s) faces %s" % [i, tr(w["name"]), w["rarity"], str(w["faces"].map(func(f): return "%s%d" % [f["type"], f["value"]]))])
 			s.append("  -> equip_loot <weapon#> <hero#> or skip")
 		"event":
-			s.append("  EVENT %s: %s" % [run.event["title"], run.event["text"]])
+			s.append("  EVENT %s: %s" % [tr(run.event["title"]), tr(run.event["text"])])
 			if run.event_result != "":
 				s.append("  RESULT: %s  -> pick 0 to continue" % run.event_result)
 			else:
 				for i in run.event["options"].size():
-					s.append("  pick %d: %s%s" % [i, run.event["options"][i]["label"], "" if run.can_choose_event_option(i) else " (cannot afford)"])
+					s.append("  pick %d: %s%s" % [i, tr(run.event["options"][i]["label"]), "" if run.can_choose_event_option(i) else " (cannot afford)"])
 		"shop":
 			for it in run.shop_items():
-				s.append("  buy %s: %s (%d gold) %s" % [it["id"], it["name"], run.price(it), it["desc"]])
+				s.append("  buy %s: %s (%d gold) %s%s" % [it["id"], tr(it["name"]), run.price(it), tr(it["desc"]), "  [SOLD]" if it["id"] in run.shop_bought else ""])
+			if run.price_note() != "":
+				s.append("  discounts: " + run.price_note())
 			s.append("  -> leave")
 		"rest":
-			s.append("  rest heal (%d%%) | rest carve" % run.rest_percent())
+			s.append(("  rest heal (%d%%) | rest carve" % run.rest_percent()) if run.rest_heal_useful() else "  everyone is rested: rest carve")
 		"combat":
 			s.append(_combat_state(run.combat))
 	return "\n".join(s)
@@ -377,12 +395,16 @@ func _combat_cmd(cb: Combat, c: String, p: PackedStringArray) -> void:
 		"reroll": cb.reroll()
 		"fate_reroll": cb.fate_reroll()
 		"twist": cb.fate_twist(n, int(p[2]) if p.size() > 2 else 0)
-		"skill": cb.use_skill(n)
+		"skill":
+			if not cb.use_skill(n):
+				say("Cannot use that skill: " + cb.skill_block_reason(n))
 		"flee":
 			if not cb.flee():
 				say("You can only flee from Isle fights, from round 2.")
 		"target": cb.set_target(n)
 		"end": cb.end_turn()
+		"look", "requests":
+			say(_status())
 		_: say("Unknown combat command. Type help.")
 	cb.log_added.disconnect(collect)
 	out.append_array(log)
@@ -395,7 +417,7 @@ func _combat_cmd(cb: Combat, c: String, p: PackedStringArray) -> void:
 			profile.record_world_fight(wenemy["group"], won, cb.twists, wenemy.get("boss", false))
 			profile.embers += int(r["embers"])
 			profile.star_dust += int(r["dust"])
-			say("FIGHT OVER: %s. +%d embers, +%d dust, drops %s%s%s" % ["FLED" if cb.fled else ("VICTORY" if r["victory"] else "DEFEAT"), r["embers"], r["dust"], str(r.get("drops", {})),
+			say("FIGHT OVER: %s. +%d embers%s, drops %s%s%s" % ["FLED" if cb.fled else ("VICTORY" if r["victory"] else "DEFEAT"), r["embers"], (", +%d dust" % r["dust"]) if int(r["dust"]) > 0 else "", str(r.get("drops", {})),
 				" - YOUR BAG WAS LOST" if r["lost_bag"] else "", ("  | " + r["carved"]) if r.get("carved", "") != "" else ""])
 			if r.get("sharpen", false):
 				say(_sharpen_text())
@@ -412,7 +434,7 @@ func _combat_state(cb: Combat) -> String:
 	for i in cb.monsters.size():
 		var m: Dictionary = cb.monsters[i]
 		if Combat.is_alive(m):
-			s.append("   enemy %d%s: %s %d/%d hp%s [%s] intent: %s" % [i, " (TARGET)" if i == cb.target_index else "", m["name"], m["hp"], m["max_hp"],
+			s.append("   enemy %d%s: %s %d/%d hp%s [%s] intent: %s" % [i, " (TARGET)" if i == cb.target_index else "", tr(m["name"]), m["hp"], m["max_hp"],
 				(" shield %d" % m["shield"]) if m["shield"] > 0 else "", m.get("element", ""), cb.intent_text(m)])
 	for i in cb.heroes.size():
 		var h: Dictionary = cb.heroes[i]
@@ -431,7 +453,7 @@ func _combat_state(cb: Combat) -> String:
 func _sharpen_text() -> String:
 	var s: Array[String] = ["BATTLE-HARDENED: pick 1 sharpening (+1 until you go home) with `sharpen <n>`, or `sharpen skip`:"]
 	for i in world.sharpen_offers.size():
-		s.append("   %d: %s" % [i, world.sharpen_offers[i]["text"]])
+		s.append("   %d: %s" % [i, tr(world.sharpen_offers[i]["text"])])
 	return "\n".join(s)
 
 
@@ -455,7 +477,7 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 				return
 			world.clock += 1.2
 			var got := world.gather(best["id"], rng_world)
-			say("Gathered %d %s%s." % [got["amount"], got["name"], " (RARE)" if got["rare"] else ""])
+			say("Gathered %d %s%s." % [got["amount"], tr(got["name"]), " (RARE)" if got["rare"] else ""])
 		"fight":
 			for e in world.enemies:
 				if world.enemy_active(e) and Vector2(e["cell"]).distance_to(Vector2(world.player_cell)) <= 1.5:
@@ -482,7 +504,7 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 			runs_started += 1
 			run = Run.new(1000 + runs_started, profile.dungeon_options(dg["id"]), profile.party)
 			mode = "road"
-			say("You go down into %s. A short board with a boss at the end; its spoils go into your bag." % dg["name"])
+			say("You go down into %s. A short board with a boss at the end; its spoils go into your bag." % tr(dg["name"]))
 			say(_road_state())
 		"home":
 			var moved := profile.bank(world)
@@ -493,9 +515,12 @@ func _world_cmd(c: String, p: PackedStringArray) -> void:
 			mode = "town"
 			say("Back in Ashfall. Stored: %s" % str(moved))
 			for q in profile.last_bank_quests:
-				say("Quest complete: %s (+%d embers)" % [q["name"], int(q["reward"])])
+				say("Quest complete: %s (+%d embers)" % [tr(q["name"]), int(q["reward"])])
 		_:
-			say("Unknown world command. Type help.")
+			if c == "end":
+				say("No fight is going on.")
+			else:
+				say("Unknown world command. Type help.")
 
 
 func _walk_to(target: Vector2i) -> void:
@@ -529,7 +554,7 @@ func _start_world_fight(e: Dictionary) -> void:
 	wenemy = e
 	wcombat = world.start_fight(e, 5000 + fights_started)
 	var c: Dictionary = world.countries[e["country"]]
-	say("FIGHT in %s (tier %d)%s!" % [c["name"], int(c["tier"]), " - BOSS" if e.get("boss", false) else ""])
+	say("FIGHT in %s (tier %d)%s!" % [tr(c["name"]), int(c["tier"]), " - BOSS" if e.get("boss", false) else ""])
 	say(_combat_state(wcombat))
 
 
@@ -552,8 +577,8 @@ func _world_look() -> String:
 	near.sort_custom(func(a, b): return a[0] < b[0])
 	for n in near.slice(0, 14):
 		s.append(n[1])
-	s.append("  countries: " + "; ".join(world.countries.map(func(x): return "%s T%d centre %s" % [x["name"], int(x["tier"]), str(x["center"])])))
-	s.append("  dungeons: " + "; ".join(world.dungeons.map(func(d): return "%s (T%d) entrance %s - stand next to it and type `dungeon`" % [d["name"], int(world.countries[d["country"]]["tier"]), str(d["cell"])])))
+	s.append("  countries: " + "; ".join(world.countries.map(func(x): return "%s T%d centre %s" % [tr(x["name"]), int(x["tier"]), str(x["center"])])))
+	s.append("  dungeons: " + "; ".join(world.dungeons.map(func(d): return "%s (T%d) entrance %s - stand next to it and type `dungeon`" % [tr(d["name"]), int(world.countries[d["country"]]["tier"]), str(d["cell"])])))
 	return "\n".join(s)
 
 

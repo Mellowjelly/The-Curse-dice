@@ -130,7 +130,7 @@
 		{
 			"id": "carving",
 			"name": "Bone Carver",
-			"desc": "Choose 1 of 3 die carvings.",
+			"desc": "Carve one of your dice: pick from the offered carvings.",
 			"cost": 35
 		},
 		{
@@ -189,7 +189,10 @@
 	"bosses": [
 		{
 			"id": "rotting_bishop",
-			"times": ["dawn", "day"],
+			"times": [
+				"dawn",
+				"day"
+			],
 			"after_wins": 0,
 			"lair": "The Chapel of Rot",
 			"scene": "battle_boss",
@@ -200,7 +203,10 @@
 		},
 		{
 			"id": "wick_mother",
-			"times": ["dusk", "night"],
+			"times": [
+				"dusk",
+				"night"
+			],
 			"after_wins": 1,
 			"lair": "The Candle Mill",
 			"scene": "battle_late",

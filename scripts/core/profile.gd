@@ -25,6 +25,7 @@ var road_bonus_day := -1          # 3.5: the day the "first road-boss kill of th
 var star_dust := 0                # upgrade material
 var stars := {}                   # "hero:varek" / "pet:ash_crow" / "relic:plague_lance" -> 1..5
 var last_bank_quests: Array = []  # quests completed by the last bank() (not saved)
+var isle_pet := ""                # companion that follows the party on the Cursed Isle ("" = first owned)
 var npc_done := {}                # villager id -> ids of the requests already finished (order-independent)
 var npc_active := {}              # villager id -> { "base": int, "run_best": int } for the accepted request
 var villagers: Array
@@ -143,6 +144,7 @@ func load_profile() -> void:
 	star_dust = d.get("star_dust", 0)
 	stars = d.get("stars", {})
 	npc_done = d.get("npc_done", {})
+	isle_pet = d.get("isle_pet", "")
 	npc_active = d.get("npc_active", {})
 	materials = d.get("materials", {})
 	world_state = d.get("world_state", {})
@@ -157,7 +159,7 @@ func save() -> void:
 		"grave_dice": grave_dice, "owned_heroes": owned_heroes, "unlocked_weapons": unlocked_weapons,
 		"party": party, "summons_since_hero": summons_since_hero, "curse": curse,
 		"summon_pity": summon_pity, "owned_pets": owned_pets, "time_of_day": time_of_day,
-		"star_dust": star_dust, "stars": stars, "npc_done": npc_done, "npc_active": npc_active,
+		"star_dust": star_dust, "stars": stars, "npc_done": npc_done, "isle_pet": isle_pet, "npc_active": npc_active,
 		"materials": materials, "world_state": world_state, "gear": gear, "equipped": equipped, "next_uid": next_uid,
 		"bestiary_claimed": bestiary_claimed, "day": day, "road_bonus_day": road_bonus_day})
 
@@ -734,9 +736,9 @@ func feature_unlocked(feature: String) -> bool:
 func unlock_hint(feature: String) -> String:
 	match feature:
 		"summon", "collection", "isle":
-			return "Finish one journey on the Hollow Road to unlock."
+			return tr("Finish one journey on the Hollow Road to unlock.")
 		"forge", "storage":
-			return "Return from the Cursed Isle once to unlock."
+			return tr("Return from the Cursed Isle once to unlock.")
 	return ""
 
 
@@ -832,6 +834,21 @@ func equip_gear(hero_id: String, slot: String, uid: int) -> void:
 
 
 ## Feeds a crafted treat to a companion (v3.1). Stored like gear under the key "pet:<id>", slot "treat".
+## The companion that walks the Isle with the party (the player's choice, else the first one owned).
+func isle_pet_id() -> String:
+	if isle_pet in owned_pets:
+		return isle_pet
+	return owned_pets[0] if not owned_pets.is_empty() else ""
+
+
+func set_isle_pet(pet_id: String) -> bool:
+	if not pet_id in owned_pets:
+		return false
+	isle_pet = pet_id
+	save()
+	return true
+
+
 func feed_treat(pet_id: String, uid: int) -> bool:
 	var g := gear_item(uid)
 	if g.is_empty() or recipe(g["recipe"]).get("slot", "") != "treat" or not pet_id in owned_pets:

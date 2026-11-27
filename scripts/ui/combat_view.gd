@@ -628,6 +628,9 @@ func _skill_button(h: Dictionary, index: int) -> Control:
 	if is_ready and h["skill"]["id"] == "broken_oath" and not combat.monsters.any(
 			func(m): return Combat.is_alive(m) and Combat.current_face(m)["type"] == "attack"):
 		hint = tr("  (no single attacks incoming)")
+	var blocked := combat.skill_block_reason(index)
+	if not is_ready and h["charge"] >= cost and blocked != "":
+		hint = "  - " + blocked  # charged but unusable (e.g. Ash Feast with no Fate): say why
 	b.text = "%s  %s%s\n%s" % [tr(h["skill"]["name"]), tr("READY!") if is_ready else "(%d/%d)" % [h["charge"], cost], hint, tr(h["skill"]["desc"])]
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.add_theme_font_size_override("font_size", 12)

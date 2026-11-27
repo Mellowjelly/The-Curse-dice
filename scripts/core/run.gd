@@ -492,7 +492,12 @@ func _offer_carving(return_to: String) -> void:
 	var count := CARVE_OFFERS + (1 if int(upgrades.get("carver", 0)) >= 1 else 0)
 	for k in count:
 		var hi: int = hero_order[k % hero_order.size()]
-		carve_offers.append(_make_offer(hi, k == 0))
+		var offer := _make_offer(hi, k == 0)
+		for attempt in 6:  # 3.5 player bug: two identical carvings in one offer
+			if not carve_offers.any(func(o): return o["text"] == offer["text"]):
+				break
+			offer = _make_offer(hero_order[(k + attempt + 1) % hero_order.size()], false)
+		carve_offers.append(offer)
 	phase = "reward"
 	changed.emit()
 
@@ -827,6 +832,21 @@ func skip_loot() -> void:
 
 
 # ---------------------------------------------------------------- rest
+
+## False when resting would heal nobody (e.g. the Last Campfire already healed you): carve instead.
+func rest_heal_useful() -> bool:
+	return heroes.any(func(h): return h["hp"] < h["max_hp"])
+
+
+## Shop discount explained for the UI ("" when there is none).
+func price_note() -> String:
+	var parts: Array[String] = []
+	if int(upgrades.get("market", 0)) > 0:
+		parts.append(tr("Night Market -%d%%") % (15 * int(upgrades.get("market", 0))))
+	if time_of_day() == "day":
+		parts.append(tr("Day -15%"))
+	return ", ".join(parts)
+
 
 func rest_heal() -> void:
 	if phase != "rest":

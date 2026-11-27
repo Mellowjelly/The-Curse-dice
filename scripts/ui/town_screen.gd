@@ -452,6 +452,19 @@ func _refresh_party() -> void:
 			b.add_theme_constant_override("icon_max_width", 64)
 		b.add_theme_font_size_override("font_size", 14)
 		grid.add_child(b)
+	# Which companion walks the Cursed Isle with the party.
+	if profile.feature_unlocked("isle") and profile.owned_pets.size() > 1:
+		_party_box.add_child(UI.label(tr("Companion on the Cursed Isle:"), 15, UI.TEXT))
+		var pets_row := HFlowContainer.new()
+		pets_row.add_theme_constant_override("h_separation", 6)
+		pets_row.add_theme_constant_override("v_separation", 6)
+		for pid in profile.owned_pets:
+			var chosen: bool = profile.isle_pet_id() == pid
+			var pb := UI.choice_button(tr(profile.item_def("pet", pid).get("name", pid)), func(): profile.set_isle_pet(pid); Sfx.play(self, "click"); _refresh(), UI.GOLD if chosen else UI.BORDER)
+			pb.autowrap_mode = TextServer.AUTOWRAP_OFF
+			pb.custom_minimum_size = Vector2(0, 36)
+			pets_row.add_child(pb)
+		_party_box.add_child(pets_row)
 	# Curse level (opt-in difficulty).
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)

@@ -220,7 +220,9 @@ func _style_tiles() -> void:
 		var border := Color("#0e0b12")
 		var width := 2
 		if t.get("gate", false):
-			border = Color("#a3541c")
+			border = Color("#e08a3c")
+			width = 4  # gates always stop the party: make them stand out
+			tile.tooltip_text = tr("Gate: your party always stops here.")
 		if i < run.pos:
 			color = color.darkened(0.65)
 			tile.modulate = Color(0.7, 0.7, 0.7)
@@ -451,6 +453,8 @@ func _refresh_modal() -> void:
 		"shop":
 			_modal_title(tr("The Bone Market"))
 			_modal_text(tr("A hooded figure spreads its wares on a burial cloth. Gold: %d") % run.gold, UI.DIM)
+			if run.price_note() != "":
+				_modal_text(tr("Discounts: %s") % run.price_note(), UI.GREEN)
 			for it in run.shop_items():
 				var id: String = it["id"]
 				var bought: bool = id in run.shop_bought
@@ -462,8 +466,9 @@ func _refresh_modal() -> void:
 			_modal_title(tr("The Last Campfire") if gate else tr("Campfire"), Color("#e08a3c"))
 			_modal_text(tr(String(run.boss_info().get("gate_text", "The chapel bells toll ahead. This is the last rest before the Bishop."))) if gate
 				else tr("Embers crackle. For one night, nothing hunts you."))
-			_modal_box.add_child(UI.choice_button(tr("Rest: heal %d%% HP (the fallen rise)") % int(run.region["rest_heal_percent"]),
-				func(): run.rest_heal(), UI.GREEN))
+			var useful := run.rest_heal_useful()
+			_modal_box.add_child(UI.choice_button(tr("Rest: heal %d%% HP (the fallen rise)") % run.rest_percent() if useful else tr("Everyone is already rested"),
+				func(): run.rest_heal(), UI.GREEN, useful))
 			_modal_box.add_child(UI.choice_button(tr("Whittle: carve a die instead"), func(): run.rest_carve(), UI.GOLD))
 		"victory":
 			var boss: Dictionary = run.boss_info()

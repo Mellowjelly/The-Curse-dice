@@ -117,7 +117,7 @@
 		{
 			"id": "carving",
 			"name": "Bone Carver",
-			"desc": "Choose 1 of 3 die carvings.",
+			"desc": "Carve one of your dice: pick from the offered carvings.",
 			"cost": 35
 		},
 		{

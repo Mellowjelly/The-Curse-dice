@@ -52,6 +52,7 @@ func _init() -> void:
 	test_v32_translations()
 	test_v32_player_bugs()
 	test_v33_changes()
+	test_v36_player_bugs()
 	test_v34_road()
 	test_v34_isle_sharpening()
 	test_v34_new_heroes()
@@ -1479,3 +1480,36 @@ func test_v34_new_heroes() -> void:
 			bot.play_run_step(run)
 			steps += 1
 		check(run.is_over(), "a %s run with Wren and Osric reaches an end" % style)
+
+
+## Bugs the AI player found in 3.5.
+func test_v36_player_bugs() -> void:
+	var c := Combat.new(360)
+	var hs := _heroes()
+	hs[0]["skill"] = {"id": "ash_feast", "name": "Ash Feast", "cost": 1}
+	c.start_battle(hs, [_monster("ghoul")])
+	c.heroes[0]["charge"] = 5
+	c.fate = 0
+	check(not c.can_use_skill(0) and c.skill_block_reason(0) != "", "a charged skill that cannot fire says why")
+	var r := Run.new(361)
+	var seen_dup := false
+	for k in 30:
+		r.carve_offers = []
+		r._offer_carving("map")
+		var texts: Array = r.carve_offers.map(func(o): return o["text"])
+		for t in texts:
+			if texts.count(t) > 1:
+				seen_dup = true
+	check(not seen_dup, "carving offers never repeat")
+	for h in r.heroes:
+		h["hp"] = h["max_hp"]
+	check(not r.rest_heal_useful(), "resting at full HP is shown as useless")
+	var day := Run.new(362, {"time": "day"})
+	check(day.price_note() != "" and Run.new(363, {"time": "night"}).price_note() == "", "the shop explains its discount")
+	var p := _fresh_profile("test_v36")
+	p.owned_pets = ["ash_crow", "black_cat"]
+	check(p.isle_pet_id() == "ash_crow" and p.set_isle_pet("black_cat") and p.isle_pet_id() == "black_cat", "the Isle companion can be chosen")
+	check(not p.set_isle_pet("ember_salamander"), "only an owned companion can follow you")
+	for tool in ["res://tools/play_cli.gd", "res://tools/playtest.gd"]:
+		var scr: GDScript = load(tool)
+		check(scr != null and scr.can_instantiate(), "tool script compiles: %s" % tool)
