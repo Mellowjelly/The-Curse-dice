@@ -74,6 +74,9 @@ func _attach(r: Run) -> void:
 	_recorded = false
 	run.changed.connect(_on_run_changed)
 	_in_combat = false
+	# 3.7: an Isle dungeon has its own board art (region "background", tools/make_backgrounds.py).
+	var art := "res://assets/backgrounds/%s.png" % String(run.region.get("background", "map"))
+	_map_art.texture = load(art if ResourceLoader.exists(art) else "res://assets/backgrounds/map.png")
 	_draw_board()
 	_on_run_changed()
 
@@ -290,8 +293,6 @@ func _on_run_changed() -> void:
 	if run.time_of_day() != "":
 		_header.text += "   (%s)" % tr(run.time_of_day().capitalize())
 	_map_art.modulate = UI.TIME_TINT.get(run.time_of_day(), Color.WHITE)
-	if run.is_dungeon():
-		_map_art.modulate *= Color(0.7, 0.85, 1.1)  # 3.5: the Sunken Abbey is under water
 	_stats.text = tr("Gold %d    Fate %d/%d") % [run.gold, run.combat.fate, Combat.MAX_FATE]
 	if not run.combat.pet.is_empty():
 		_stats.text += tr("    Pet: ") + tr(run.combat.pet["name"])

@@ -198,5 +198,6 @@
 	"night": {
 		"hp": 1.1,
 		"damage": 0
-	}
+	},
+	"background": "map_slag_cathedral"
 }

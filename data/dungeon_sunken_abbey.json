@@ -197,5 +197,6 @@
 	"night": {
 		"hp": 1.1,
 		"damage": 0
-	}
+	},
+	"background": "map_sunken_abbey"
 }

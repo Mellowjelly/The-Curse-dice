@@ -64,6 +64,7 @@ func _init() -> void:
 	test_v35_isle_dungeon()
 	test_v37_fight_pacing()
 	test_v37_new_dungeons()
+	test_v37_dungeon_art()
 	test_crafting_and_hunting()
 	test_new_pets()
 	test_tile_snapshot_reload()
@@ -1582,3 +1583,18 @@ func test_v37_new_dungeons() -> void:
 			bot.play_run_step(run)
 			steps += 1
 		check(run.is_over(), "a bot run of %s ends" % id)
+
+
+## 3.7: every Isle dungeon has its own board art instead of a tinted road map.
+func test_v37_dungeon_art() -> void:
+	var seen := {}
+	for f in DirAccess.get_files_at("res://data"):
+		if not f.begins_with("dungeon_") or not f.ends_with(".json"):
+			continue
+		var d: Dictionary = GameData.load_json("res://data/" + f)
+		var bg := String(d.get("background", ""))
+		check(bg != "" and ResourceLoader.exists("res://assets/backgrounds/%s.png" % bg), "%s has its own board art" % d["id"])
+		check(not seen.has(bg), "%s does not share its art" % d["id"])
+		seen[bg] = true
+	check(seen.size() >= 3, "three dungeons have board art")
+	check(not GameData.load_region().has("background"), "the Hollow Road keeps its map")

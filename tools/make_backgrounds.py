@@ -6,6 +6,7 @@ Original pixel art drawn from shapes in code:
   assets/backgrounds/battle_late.png   (burning village ruins)  320x180
   assets/backgrounds/battle_boss.png   (inside the Chapel of Rot) 320x180
   assets/backgrounds/map.png           (The Hollow Road)        320x180 (game scales x4)
+  assets/backgrounds/map_<dungeon>.png (3.7: each Isle dungeon's own board) 320x180
   assets/icons/tile_<type>.png         16x16 map icons
 """
 import math
@@ -256,6 +257,148 @@ def world_map():
     return img
 
 
+
+# ---------------------------------------------------------------- Isle dungeon boards (3.7)
+# A dungeon board is 13 tiles: row 1 runs along art y ~30, row 2 (tiles 10-12) along y ~50 on the right,
+# so the boss tile sits near (215, 50). The lair is drawn just below-left of it; the open floor
+# below the road carries each dungeon's own scenery. The dark band from y 130 is under the party panel.
+
+def _dungeon_base(rng, wall, wall_d, floor, floor_d, slab=True):
+    img = Image.new("RGBA", (W, H))
+    sky(img, wall_d, wall, 0, 20, 4)                       # the back wall
+    d = ImageDraw.Draw(img)
+    px = img.load()
+    for y in range(20, 130):                               # the floor, darker towards the back
+        t = (y - 20) / 110
+        c = lerp(floor_d, floor, t)
+        for x in range(W):
+            n = (math.sin(x * 0.7 + y * 1.3) + math.sin(x * 0.23 - y * 0.41)) * 2
+            px[x, y] = tuple(max(0, min(255, int(v + n))) for v in c) + (255,)
+    if slab:                                               # flagstone joints
+        for y in range(24, 130, 9):
+            d.line([(0, y), (W, y)], fill=floor_d)
+            off = 0 if (y // 9) % 2 else 7
+            for x in range(off, W, 14):
+                d.line([(x, y), (x, y + 8)], fill=floor_d)
+    d.line([(0, 19), (W, 19)], fill=(10, 8, 12))
+    return img, d
+
+
+def _arches(d, color, inner, step=32, top=3):
+    for x in range(8, W, step):                            # arched windows / niches in the back wall
+        d.rectangle([x, top + 5, x + 12, 18], fill=color)
+        d.pieslice([x, top, x + 12, top + 10], 180, 360, fill=color)
+        d.rectangle([x + 2, top + 6, x + 10, 18], fill=inner)
+        d.pieslice([x + 2, top + 2, x + 10, top + 10], 180, 360, fill=inner)
+
+
+def _pillar(d, x, y, h, color, dark, cap):
+    d.rectangle([x, y - h, x + 7, y], fill=color)
+    d.rectangle([x + 5, y - h, x + 7, y], fill=dark)
+    d.rectangle([x - 1, y - h - 2, x + 8, y - h], fill=cap)
+    d.rectangle([x - 1, y, x + 8, y + 2], fill=cap)
+
+
+def _finish(img):
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 130, W, H], fill=(14, 11, 16))
+    vig = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    vd = ImageDraw.Draw(vig)
+    for i in range(14):
+        vd.rectangle([i, i, W - 1 - i, H - 1 - i], outline=(0, 0, 0, 150 - i * 10))
+    img.alpha_composite(vig)
+    return img
+
+
+def map_sunken_abbey():
+    """The Sunken Abbey: a flooded nave, pews in the water, the drowned altar and its bell."""
+    rng = random.Random(31)
+    img, d = _dungeon_base(rng, (52, 60, 64), (30, 36, 40), (64, 74, 72), (42, 50, 50))
+    _arches(d, (70, 80, 82), (16, 26, 34))
+    water = Image.new("RGBA", img.size, (0, 0, 0, 0))     # the tide over the lower nave
+    wd = ImageDraw.Draw(water)
+    for y in range(58, 130):
+        wd.line([(0, y), (W, y)], fill=(30, 70, 90, min(200, 60 + (y - 58) * 2)))
+    img.alpha_composite(water)
+    d = ImageDraw.Draw(img)
+    for y in range(62, 128, 6):                            # ripples
+        for _ in range(5):
+            x = rng.randint(0, W - 12)
+            d.line([(x, y), (x + rng.randint(4, 10), y)], fill=(90, 140, 150))
+    for row in range(3):                                   # half-sunk pews
+        for col in range(4):
+            x, y = 14 + col * 40 + row * 6, 70 + row * 18
+            d.rectangle([x, y, x + 26, y + 3], fill=(58, 44, 34)); d.rectangle([x, y - 5, x + 2, y + 3], fill=(58, 44, 34))
+    for x in (6, 164, 300):
+        _pillar(d, x, 120, 54, (92, 100, 98), (66, 72, 72), (110, 118, 116))
+    cx, cy = 214, 86                                       # the drowned altar under the boss tile
+    d.rectangle([cx - 18, cy, cx + 18, cy + 10], fill=(84, 90, 88)); d.rectangle([cx - 14, cy - 4, cx + 14, cy], fill=(104, 110, 108))
+    d.line([(cx, cy - 30), (cx, cy - 12)], fill=(40, 36, 30)); d.ellipse([cx - 6, cy - 14, cx + 6, cy - 2], fill=(176, 140, 70))
+    d.point((cx, cy - 1), fill=(220, 190, 110))
+    for x in range(cx - 30, cx + 30, 3):                   # black coral at its foot
+        if rng.random() < 0.5:
+            d.line([(x, cy + 12), (x + rng.randint(-1, 1), cy + 12 - rng.randint(2, 6))], fill=(20, 18, 26))
+    for _ in range(14):                                    # candles still floating
+        x, y = rng.randint(10, W - 10), rng.randint(64, 126)
+        d.point((x, y), fill=(240, 210, 120)); d.point((x, y + 1), fill=(200, 190, 170))
+    return _finish(img)
+
+
+def map_slag_cathedral():
+    """The Slag Cathedral: an iron floor split by channels of molten slag, iron pillars, the pouring altar."""
+    rng = random.Random(41)
+    img, d = _dungeon_base(rng, (48, 36, 36), (24, 18, 20), (52, 44, 46), (32, 26, 28))
+    _arches(d, (60, 46, 44), (90, 34, 18))
+    for i in range(2):                                     # glowing channels of slag across the floor
+        base = 74 + i * 30
+        pts = [(x, base + 4 * math.sin(x / 19 + i * 3) + 2 * math.sin(x / 7)) for x in range(0, W + 4, 4)]
+        d.line(pts, fill=(120, 30, 14), width=6)
+        d.line(pts, fill=(230, 100, 30), width=3)
+        d.line([(x, y - 1) for x, y in pts], fill=(255, 200, 90), width=1)
+    for _ in range(30):                                    # embers
+        x, y = rng.randint(0, W), rng.randint(22, 128)
+        d.point((x, y), fill=rng.choice([(250, 150, 50), (230, 90, 30), (255, 210, 120)]))
+    for x in (8, 72, 150, 296):
+        _pillar(d, x, 124, 50, (70, 58, 60), (46, 38, 42), (90, 76, 76))
+        d.line([(x + 2, 100), (x + 3, 112)], fill=(240, 130, 40))   # a molten seam
+    cx, cy = 214, 88                                       # the pouring altar: a great iron ladle over a basin
+    d.ellipse([cx - 24, cy + 2, cx + 24, cy + 16], fill=(60, 20, 12)); d.ellipse([cx - 18, cy + 4, cx + 18, cy + 13], fill=(240, 120, 30))
+    d.ellipse([cx - 10, cy + 6, cx + 10, cy + 11], fill=(255, 200, 90))
+    d.line([(cx - 30, cy - 28), (cx - 6, cy - 6)], fill=(40, 32, 34), width=3)
+    d.pieslice([cx - 12, cy - 14, cx + 6, cy + 2], 0, 180, fill=(52, 42, 44))
+    d.line([(cx - 3, cy + 1), (cx - 3, cy + 6)], fill=(255, 170, 60), width=2)    # the iron still pouring
+    return _finish(img)
+
+
+def map_marrow_vault():
+    """The Marrow Vault: shelves of labelled bones along the walls, a dust floor, the toll-stone and ledger."""
+    rng = random.Random(51)
+    img, d = _dungeon_base(rng, (70, 62, 56), (40, 34, 32), (92, 82, 72), (58, 50, 46), slab=False)
+    for x in range(0, W, 2):                               # the back wall is all skulls, row on row
+        for y in range(3, 18, 5):
+            if (x // 2 + y) % 3 == 0:
+                d.ellipse([x, y, x + 3, y + 3], fill=(104, 96, 84)); d.point((x + 1, y + 2), fill=(30, 26, 26))  # dim, so the header reads
+    for sx, sy in ((6, 64), (6, 96), (250, 104), (120, 70), (120, 104)):    # free-standing bone shelves
+        d.rectangle([sx, sy, sx + 60, sy + 20], fill=(46, 38, 34))
+        for k in range(3):
+            y = sy + 2 + k * 6
+            d.line([(sx + 1, y + 4), (sx + 59, y + 4)], fill=(70, 60, 52))
+            for bx in range(sx + 2, sx + 58, 4):
+                if rng.random() < 0.8:
+                    d.line([(bx, y + 1), (bx + 2, y + 3)], fill=(214, 204, 184))
+            d.point((sx + 4 + k * 17, y), fill=(240, 230, 200))           # a little paper label
+    for _ in range(80):                                    # dust and stray bones on the floor
+        x, y = rng.randint(0, W), rng.randint(24, 128)
+        d.point((x, y), fill=rng.choice([(110, 100, 88), (200, 190, 170)]))
+    cx, cy = 206, 86                                       # the toll-stone, the ledger and a candle
+    d.rectangle([cx - 14, cy, cx + 14, cy + 12], fill=(96, 90, 86)); d.rectangle([cx - 14, cy, cx + 14, cy + 2], fill=(120, 114, 108))
+    d.rectangle([cx - 8, cy - 4, cx + 8, cy], fill=(110, 30, 30)); d.line([(cx, cy - 4), (cx, cy)], fill=(70, 16, 16))
+    d.line([(cx - 6, cy - 3), (cx - 2, cy - 3)], fill=(230, 220, 190)); d.line([(cx + 2, cy - 3), (cx + 6, cy - 3)], fill=(230, 220, 190))
+    d.rectangle([cx + 16, cy - 6, cx + 17, cy], fill=(220, 210, 190)); d.point((cx + 16, cy - 7), fill=(250, 200, 90))
+    d.point((cx, cy + 7), fill=(170, 120, 230)); d.point((cx + 1, cy + 6), fill=(200, 160, 250))   # the fate fragment
+    return _finish(img)
+
+
 # ---------------------------------------------------------------- the town of Ashfall
 # Building rectangles (art pixels, x4 on screen). town_screen.gd uses the same numbers for hotspots.
 TOWN_BUILDINGS = {
@@ -425,7 +568,9 @@ if __name__ == "__main__":
     os.makedirs("assets/backgrounds", exist_ok=True)
     os.makedirs("assets/icons", exist_ok=True)
     for name, fn in {"battle_early": battle_early, "battle_mid": battle_mid, "battle_late": battle_late,
-                     "battle_boss": battle_boss, "map": world_map, "town": town, "town_day": lambda: town(True)}.items():
+                     "battle_boss": battle_boss, "map": world_map, "town": town, "town_day": lambda: town(True),
+                     "map_sunken_abbey": map_sunken_abbey, "map_slag_cathedral": map_slag_cathedral,
+                     "map_marrow_vault": map_marrow_vault}.items():
         fn().convert("RGB").save(f"assets/backgrounds/{name}.png")
         print("wrote", name)
     for name, fn in TILE_ICONS.items():
