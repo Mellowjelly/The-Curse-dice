@@ -1,0 +1,588 @@
+help
+status
+talk tobin
+talk marla
+talk pip
+talk hesk
+accept tobin
+accept marla
+accept pip
+recipes
+bestiary
+summon heroes
+road
+pick 1
+roll
+move 1
+rest carve
+pick 0
+roll
+move 0
+lock 0
+reroll
+lock 2
+reroll
+end
+end
+lock 2
+reroll
+end
+pick 1
+roll
+move 0
+equip_loot 0 2
+roll
+move 0
+lock 0
+lock 1
+reroll
+reroll
+end
+reroll
+end
+end
+pick 0
+roll
+move 1
+buy carving
+pick 0
+buy tonic
+leave
+roll
+move 0
+pick 0
+pick 0
+roll
+move 0
+rest carve
+pick 0
+roll
+move 1
+end
+twist 0 5
+end
+lock 0
+lock 1
+reroll
+reroll
+end
+skill 2
+skill 0
+end
+skill 1
+reroll
+end
+end
+pick 1
+roll
+move 1
+equip_loot 0 2
+roll
+move 1
+buy tonic
+buy weapon
+equip_loot 1 0
+buy fate_shard
+leave
+roll
+move 0
+lock 2
+reroll
+lock 1
+reroll
+end
+twist 1 2
+lock 2
+reroll
+end
+reroll
+reroll
+reroll
+end
+skill 0
+target 1
+end
+skill 1
+target 0
+end
+skill 2
+target 2
+end
+twist 1 2
+twist 2 1
+end
+end
+pick 1
+roll
+reroll_move
+move 0
+lock 1
+reroll
+end
+lock 0
+reroll
+end
+end
+lock 1
+reroll
+end
+end
+skill 1
+skill 2
+lock 1
+reroll
+end
+end
+pick 1
+roll
+move 0
+rest carve
+pick 2
+roll
+move 1
+pick 0
+pick 0
+roll
+move 1
+skip
+roll
+move 1
+pick 0
+pick 0
+roll
+move 0
+pick 0
+pick 0
+roll
+move 0
+rest heal
+roll
+move 0
+end
+twist 2 4
+end
+lock 2
+reroll
+end
+lock 1
+lock 2
+reroll
+end
+skill 1
+skill 2
+lock 1
+lock 2
+reroll
+end
+skill 0
+lock 0
+lock 2
+reroll
+reroll
+end
+lock 2
+reroll
+end
+lock 0
+lock 2
+reroll
+end
+end
+status
+claim tobin
+claim marla
+claim pip
+talk hesk
+talk tobin
+talk marla
+status
+accept hesk
+accept tobin
+accept marla
+summon heroes
+summon pets
+summon relics
+status
+summon heroes
+summon heroes
+status
+build chapel
+build smithy
+build market
+build carver
+status
+upgrade hero varek
+explore
+look
+goto 21 41
+gather
+goto 19 40
+gather
+goto 21 39
+gather
+gather
+goto 18 42
+gather
+look
+goto 20 55
+fight
+reroll
+end
+sharpen 2
+look
+goto 22 60
+reroll
+end
+reroll
+end
+sharpen 0
+goto 25 61
+reroll
+end
+end
+end
+sharpen 0
+goto 26 46
+fight
+end
+lock 1
+reroll
+end
+lock 1
+reroll
+end
+end
+skill 1
+twist 1 4
+end
+skill 2
+lock 0
+lock 2
+reroll
+end
+end
+look
+home
+status
+recipes
+claim tobin
+talk hesk
+wait
+status
+claim tobin
+claim pip
+talk pip
+talk tobin
+accept pip
+claim pip
+accept tobin
+talk pip
+summon heroes
+summon heroes
+summon pets
+status
+accept pip
+upgrade pet black_cat
+upgrade hero lys
+build kennel
+party osric vael aldric
+status
+road
+pick 1
+roll
+equip_loot 0 2
+roll
+move 1
+rest carve
+pick 1
+roll
+move 0
+roll
+move 0
+lock 2
+reroll
+end
+lock 2
+reroll
+end
+lock 0
+reroll
+end
+end
+pick 0
+roll
+move 0
+lock 1
+reroll
+end
+lock 0
+reroll
+end
+end
+pick 2
+roll
+move 1
+rest carve
+pick 0
+talk pip
+roll
+move 1
+target 3
+twist 0 4
+end
+target 2
+lock 0
+lock 2
+reroll
+end
+reroll
+end
+lock 1
+lock 2
+reroll
+end
+skill 0
+skill 1
+end
+pick 3
+roll
+move 1
+roll
+move 0
+buy carving
+pick 2
+buy tonic
+buy tonic
+leave
+roll
+move 1
+pick 0
+pick 0
+roll
+move 0
+rest carve
+pick 3
+roll
+move 1
+lock 0
+reroll
+end
+end
+lock 0
+lock 2
+reroll
+reroll
+end
+skill 2
+skill 1
+end
+skill 0
+end
+end
+pick 3
+roll
+reroll_move
+reroll_move
+move 0
+buy carving
+pick 0
+buy tonic
+leave
+roll
+move 1
+roll
+equip_loot 0 1
+roll
+move 1
+rest carve
+pick 3
+roll
+move 0
+lock 1
+lock 2
+reroll
+end
+lock 1
+reroll
+end
+lock 1
+lock 2
+reroll
+end
+reroll
+end
+skill 1
+skill 0
+lock 1
+reroll
+end
+skill 2
+lock 0
+reroll
+end
+end
+status
+claim tobin
+claim pip
+talk hesk
+talk marla
+talk tobin
+talk pip
+summon heroes
+status
+talk pip
+accept pip
+accept tobin
+build fortune
+summon pets
+party varek lys aldric
+explore
+goto 19 46
+gather
+goto 19 52
+gather
+goto 24 52
+gather
+goto 28 54
+gather
+look
+goto 32 36
+look
+end
+end
+end
+sharpen 1
+goto 40 25
+look
+end
+end
+end
+sharpen 0
+look
+goto 41 25
+gather
+goto 42 25
+gather
+goto 40 24
+gather
+goto 45 24
+gather
+goto 45 29
+gather
+look
+home
+craft amber_staff
+craft iron_hatchet
+status
+equip aldric weapon 1
+equip lys weapon 2
+craft ember_biscuit
+feed black_cat 3
+summon pets
+status
+talk hesk
+talk tobin
+talk marla
+wait
+talk pip
+talk hesk
+status
+road
+pick 2
+roll
+skip
+roll
+move 1
+lock 1
+reroll
+end
+end
+end
+end
+pick 3
+roll
+move 1
+pick 0
+pick 0
+roll
+move 0
+pick 0
+twist 2 4
+lock 1
+reroll
+end
+lock 0
+reroll
+end
+reroll
+end
+lock 1
+reroll
+end
+reroll
+end
+skill 1
+reroll
+end
+skill 0
+end
+twist 1 2
+reroll
+end
+end
+pick 1
+roll
+move 1
+buy tonic
+buy carving
+pick 2
+buy fate_shard
+leave
+roll
+move 0
+roll
+equip_loot 0 0
+roll
+move 1
+target 1
+twist 1 2
+end
+reroll
+end
+lock 1
+reroll
+reroll
+end
+lock 0
+lock 1
+reroll
+end
+skill 0
+skill 1
+reroll
+end
+end
+skip
+pick 0
+roll
+move 0
+buy carving
+pick 3
+leave
+roll
+move 1
+twist 0 5
+end
+reroll
+end
+lock 1
+lock 2
+reroll
+end
+skill 1
+twist 1 2
+lock 0
+reroll
+end
+skill 0
+end
