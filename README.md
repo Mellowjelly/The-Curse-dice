@@ -1,7 +1,8 @@
-# Cursed Dice: ลูกเต๋าต้องสาป — เวอร์ชัน 3.6
+# Cursed Dice: ลูกเต๋าต้องสาป — เวอร์ชัน 3.7
 
 เกมโร้กไลต์ดาร์กแฟนตาซี ต่อสู้ด้วยลูกเต๋า 2D สร้างด้วย Godot 4
 ภูมิภาคแรก **The Hollow Road** เล่นจบได้ครบ: เมือง → ถนน 42 ช่อง → บอส The Rotting Bishop หรือ The Wick-Mother (ขึ้นกับเวลา)
+ภูมิภาคที่ 2 **The Ash Desert (ทะเลทรายเถ้า)** เปิดหลังชนะบอสถนนครั้งแรก: กระดาน 36 ช่อง → บอส The Glass Pilgrim (3.7)
 
 ![world](docs/world_animation.gif)
 ![town](docs/town_animation.gif)
